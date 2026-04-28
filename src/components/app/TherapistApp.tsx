@@ -324,7 +324,7 @@ const TherapistPatients = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4">
+      <div className="px-4 -mt-8 space-y-4">
         {NEW_PATIENT_COUNT > 0 && (
           <div className="bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning">
             <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
