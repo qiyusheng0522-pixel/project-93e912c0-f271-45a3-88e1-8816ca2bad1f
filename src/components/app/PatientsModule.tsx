@@ -156,44 +156,53 @@ export const PatientsPage = ({
       </div>
 
       <div className="px-4 -mt-5 space-y-3 relative">
-        {/* 状态筛选 */}
-        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 py-1">
-          {filterChips.map(c => {
-            const active = statusFilter === c.key;
-            return (
-              <button
-                key={c.key}
-                onClick={() => setStatusFilter(c.key)}
-                className={`shrink-0 text-[11px] px-3 py-1.5 rounded-full font-semibold transition-all ${
-                  active ? `${accentBg[accent]} text-white shadow-card` : "bg-card text-foreground/70"
-                }`}
+        {/* 筛选卡片：状态 / 病症 / 入院时间 */}
+        <div className="bg-card rounded-2xl shadow-card p-3 space-y-2.5">
+          <div>
+            <div className="text-[10px] text-muted-foreground mb-1.5 px-0.5">状态</div>
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-0.5 px-0.5">
+              {filterChips.map(c => {
+                const active = statusFilter === c.key;
+                return (
+                  <button
+                    key={c.key}
+                    onClick={() => setStatusFilter(c.key)}
+                    className={`shrink-0 text-[11px] px-2.5 py-1 rounded-full font-semibold transition-all ${
+                      active ? `${accentBg[accent]} text-white shadow-card` : "bg-muted text-foreground/70"
+                    }`}
+                  >
+                    {c.label} <span className={active ? "opacity-80" : "text-muted-foreground"}>({c.count})</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-1 px-0.5">病症</div>
+              <select
+                value={condition}
+                onChange={e => setCondition(e.target.value)}
+                className="w-full bg-muted border border-border rounded-full px-3 py-1.5 outline-none"
               >
-                {c.label} <span className={active ? "opacity-80" : "text-muted-foreground"}>({c.count})</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* 病症 + 入院时间 筛选 */}
-        <div className="flex gap-2 text-[11px]">
-          <select
-            value={condition}
-            onChange={e => setCondition(e.target.value)}
-            className="flex-1 bg-card border border-border rounded-full px-3 py-1.5 outline-none"
-          >
-            <option value="">全部病症</option>
-            {ALL_CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-          </select>
-          <select
-            value={admitRange}
-            onChange={e => setAdmitRange(e.target.value as any)}
-            className="flex-1 bg-card border border-border rounded-full px-3 py-1.5 outline-none"
-          >
-            <option value="all">全部入院时间</option>
-            <option value="0-3">0-3 天</option>
-            <option value="4-14">4-14 天</option>
-            <option value="15+">15 天以上</option>
-          </select>
+                <option value="">全部病症</option>
+                {ALL_CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </div>
+            <div>
+              <div className="text-[10px] text-muted-foreground mb-1 px-0.5">入院时间</div>
+              <select
+                value={admitRange}
+                onChange={e => setAdmitRange(e.target.value as any)}
+                className="w-full bg-muted border border-border rounded-full px-3 py-1.5 outline-none"
+              >
+                <option value="all">全部</option>
+                <option value="0-3">0-3 天</option>
+                <option value="4-14">4-14 天</option>
+                <option value="15+">15 天以上</option>
+              </select>
+            </div>
+          </div>
         </div>
 
         {statusFilter === "待首次评估" && list.length > 0 && (
