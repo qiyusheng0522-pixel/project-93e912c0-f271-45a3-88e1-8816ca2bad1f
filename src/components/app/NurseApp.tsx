@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
-import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
+import { AICard, SectionTitle } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
 import {
@@ -8,103 +8,91 @@ import {
   PatientDetailSheet,
   AddNoteSheet,
   TeamManageSheet,
+  PatientChatListSheet,
+  PatientChatSheet,
   Patient,
+  PATIENTS,
   NEW_PATIENT_COUNT,
+  PATIENT_UNREAD,
 } from "@/components/app/PatientsModule";
-import { RehabPlanModule, AIRxModule } from "@/components/app/RehabPlanModule";
-import { Home as HomeIcon, UsersRound as UR2, FileHeart as FH2, Sparkles as SP2, User as UserIcon } from "lucide-react";
-const NURSE_TABS: TabBarItem[] = [
-  { key: "home", label: "工作台", icon: HomeIcon },
-  { key: "patients", label: "患者管理", icon: UR2 },
-  { key: "plan", label: "康复方案", icon: FH2 },
-  { key: "ai", label: "AI康复处方", icon: SP2 },
-  { key: "me", label: "我的", icon: UserIcon },
-];
-import { toast } from "sonner";
 import {
+  Home as HomeIcon,
+  UsersRound,
+  BookOpen,
+  MessageCircle,
+  User as UserIcon,
   Bell,
   ChevronRight,
   Pill,
   HeartPulse,
-  BookOpen,
   CheckCircle2,
-  AlertCircle,
-  ArrowRight,
   Syringe,
   Activity,
   ClipboardCheck,
   Users,
-  Stethoscope,
   ShieldCheck,
-  UsersRound,
+  Stethoscope,
   AlertTriangle,
+  Send,
+  Sparkles,
 } from "lucide-react";
+import { toast } from "sonner";
+
+const NURSE_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: HomeIcon },
+  { key: "patients", label: "患者管理", icon: UsersRound },
+  { key: "edu", label: "宣教", icon: BookOpen },
+  { key: "chat", label: "患者沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
+  { key: "me", label: "我的", icon: UserIcon },
+];
 
 type SheetKey =
   | null
   | "med"
   | "vitals"
-  | "edu"
   | "inject"
   | "obs"
-  | "bed"
-  | "order"
-  | "patient"
-  | "eduDetail"
   | "execTask"
   | "patientDetail"
   | "addNote"
-  | "team";
+  | "team"
+  | "patientChat"
+  | "eduPush"
+  | "dailyNote";
 
-type QueueKey = "med" | "vitals" | "inject" | "obs" | "edu" | "execTask" | "order";
+type QueueKey = "med" | "vitals" | "inject" | "obs" | "execTask";
 
 const QUEUE_TITLE: Record<QueueKey, string> = {
   med: "待执行给药",
   vitals: "待测生命体征",
   inject: "待执行注射",
   obs: "待病情观察",
-  edu: "待开展宣教",
   execTask: "待执行护理任务",
-  order: "待执行医嘱",
 };
 
+// 根据康复处方生成的待办（按患者维度）
 const QUEUES: Record<QueueKey, TodoItem[]> = {
   med: [
-    { id: "m1", patient: "303 张建国", meta: "阿司匹林 100mg · IV", detail: "静脉给药 · 双人核对", time: "14:00", urgency: "high" },
-    { id: "m2", patient: "310 陈丽华", meta: "多奈哌齐 5mg · po", detail: "口服给药", time: "15:30", urgency: "medium" },
-    { id: "m3", patient: "305 王秀英", meta: "塞来昔布 200mg · po", detail: "餐后口服", time: "16:00", urgency: "medium" },
-    { id: "m4", patient: "307 李 强", meta: "巴氯芬 10mg · po", detail: "睡前口服", time: "21:00", urgency: "low" },
+    { id: "m1", patient: "303 张建国", meta: "阿司匹林 100mg · IV", detail: "处方关联：脑卒中后偏瘫", time: "14:00", urgency: "high" },
+    { id: "m2", patient: "310 陈丽华", meta: "多奈哌齐 5mg · po", detail: "处方关联：认知障碍", time: "15:30", urgency: "medium" },
+    { id: "m3", patient: "305 王秀英", meta: "塞来昔布 200mg · po", detail: "处方关联：髋关节术后", time: "16:00", urgency: "medium" },
+    { id: "m4", patient: "307 李 强", meta: "巴氯芬 10mg · po", detail: "处方关联：脊髓损伤", time: "21:00", urgency: "low" },
   ],
   vitals: [
     { id: "v1", patient: "305 王秀英", meta: "血压 + 心率", detail: "VS q4h · 第 3 次", time: "14:30", urgency: "medium" },
     { id: "v2", patient: "303 张建国", meta: "血压 + 心率 + 血氧", detail: "VS q6h", time: "15:00", urgency: "medium" },
-    { id: "v3", patient: "312 刘伟明", meta: "全套生命体征", detail: "术后观察", time: "16:00", urgency: "low" },
   ],
   inject: [
     { id: "in1", patient: "305 王秀英", meta: "低分子肝素 0.4ml ih", detail: "腹部皮下", time: "14:35", urgency: "medium" },
-    { id: "in2", patient: "310 陈丽华", meta: "维生素 B12 1ml im", detail: "臀部肌注", time: "16:30", urgency: "low" },
   ],
   obs: [
     { id: "o1", patient: "303 张建国", meta: "夜间血压波动", detail: "AI 提示加强观察", urgency: "high" },
     { id: "o2", patient: "307 李 强", meta: "压疮高风险监测", detail: "Braden 14 分", urgency: "medium" },
-    { id: "o3", patient: "312 刘伟明", meta: "术后伤口情况", detail: "第 5 天", urgency: "medium" },
-  ],
-  edu: [
-    { id: "ed1", patient: "303 张建国", meta: "脑卒中后吞咽训练", detail: "AI 推荐内容 · 视频 + 图文", urgency: "medium" },
-    { id: "ed2", patient: "305 王秀英", meta: "髋关节术后家庭防护", detail: "术后必读", urgency: "medium" },
-    { id: "ed3", patient: "307 李 强", meta: "出院后家庭训练指导", detail: "出院前必修", urgency: "high" },
-    { id: "ed4", patient: "全部患者", meta: "用药安全与不良反应", detail: "群发宣教", urgency: "low" },
   ],
   execTask: [
     { id: "et1", patient: "312 刘伟明", meta: "伤口换药", detail: "术后第 5 天", time: "16:00", urgency: "high" },
     { id: "et2", patient: "303 张建国", meta: "翻身 + 拍背", detail: "q2h", time: "15:00", urgency: "medium" },
     { id: "et3", patient: "307 李 强", meta: "导尿管护理", detail: "每日清洁", time: "17:00", urgency: "medium" },
-  ],
-  order: [
-    { id: "or1", patient: "303 张建国", meta: "阿司匹林 100mg qd IV", detail: "医师签发 · 长期", urgency: "high" },
-    { id: "or2", patient: "305 王秀英", meta: "低分子肝素 0.4ml q12h ih", detail: "医师签发", urgency: "medium" },
-    { id: "or3", patient: "307 李 强", meta: "VS q4h", detail: "新增医嘱", urgency: "medium" },
-    { id: "or4", patient: "310 陈丽华", meta: "多奈哌齐 5mg qn po", detail: "新增医嘱", urgency: "low" },
   ],
 };
 
@@ -114,7 +102,9 @@ export const NurseApp = () => {
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
   const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
+
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
   const openQueue = (k: QueueKey) => setQueue(k);
@@ -135,20 +125,24 @@ export const NurseApp = () => {
     vitals: "vitals",
     inject: "inject",
     obs: "obs",
-    edu: "eduDetail",
     execTask: "execTask",
-    order: "order",
   };
 
   return (
     <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} items={NURSE_TABS} />}>
-      {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
+      {tab === "home" && (
+        <NurseHome
+          onOpenQueue={openQueue}
+          onOpenDailyNote={() => open("dailyNote")}
+          onOpenEdu={() => setTab("edu")}
+        />
+      )}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
-      {tab === "plan" && <RehabPlanModule accent="nurse" initialStage="plan" onPickPlan={() => toast("请由康复医师调整方案")} />}
-      {tab === "ai" && <AIRxModule accent="nurse" onPick={() => toast("请由康复医师确认 AI 处方")} />}
+      {tab === "edu" && <EduPage onOpenPush={() => open("eduPush")} />}
+      {tab === "chat" && <PatientChatListSheet accent="nurse" onPick={(p) => { setChatPatient(p); setSheet("patientChat"); }} />}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
-      {(["med", "vitals", "inject", "obs", "edu", "execTask", "order"] as QueueKey[]).map((k) => (
+      {(["med", "vitals", "inject", "obs", "execTask"] as QueueKey[]).map((k) => (
         <PhoneSheet key={k} open={queue === k} onClose={closeQueue} title={QUEUE_TITLE[k]} accent="nurse">
           <TodoQueueList accent="nurse" items={QUEUES[k]} onPick={(item) => pickFromQueue(item, queueToSheet[k])} />
         </PhoneSheet>
@@ -156,16 +150,12 @@ export const NurseApp = () => {
 
       <PhoneSheet open={sheet === "med"} onClose={close} title={`给药操作${activePatient ? " · " + activePatient : ""}`} accent="nurse"
         footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("给药完成 · 已自动生成执行记录"); close(); }}>确认给药完成</PrimaryBtn>}>
-        <MedSheet patient={activePatient} />
+        <MedExecSheet patient={activePatient} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "vitals"} onClose={close} title={`生命体征录入${activePatient ? " · " + activePatient : ""}`} accent="nurse"
         footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("生命体征已保存 · 已同步医师端"); close(); }}>保存</PrimaryBtn>}>
         <VitalsSheet patient={activePatient} />
-      </PhoneSheet>
-
-      <PhoneSheet open={sheet === "edu"} onClose={close} title="康复宣教" accent="nurse">
-        <EduListSheet onOpen={open} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "inject"} onClose={close} title={`注射记录${activePatient ? " · " + activePatient : ""}`} accent="nurse"
@@ -178,57 +168,84 @@ export const NurseApp = () => {
         <ObsSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "bed"} onClose={close} title="床位管理" accent="nurse">
-        <BedSheet />
-      </PhoneSheet>
-
-      <PhoneSheet open={sheet === "order"} onClose={close} title="医嘱执行" accent="nurse">
-        <OrderSheet onOpen={open} />
-      </PhoneSheet>
-
-      <PhoneSheet open={sheet === "patient"} onClose={close} title="患者床卡 · 张建国" accent="nurse">
-        <PatientSheet onOpen={open} />
-      </PhoneSheet>
-
-      <PhoneSheet open={sheet === "eduDetail"} onClose={close} title={`宣教内容${activePatient ? " · " + activePatient : ""}`} accent="nurse"
-        footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("已推送给患者及家属"); close(); }}>一键推送患者</PrimaryBtn>}>
-        <EduDetailSheet />
-      </PhoneSheet>
-
       <PhoneSheet open={sheet === "execTask"} onClose={close} title={`执行护理任务${activePatient ? " · " + activePatient : ""}`} accent="nurse"
         footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("任务已完成 · 已记录"); close(); }}>完成任务</PrimaryBtn>}>
         <ExecTaskSheet />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "dailyNote"} onClose={close} title="每日康复护理备注" accent="nurse"
+        footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("护理备注已保存到患者档案"); close(); }}>保存到患者档案</PrimaryBtn>}>
+        <DailyNoteSheet />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "eduPush"} onClose={close} title="多患者宣教推送" accent="nurse"
+        footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("宣教内容已推送选中患者及家属"); close(); }}>一键推送</PrimaryBtn>}>
+        <EduPushSheet />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="nurse">
+        <PatientDetailSheet
+          patient={pickedPatient}
+          accent="nurse"
+          onAddNote={() => setSheet("addNote")}
+          onShare={() => toast.success("已打开共享设置")}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "addNote"} onClose={() => setSheet("patientDetail")} title="添加护理备注" accent="nurse">
+        <AddNoteSheet
+          patient={pickedPatient}
+          accent="nurse"
+          onSave={(text) => {
+            if (!pickedPatient) return;
+            const newNote = { author: "赵护士", time: "刚刚", text };
+            const updated = [newNote, ...(patientNotes[pickedPatient.id] ?? pickedPatient.notes)];
+            setPatientNotes({ ...patientNotes, [pickedPatient.id]: updated });
+            setPickedPatient({ ...pickedPatient, notes: updated });
+            toast.success("备注已保存并共享给团队");
+            setSheet("patientDetail");
+          }}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "team"} onClose={close} title="团队管理" accent="nurse">
+        <TeamManageSheet accent="nurse" />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "patientChat"} onClose={close} title="患者沟通" accent="nurse" flush hideHeader>
+        <PatientChatSheet accent="nurse" patient={chatPatient} onClose={close} />
       </PhoneSheet>
     </ScreenShell>
   );
 };
 
-const Home = ({
-  onOpen,
+/* ============== 工作台首页：根据康复处方生成的不同患者待办列 ============== */
+const NurseHome = ({
   onOpenQueue,
-  onGoPatients,
+  onOpenDailyNote,
+  onOpenEdu,
 }: {
-  onOpen: (k: SheetKey) => void;
   onOpenQueue: (k: QueueKey) => void;
-  onGoPatients: () => void;
+  onOpenDailyNote: () => void;
+  onOpenEdu: () => void;
 }) => {
-  const tiles: { icon: any; label: string; color: string; k: QueueKey }[] = [
-    { icon: Pill, label: "给药操作", color: "text-warning bg-warning-soft", k: "med" },
-    { icon: HeartPulse, label: "生命体征", color: "text-destructive/80 bg-red-50", k: "vitals" },
-    { icon: Syringe, label: "注射记录", color: "text-primary bg-primary-soft", k: "inject" },
-    { icon: Activity, label: "病情观察", color: "text-secondary bg-secondary-soft", k: "obs" },
-    { icon: BookOpen, label: "康复宣教", color: "text-ai bg-ai-soft", k: "edu" },
-    { icon: ClipboardCheck, label: "护理任务", color: "text-role-nurse bg-rose-50", k: "execTask" },
-    { icon: Stethoscope, label: "医嘱执行", color: "text-role-nurse bg-rose-50", k: "order" },
-  ];
+  const totalTodo = QUEUES.med.length + QUEUES.vitals.length + QUEUES.inject.length + QUEUES.obs.length + QUEUES.execTask.length;
+  const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
+    ...QUEUES.med.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency, k: "med" as QueueKey })),
+    ...QUEUES.execTask.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency, k: "execTask" as QueueKey })),
+    ...QUEUES.vitals.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency, k: "vitals" as QueueKey })),
+    ...QUEUES.obs.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency, k: "obs" as QueueKey })),
+  ].sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.urgency] - { high: 0, medium: 1, low: 2 }[b.urgency]));
+
   return (
     <div className="pb-4">
-      <div className="gradient-nurse px-5 pt-2 pb-8 text-white relative overflow-hidden">
+      <div className="gradient-nurse px-5 pt-6 pb-10 text-white relative overflow-hidden">
         <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <div>
             <div className="text-xs opacity-80">您好</div>
             <div className="text-xl font-bold mt-0.5">赵护士 👋</div>
+            <div className="text-[11px] opacity-90 mt-1">今日共 {totalTodo} 项护理待办（来自康复处方）</div>
           </div>
           <button onClick={() => toast("您有 4 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
@@ -240,176 +257,140 @@ const Home = ({
             items={[
               { label: "待给药", count: QUEUES.med.length, onClick: () => onOpenQueue("med") },
               { label: "待护理", count: QUEUES.execTask.length, onClick: () => onOpenQueue("execTask") },
-              { label: "待宣教", count: QUEUES.edu.length, onClick: () => onOpenQueue("edu") },
+              { label: "待观察", count: QUEUES.obs.length, onClick: () => onOpenQueue("obs") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
-        {NEW_PATIENT_COUNT > 0 && (
-          <button onClick={onGoPatients} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]">
-            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">前往患者管理查看共享患者档案</div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </button>
-        )}
-
+      <div className="px-4 -mt-5 space-y-4">
         <div>
-          <SectionTitle title="护士工作台 · 点击查看待办列表" />
+          <SectionTitle title="护理快捷入口" extra={
+            <div className="flex gap-2">
+              <button onClick={onOpenDailyNote} className="text-[11px] text-role-nurse font-semibold">每日护理备注</button>
+              <button onClick={onOpenEdu} className="text-[11px] text-ai font-semibold">宣教推送</button>
+            </div>
+          } />
           <div className="grid grid-cols-4 gap-2">
-            {tiles.map((it) => (
-              <WorkbenchTile
-                key={it.label}
-                icon={it.icon}
-                label={it.label}
-                color={it.color}
-                count={QUEUES[it.k].length}
-                onClick={() => onOpenQueue(it.k)}
-              />
-            ))}
-            <WorkbenchTile icon={Users} label="床位管理" color="text-success bg-success-soft" onClick={() => onOpen("bed")} />
-            <WorkbenchTile icon={UsersRound} label="患者管理" color="text-role-nurse bg-rose-50" count={NEW_PATIENT_COUNT} onClick={onGoPatients} />
+            <WorkbenchTile icon={Pill} label="给药操作" color="text-warning bg-warning-soft" count={QUEUES.med.length} onClick={() => onOpenQueue("med")} />
+            <WorkbenchTile icon={ClipboardCheck} label="护理任务" color="text-role-nurse bg-rose-50" count={QUEUES.execTask.length} onClick={() => onOpenQueue("execTask")} />
+            <WorkbenchTile icon={HeartPulse} label="生命体征" color="text-destructive/80 bg-red-50" count={QUEUES.vitals.length} onClick={() => onOpenQueue("vitals")} />
+            <WorkbenchTile icon={Activity} label="病情观察" color="text-secondary bg-secondary-soft" count={QUEUES.obs.length} onClick={() => onOpenQueue("obs")} />
           </div>
         </div>
 
         <div>
-          <SectionTitle title="紧急任务" extra={<span className="text-[10px] text-destructive font-semibold">{QUEUES.med.filter(m => m.urgency === "high").length} 项</span>} />
-          <button onClick={() => onOpenQueue("med")} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 border-l-4 border-l-destructive flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-destructive" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[13px] font-semibold">303 床 · 张建国</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">静脉给药 · 阿司匹林 100mg</div>
-            </div>
-            <span className="text-[10px] px-2 py-1 rounded-full bg-destructive/10 text-destructive font-semibold">14:00</span>
-          </button>
+          <SectionTitle title={`患者待办列 · ${allTodos.length}`} extra={<span className="text-[10px] text-muted-foreground">基于康复处方按患者排序</span>} />
+          <div className="space-y-2">
+            {allTodos.slice(0, 8).map((t, i) => {
+              const u = { high: "border-l-destructive", medium: "border-l-warning", low: "border-l-border" }[t.urgency];
+              const tag = { med: "给药", execTask: "护理", vitals: "体征", obs: "观察", inject: "注射" }[t.k];
+              return (
+                <button
+                  key={i}
+                  onClick={() => onOpenQueue(t.k)}
+                  className={`w-full text-left bg-card rounded-2xl shadow-card p-3 border-l-4 ${u} flex items-center gap-3 active:scale-[0.99]`}
+                >
+                  <div className="w-9 h-9 rounded-xl bg-rose-50 text-role-nurse flex items-center justify-center text-[10px] font-bold">{tag}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[12px] font-semibold truncate">{t.patient}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{t.meta}</div>
+                  </div>
+                  {t.time && <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{t.time}</span>}
+                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
-const Tasks = ({ onOpenQueue }: { onOpenQueue: (k: QueueKey) => void }) => {
-  const queues: { k: QueueKey; label: string; desc: string; icon: any; color: string }[] = [
-    { k: "med", label: "给药操作", desc: "三查七对 · 双人核对", icon: Pill, color: "bg-warning-soft text-warning" },
-    { k: "vitals", label: "生命体征", desc: "VS 测量录入", icon: HeartPulse, color: "bg-red-50 text-destructive/80" },
-    { k: "inject", label: "注射记录", desc: "皮下 / 肌注 / 静推", icon: Syringe, color: "bg-primary-soft text-primary" },
-    { k: "obs", label: "病情观察", desc: "AI 异常监测", icon: Activity, color: "bg-secondary-soft text-secondary" },
-    { k: "edu", label: "康复宣教", desc: "AI 智能推送", icon: BookOpen, color: "bg-ai-soft text-ai" },
-    { k: "execTask", label: "护理任务", desc: "翻身 / 换药 / 护理", icon: ClipboardCheck, color: "bg-rose-50 text-role-nurse" },
-    { k: "order", label: "医嘱执行", desc: "医师签发", icon: Stethoscope, color: "bg-rose-50 text-role-nurse" },
-  ];
-  return (
-    <div className="px-4 pt-4 pb-4">
-      <h2 className="text-xl font-bold mb-1">待办分类</h2>
-      <p className="text-xs text-muted-foreground mb-4">按事项类型查看患者列表，逐位执行</p>
-      <div className="space-y-2">
-        {queues.map((q) => {
-          const Icon = q.icon;
-          const count = QUEUES[q.k].length;
-          return (
-            <button key={q.k} onClick={() => onOpenQueue(q.k)} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]">
-              <div className={`w-10 h-10 rounded-xl ${q.color} flex items-center justify-center`}>
-                <Icon className="w-5 h-5" strokeWidth={2.2} />
-              </div>
-              <div className="flex-1">
-                <div className="text-[13px] font-semibold">{q.label}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{q.desc}</div>
-              </div>
-              <div className="text-right">
-                <div className="text-lg font-bold text-foreground">{count}</div>
-                <div className="text-[10px] text-muted-foreground">待处理</div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const Edu = ({
-  onOpen,
-  onOpenQueue,
-}: {
-  onOpen: (k: SheetKey) => void;
-  onOpenQueue: (k: QueueKey) => void;
-}) => (
-  <div className="px-4 pt-4 pb-4 space-y-4">
-    <div className="rounded-2xl p-5 gradient-nurse text-white relative overflow-hidden">
-      <BookOpen className="absolute top-3 right-3 w-16 h-16 opacity-20" />
+/* ============== 宣教中心页 ============== */
+const EduPage = ({ onOpenPush }: { onOpenPush: () => void }) => (
+  <div className="pb-4">
+    <div className="gradient-nurse px-5 pt-6 pb-6 text-white">
       <div className="text-xs opacity-80">康复宣教中心</div>
-      <div className="text-2xl font-bold mt-1">AI 智能宣教</div>
-      <div className="text-xs opacity-90 mt-2">个性化内容 · 一键推送给患者</div>
+      <div className="text-[15px] font-semibold mt-0.5">按康复阶段推送 · 单 / 多患者</div>
     </div>
-
-    <AICard title={`今日待宣教 · ${QUEUES.edu.length} 位患者`} action={
-      <button onClick={() => onOpenQueue("edu")} className="w-full bg-ai text-ai-foreground rounded-xl py-2.5 text-sm font-semibold">查看待宣教列表</button>
-    }>
-      <div className="space-y-2 text-[12px]">
-        {QUEUES.edu.slice(0, 3).map((e) => (
-          <div key={e.id} className="flex items-center gap-2"><CheckCircle2 className="w-3.5 h-3.5 text-ai" /><span>{e.meta} · {e.patient}</span></div>
+    <div className="px-4 pt-4 space-y-3">
+      <button onClick={onOpenPush} className="w-full gradient-nurse text-white rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-card">
+        <Send className="w-4 h-4" /> 多患者宣教推送
+      </button>
+      <AICard title="AI 智能推荐宣教内容">基于患者康复阶段（术后早期 / 中期 / 出院前）自动匹配最适合的宣教素材。</AICard>
+      <SectionTitle title="按阶段分类" />
+      <div className="grid grid-cols-2 gap-2">
+        {[
+          { title: "术后早期", desc: "0-7 天", count: 8 },
+          { title: "康复中期", desc: "8-21 天", count: 14 },
+          { title: "出院前", desc: "22+ 天", count: 9 },
+          { title: "家属篇", desc: "全阶段", count: 6 },
+        ].map(c => (
+          <button key={c.title} onClick={onOpenPush} className="bg-card rounded-2xl shadow-card p-4 text-left active:scale-[0.99]">
+            <div className="text-sm font-bold">{c.title}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">{c.desc} · {c.count} 个素材</div>
+          </button>
         ))}
       </div>
-    </AICard>
-
-    <SectionTitle title="宣教素材库" />
-    <div className="grid grid-cols-2 gap-2">
-      {[
-        { title: "吞咽训练", count: 12, color: "gradient-doctor" },
-        { title: "肢体康复", count: 28, color: "gradient-therapist" },
-        { title: "用药指南", count: 16, color: "gradient-nurse" },
-        { title: "心理疏导", count: 9, color: "gradient-ai" },
-      ].map((c) => (
-        <button key={c.title} onClick={() => onOpen("eduDetail")} className={`${c.color} text-left rounded-2xl p-4 text-white relative overflow-hidden h-24`}>
-          <div className="text-sm font-bold">{c.title}</div>
-          <div className="text-[10px] opacity-80 mt-1">{c.count} 个素材</div>
-          <ArrowRight className="absolute bottom-3 right-3 w-4 h-4 opacity-80" />
-        </button>
-      ))}
     </div>
   </div>
 );
 
-const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
-  <div className="px-4 pt-4 pb-4 space-y-4">
-    <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
-      <div className="w-16 h-16 rounded-2xl gradient-nurse flex items-center justify-center text-white text-xl font-bold">赵</div>
-      <div>
-        <div className="text-base font-bold">赵静怡 主管护师</div>
-        <div className="text-xs text-muted-foreground mt-0.5">康复护理组 · 12 年</div>
+const EduPushSheet = () => {
+  const [selected, setSelected] = useState<string[]>([PATIENTS[2].id, PATIENTS[3].id]);
+  const toggle = (id: string) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id]);
+  return (
+    <div className="p-4 space-y-3">
+      <AICard title="AI 推荐推送对象">
+        系统已根据康复阶段自动勾选 2 位最适合接收「术后家庭防护」宣教的患者，可手动调整。
+      </AICard>
+      <SectionTitle title="选择宣教素材" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="素材" value={<select className="bg-muted rounded px-2 py-1 text-xs"><option>术后家庭防护</option><option>吞咽训练</option><option>用药安全</option></select>} />
+        <FormRow label="格式" value={<span className="text-[11px]">视频 + 图文 + 测验</span>} />
+      </div>
+      <SectionTitle title={`选择推送患者 · 已选 ${selected.length}`} extra={<button onClick={() => setSelected(PATIENTS.map(p => p.id))} className="text-[11px] text-role-nurse font-semibold">全选</button>} />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        {PATIENTS.map(p => (
+          <button key={p.id} onClick={() => toggle(p.id)} className="w-full flex items-center justify-between px-3 py-3">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg gradient-nurse text-white flex items-center justify-center text-xs font-bold">{p.name[0]}</div>
+              <div className="text-left">
+                <div className="text-[12px] font-semibold">{p.name} · 床{p.bed}</div>
+                <div className="text-[10px] text-muted-foreground">{p.condition} · 入院 {p.admitDays} 天</div>
+              </div>
+            </div>
+            <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center ${selected.includes(p.id) ? "bg-role-nurse border-role-nurse text-white" : "border-border"}`}>
+              {selected.includes(p.id) && <CheckCircle2 className="w-3.5 h-3.5" />}
+            </div>
+          </button>
+        ))}
       </div>
     </div>
+  );
+};
+
+const DailyNoteSheet = () => (
+  <div className="p-4 space-y-3">
+    <AICard title="每日康复护理备注">
+      记录今日护理观察、给药执行、患者反馈等，提交后写入对应患者档案。
+    </AICard>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
-        <div className="flex items-center gap-3">
-          <Users className="w-4 h-4 text-role-nurse" />
-          <span className="text-sm">团队管理</span>
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">配置成员 · 共享患者</span>
-        </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-      </button>
-      {["护理记录", "给药历史", "宣教记录", "排班", "设置"].map((it) => (
-        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
-          <span className="text-sm">{it}</span>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-      ))}
+      <FormRow label="患者" value={<select className="bg-muted rounded px-2 py-1 text-xs">{PATIENTS.map(p => <option key={p.id}>{p.name} · 床{p.bed}</option>)}</select>} />
+      <FormRow label="班次" value={<select className="bg-muted rounded px-2 py-1 text-xs"><option>白班</option><option>夜班</option></select>} />
     </div>
+    <textarea
+      defaultValue="患者今日精神可，配合度高；伤口干洁；夜间睡眠 6h，无诉不适。给药全部执行到位。"
+      className="w-full bg-card border border-border rounded-2xl p-3 text-xs h-32 outline-none"
+    />
   </div>
 );
 
 /* ===================== Sheets ===================== */
 
-const MedSheet = ({ patient }: { patient?: string }) => (
+const MedExecSheet = ({ patient }: { patient?: string }) => (
   <div className="p-4 space-y-3">
     <div className="rounded-2xl gradient-nurse text-white p-5">
       <div className="text-xs opacity-80">给药任务</div>
@@ -440,12 +421,8 @@ const VitalsSheet = ({ patient }: { patient?: string }) => (
     </div>
     <div className="grid grid-cols-2 gap-2">
       {[
-        { l: "体温 ℃", d: "36.7" },
-        { l: "脉搏 bpm", d: "78" },
-        { l: "呼吸 /min", d: "18" },
-        { l: "血压 mmHg", d: "128/82" },
-        { l: "血氧 %", d: "98" },
-        { l: "疼痛 VAS", d: "3" },
+        { l: "体温 ℃", d: "36.7" }, { l: "脉搏 bpm", d: "78" }, { l: "呼吸 /min", d: "18" },
+        { l: "血压 mmHg", d: "128/82" }, { l: "血氧 %", d: "98" }, { l: "疼痛 VAS", d: "3" },
       ].map((v) => (
         <div key={v.l} className="bg-card rounded-2xl shadow-card p-3">
           <div className="text-[10px] text-muted-foreground">{v.l}</div>
@@ -454,45 +431,6 @@ const VitalsSheet = ({ patient }: { patient?: string }) => (
       ))}
     </div>
     <AICard title="AI 异常筛查">所有指标在正常范围内。</AICard>
-  </div>
-);
-
-const EduListSheet = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => (
-  <div className="p-4 space-y-2">
-    {["脑卒中后吞咽训练", "髋关节术后家庭防护", "用药安全与不良反应", "心理疏导 · 家属篇", "康复期营养指南"].map((t) => (
-      <button key={t} onClick={() => onOpen("eduDetail")} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-ai-soft flex items-center justify-center"><BookOpen className="w-5 h-5 text-ai" /></div>
-        <div className="flex-1">
-          <div className="text-[13px] font-semibold">{t}</div>
-          <div className="text-[10px] text-muted-foreground mt-0.5">视频 · 图文 · 测验</div>
-        </div>
-        <ChevronRight className="w-4 h-4 text-muted-foreground" />
-      </button>
-    ))}
-  </div>
-);
-
-const EduDetailSheet = () => (
-  <div className="p-4 space-y-3">
-    <div className="rounded-2xl gradient-nurse text-white p-5">
-      <BookOpen className="w-8 h-8 mb-2 opacity-90" />
-      <div className="text-lg font-bold">脑卒中后吞咽训练</div>
-      <div className="text-[11px] opacity-90 mt-1">视频 5 分钟 · 图文 8 页 · 课后测验</div>
-    </div>
-    <div className="bg-card rounded-2xl shadow-card p-4 space-y-2 text-sm">
-      <p className="text-foreground/80 leading-relaxed">本指南帮助患者及家属掌握安全进食、口腔运动训练、呛咳应急处理等技能。</p>
-      <div className="grid grid-cols-3 gap-2 mt-3">
-        {["视频", "图文", "测验"].map((t) => (
-          <div key={t} className="text-center text-xs bg-muted py-2 rounded-lg">{t}</div>
-        ))}
-      </div>
-    </div>
-    <SectionTitle title="选择推送对象" />
-    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      {["303 张建国", "305 王秀英", "307 李 强"].map((p) => (
-        <FormRow key={p} label={p} value={<input type="checkbox" defaultChecked className="w-4 h-4 accent-pink-500" />} />
-      ))}
-    </div>
   </div>
 );
 
@@ -524,69 +462,6 @@ const ObsSheet = () => (
   </div>
 );
 
-const BedSheet = () => (
-  <div className="p-4 space-y-3">
-    <SectionTitle title="西区病房床位" extra={<span className="text-[10px] text-muted-foreground">16/20</span>} />
-    <div className="grid grid-cols-4 gap-2">
-      {Array.from({ length: 20 }).map((_, i) => {
-        const occ = i < 16;
-        return (
-          <div key={i} className={`aspect-square rounded-xl flex flex-col items-center justify-center text-[10px] ${occ ? "gradient-nurse text-white" : "bg-muted text-muted-foreground"}`}>
-            <div className="text-[9px] opacity-80">床</div>
-            <div className="text-sm font-bold">{301 + i}</div>
-          </div>
-        );
-      })}
-    </div>
-  </div>
-);
-
-const OrderSheet = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => (
-  <div className="p-4 space-y-2">
-    <AICard title="医嘱已自动转护理任务">医师签发的医嘱已分解为可执行护理任务。</AICard>
-    {[
-      { p: "303 张建国", o: "阿司匹林 100mg qd IV", k: "med" as SheetKey },
-      { p: "305 王秀英", o: "低分子肝素 0.4ml q12h ih", k: "inject" as SheetKey },
-      { p: "307 李 强", o: "VS q4h", k: "vitals" as SheetKey },
-      { p: "310 陈丽华", o: "多奈哌齐 5mg qn po", k: "med" as SheetKey },
-    ].map((o) => (
-      <button key={o.p} onClick={() => onOpen(o.k)} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5">
-        <div className="text-[13px] font-semibold">{o.p}</div>
-        <div className="text-[11px] text-muted-foreground mt-0.5">{o.o}</div>
-      </button>
-    ))}
-  </div>
-);
-
-const PatientSheet = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => (
-  <div className="p-4 space-y-3">
-    <div className="bg-card rounded-2xl shadow-card p-4">
-      <div className="flex items-center gap-3">
-        <div className="w-12 h-12 rounded-2xl gradient-nurse text-white flex items-center justify-center font-bold">张</div>
-        <div className="flex-1">
-          <div className="text-sm font-bold">张建国 · 男 56 岁</div>
-          <div className="text-[11px] text-muted-foreground">床号 303 · 脑卒中后偏瘫</div>
-        </div>
-      </div>
-    </div>
-    <div className="grid grid-cols-3 gap-2">
-      {[
-        { l: "给药", k: "med" as SheetKey, i: Pill },
-        { l: "体征", k: "vitals" as SheetKey, i: HeartPulse },
-        { l: "宣教", k: "eduDetail" as SheetKey, i: BookOpen },
-        { l: "观察", k: "obs" as SheetKey, i: Activity },
-        { l: "注射", k: "inject" as SheetKey, i: Syringe },
-        { l: "医嘱", k: "order" as SheetKey, i: Stethoscope },
-      ].map((it) => (
-        <button key={it.l} onClick={() => onOpen(it.k)} className="flex flex-col items-center gap-1.5 py-3 bg-card rounded-2xl shadow-card">
-          <it.i className="w-5 h-5 text-role-nurse" />
-          <span className="text-[11px]">{it.l}</span>
-        </button>
-      ))}
-    </div>
-  </div>
-);
-
 const ExecTaskSheet = () => (
   <div className="p-4 space-y-3">
     <div className="bg-card rounded-2xl shadow-card p-4">
@@ -599,6 +474,33 @@ const ExecTaskSheet = () => (
         <FormRow key={s} label={`${i + 1}. ${s}`} value={<input type="checkbox" className="w-4 h-4 accent-pink-500" />} />
       ))}
     </div>
-    <textarea placeholder="伤口情况记录..." className="w-full bg-card border border-border rounded-2xl p-3 text-xs h-20 outline-none" />
+  </div>
+);
+
+const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
+  <div className="px-4 pt-4 pb-4 space-y-4">
+    <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
+      <div className="w-16 h-16 rounded-2xl gradient-nurse flex items-center justify-center text-white text-xl font-bold">赵</div>
+      <div>
+        <div className="text-base font-bold">赵静怡 主管护师</div>
+        <div className="text-xs text-muted-foreground mt-0.5">康复护理组 · 12 年</div>
+      </div>
+    </div>
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-role-nurse" />
+          <span className="text-sm">团队管理</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">配置成员 · 共享患者</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
+      {["护理记录", "给药历史", "宣教记录", "排班", "设置"].map((it) => (
+        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
+          <span className="text-sm">{it}</span>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+      ))}
+    </div>
   </div>
 );

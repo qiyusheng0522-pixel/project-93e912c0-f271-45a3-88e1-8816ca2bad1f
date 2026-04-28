@@ -3,27 +3,29 @@ import { Accent, Patient, PATIENTS } from "@/components/app/PatientsModule";
 import { SectionTitle, AICard } from "@/components/app/UI";
 import { ChevronRight, Target, FileText, Home as HomeIcon, Sparkles } from "lucide-react";
 
-export type PlanStage = "goal" | "plan" | "discharge";
+export type PlanStage = "goal" | "plan" | "discharge" | "airx";
 
 const STAGE_LABEL: Record<PlanStage, string> = {
   goal: "康复目标",
   plan: "康复方案",
+  airx: "AI 处方",
   discharge: "出院方案",
 };
 
 const STAGE_DESC: Record<PlanStage, string> = {
   goal: "AI 智能设定 / 手动调整目标",
   plan: "AI 生成 / 团队会议确认方案",
-  discharge: "AI 生成院外二级方案",
+  airx: "AI 自动生成处方 · 医师确认",
+  discharge: "AI 生成院外二级方案 · 需二次确认",
 };
 
 const STAGE_ICON: Record<PlanStage, any> = {
   goal: Target,
   plan: FileText,
+  airx: Sparkles,
   discharge: HomeIcon,
 };
 
-// Mock per-stage patient buckets (uses real patient ids/names from PatientsModule)
 export const REHAB_PLAN_BUCKETS: Record<PlanStage, { patientId: string; status: string; detail: string }[]> = {
   goal: [
     { patientId: "p1", status: "AI 已生成 4 周目标", detail: "待医师确认 · 步行 50m / FMA +8" },
@@ -35,8 +37,14 @@ export const REHAB_PLAN_BUCKETS: Record<PlanStage, { patientId: string; status: 
     { patientId: "p2", status: "新方案待确认", detail: "新增站立平衡训练" },
     { patientId: "p4", status: "方案微调", detail: "增加 ST 训练 2 次/周" },
   ],
+  airx: [
+    { patientId: "p1", status: "AI 待医师确认", detail: "PT 5/周 + OT 5/周 + ST 3/周" },
+    { patientId: "p2", status: "AI 待医师确认", detail: "新增站立位平衡训练" },
+    { patientId: "p3", status: "已签发待治疗师确认", detail: "OT 强度调整建议" },
+    { patientId: "p5", status: "AI 待医师确认", detail: "首版 AI 处方建议" },
+  ],
   discharge: [
-    { patientId: "p3", status: "AI 二级方案已生成", detail: "满足出院条件 · 待调整确认转社区" },
+    { patientId: "p3", status: "AI 二级方案已生成", detail: "满足出院条件 · 需 AI 二次确认 · 转社区" },
     { patientId: "p1", status: "出院条件评估中", detail: "Barthel 70 / 75 · 差 5 分" },
   ],
 };
@@ -45,12 +53,19 @@ export const RehabPlanModule = ({
   accent,
   onPickPlan,
   initialStage = "plan",
+  stages = ["goal", "plan", "airx", "discharge"],
+  title = "康复方案",
+  subtitle = "基于患者状态的处理列表",
 }: {
   accent: Accent;
   onPickPlan: (stage: PlanStage, patient: Patient) => void;
   initialStage?: PlanStage;
+  stages?: PlanStage[];
+  title?: string;
+  subtitle?: string;
 }) => {
-  const [stage, setStage] = useState<PlanStage>(initialStage);
+  const safeInitial = stages.includes(initialStage) ? initialStage : stages[0];
+  const [stage, setStage] = useState<PlanStage>(safeInitial);
   const accentBg = {
     doctor: "gradient-doctor",
     therapist: "gradient-therapist",
@@ -65,28 +80,30 @@ export const RehabPlanModule = ({
 
   return (
     <div className="pb-4">
-      <div className={`${accentBg} px-5 pt-2 pb-6 text-white relative overflow-hidden`}>
+      <div className={`${accentBg} px-5 pt-3 pb-6 text-white relative overflow-hidden`}>
         <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative">
-          <div className="text-xs opacity-80">康复方案</div>
-          <div className="text-lg font-semibold mt-0.5">基于患者状态的处理列表</div>
-          <div className="mt-3 flex gap-1.5 bg-white/15 backdrop-blur rounded-full p-1">
-            {(["goal", "plan", "discharge"] as PlanStage[]).map((s) => {
-              const active = stage === s;
-              return (
-                <button
-                  key={s}
-                  onClick={() => setStage(s)}
-                  className={`flex-1 text-[12px] py-1.5 rounded-full font-semibold transition-all ${
-                    active ? "bg-white text-foreground" : "text-white/90"
-                  }`}
-                >
-                  {STAGE_LABEL[s]}
-                  <span className="ml-1 opacity-70">({REHAB_PLAN_BUCKETS[s].length})</span>
-                </button>
-              );
-            })}
-          </div>
+          <div className="text-xs opacity-80">{title}</div>
+          <div className="text-[15px] font-semibold mt-0.5">{subtitle}</div>
+          {stages.length > 1 && (
+            <div className="mt-3 flex gap-1 bg-white/15 backdrop-blur rounded-full p-1">
+              {stages.map((s) => {
+                const active = stage === s;
+                return (
+                  <button
+                    key={s}
+                    onClick={() => setStage(s)}
+                    className={`flex-1 text-[11px] py-1.5 rounded-full font-semibold transition-all ${
+                      active ? "bg-white text-foreground" : "text-white/90"
+                    }`}
+                  >
+                    {STAGE_LABEL[s]}
+                    <span className="ml-0.5 opacity-70">({REHAB_PLAN_BUCKETS[s].length})</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -132,7 +149,7 @@ export const RehabPlanModule = ({
   );
 };
 
-/* =============== AI 康复处方模块 =============== */
+/* =============== AI 康复处方模块（独立）保留以兼容 =============== */
 export interface AIRxBucket {
   patientId: string;
   status: "AI 待医师确认" | "已签发待治疗师确认" | "执行中" | "已完成";
@@ -166,14 +183,14 @@ export const AIRxModule = ({
 
   return (
     <div className="pb-4">
-      <div className={`${accentBg} px-5 pt-2 pb-6 text-white relative overflow-hidden`}>
+      <div className={`${accentBg} px-5 pt-3 pb-6 text-white relative overflow-hidden`}>
         <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative">
           <div className="flex items-center gap-2">
             <Sparkles className="w-4 h-4" />
             <div className="text-xs opacity-80">AI 康复处方</div>
           </div>
-          <div className="text-lg font-semibold mt-0.5">基于方案智能生成 · 医师确认</div>
+          <div className="text-[15px] font-semibold mt-0.5">基于方案智能生成 · 医师确认</div>
           <div className="mt-3 flex gap-1.5 bg-white/15 backdrop-blur rounded-full p-1 w-fit">
             {(["all", "pending"] as const).map((f) => {
               const active = filter === f;
