@@ -659,6 +659,188 @@ export const TeamMeetingListSheet = ({
   </div>
 );
 
+/* ============== 患者沟通：会话列表 + 单会话 ============== */
+export interface PatientChatThread {
+  patientId: string;
+  lastMsg: string;
+  time: string;
+  unread: number;
+}
+
+export const DEFAULT_PATIENT_THREADS: PatientChatThread[] = [
+  { patientId: "p1", lastMsg: "医生今晚我可以下床走几步吗？", time: "14:32", unread: 2 },
+  { patientId: "p2", lastMsg: "夜间疼痛比昨天好多了，谢谢", time: "12:08", unread: 0 },
+  { patientId: "p3", lastMsg: "出院后社区怎么衔接？", time: "昨日", unread: 1 },
+  { patientId: "p5", lastMsg: "首次评估什么时候安排？", time: "昨日", unread: 3 },
+];
+
+export const PatientChatListSheet = ({
+  accent,
+  onPick,
+}: {
+  accent: Accent;
+  onPick: (p: Patient) => void;
+}) => {
+  const totalUnread = DEFAULT_PATIENT_THREADS.reduce((s, t) => s + t.unread, 0);
+  return (
+    <div className="p-4 space-y-3">
+      <AICard title={`患者沟通 · 未读 ${totalUnread}`}>
+        AI 已对所有患者会话进行情绪与紧急度分析，标红为需优先回复。
+      </AICard>
+      <SectionTitle title={`会话列表 · ${DEFAULT_PATIENT_THREADS.length}`} />
+      <div className="space-y-2">
+        {DEFAULT_PATIENT_THREADS.map(t => {
+          const p = PATIENTS.find(x => x.id === t.patientId);
+          if (!p) return null;
+          return (
+            <button
+              key={t.patientId}
+              onClick={() => onPick(p)}
+              className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]"
+            >
+              <div className={`w-11 h-11 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center font-bold relative`}>
+                {p.name[0]}
+                {t.unread > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-destructive text-white text-[10px] font-bold flex items-center justify-center">
+                    {t.unread}
+                  </span>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] font-semibold">{p.name} · 床{p.bed}</span>
+                  <span className="text-[10px] text-muted-foreground">{t.time}</span>
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{t.lastMsg}</div>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
+export const PatientChatSheet = ({
+  accent,
+  patient,
+  onClose,
+  showProfile = true,
+}: {
+  accent: Accent;
+  patient: Patient | null;
+  onClose: () => void;
+  showProfile?: boolean;
+}) => {
+  const [msgs, setMsgs] = useState<ChatMessage[]>([
+    { id: "p1", author: patient?.name || "患者", text: "医生您好，请问今晚我可以下床走几步吗？", time: "14:30" },
+    { id: "p2", author: "我", isMe: true, text: "可以，请使用助行器，先在床边站立 1 分钟，无头晕再尝试走 3-5 步。", time: "14:31" },
+    { id: "p3", author: patient?.name || "患者", text: "好的，请问需要家属陪同吗？", time: "14:32" },
+  ]);
+  const [input, setInput] = useState("");
+  const [showAI, setShowAI] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  if (!patient) return null;
+
+  const aiSuggestions = [
+    "建议有家属或护士陪同，避免跌倒。如出现头晕、心慌请立即坐下并呼叫护士。",
+    "可以下床但需循序渐进，从床边坐立 → 站立 → 短距离行走，每次不超过 5 分钟。",
+    "今日 VAS 已降至 3，可以适度活动，注意患肢负重不超过 30%。",
+  ];
+
+  const send = (text?: string) => {
+    const v = (text ?? input).trim();
+    if (!v) return;
+    setMsgs([...msgs, { id: Date.now().toString(), author: "我", isMe: true, text: v, time: "刚刚" }]);
+    setInput("");
+    setShowAI(false);
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <div className={`${accentBg[accent]} text-white px-4 py-3 flex items-center gap-2`}>
+        <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center -ml-1">
+          <ChevronRight className="w-4 h-4 rotate-180" />
+        </button>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-bold truncate">{patient.name} · 床{patient.bed}</div>
+          <div className="text-[11px] opacity-90 truncate">{patient.condition} · {patient.meta}</div>
+        </div>
+        {showProfile && (
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            className="text-[11px] px-2 py-1 rounded-full bg-white/20 backdrop-blur"
+          >
+            {profileOpen ? "收起档案" : "查看档案"}
+          </button>
+        )}
+      </div>
+
+      {profileOpen && (
+        <div className="bg-card border-b border-border/60 px-4 py-3 text-[11px] space-y-1.5 max-h-[180px] overflow-y-auto">
+          <div className="flex justify-between"><span className="text-muted-foreground">主诊断</span><span className="font-semibold">{patient.condition}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">入院</span><span>第 {patient.admitDays} 天</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">主管团队</span><span>{patient.shared.slice(0, 3).join(" / ")}</span></div>
+          <div className="flex justify-between"><span className="text-muted-foreground">最近备注</span><span className="text-right">{patient.notes[0]?.text?.slice(0, 18) || "无"}</span></div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 bg-muted/30">
+        {msgs.map(m => (
+          <div key={m.id} className={`flex gap-2 ${m.isMe ? "flex-row-reverse" : ""}`}>
+            <div className={`w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-[11px] font-bold text-white ${m.isMe ? accentBg[accent] : "bg-muted-foreground"}`}>
+              {m.author[0]}
+            </div>
+            <div className={`max-w-[78%] flex flex-col gap-1`}>
+              <div className="text-[10px] text-muted-foreground px-1">{m.author} · {m.time}</div>
+              <div className={`text-[12px] leading-relaxed px-3 py-2 rounded-2xl whitespace-pre-line ${
+                m.isMe ? `${accentBg[accent]} text-white rounded-tr-sm` : "bg-card shadow-card rounded-tl-sm"
+              }`}>{m.text}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {showAI && (
+        <div className="bg-ai-soft border-t border-ai/20 px-3 py-2 space-y-1.5">
+          <div className="text-[10px] text-ai font-semibold flex items-center gap-1"><Sparkles className="w-3 h-3" />AI 自动回复建议 · 点击引用</div>
+          {aiSuggestions.map((s, i) => (
+            <button
+              key={i}
+              onClick={() => send(s)}
+              className="w-full text-left bg-card rounded-xl px-3 py-2 text-[11px] leading-relaxed border border-ai/15 active:scale-[0.99]"
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="px-3 py-2 bg-card border-t border-border/60 flex items-center gap-2">
+        <button
+          onClick={() => setShowAI(!showAI)}
+          className={`w-9 h-9 rounded-full flex items-center justify-center ${showAI ? "gradient-ai text-white" : "bg-muted text-foreground/70"}`}
+        >
+          <Sparkles className="w-4 h-4" />
+        </button>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === "Enter") send(); }}
+          placeholder="输入消息..."
+          className="flex-1 bg-muted rounded-full px-4 py-2 text-xs outline-none"
+        />
+        <button onClick={() => send()} className={`w-9 h-9 rounded-full ${accentBg[accent]} text-white flex items-center justify-center`}>
+          <Send className="w-4 h-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export const PATIENT_UNREAD = DEFAULT_PATIENT_THREADS.reduce((s, t) => s + t.unread, 0);
+
 export const NewMeetingSheet = ({
   accent,
   onCreate,
