@@ -73,14 +73,8 @@ const DOCTOR_TABS: TabBarItem[] = [
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
   { key: "ai", label: "AI康复处方", icon: Sparkles },
-  { key: "me", label: "我的", icon: User_Icon },
+  { key: "me", label: "我的", icon: UserIcon },
 ];
-function User_Icon(props: any) {
-  // simple proxy to lucide User to avoid extra import noise above
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { User } = require("lucide-react");
-  return <User {...props} />;
-}
 
 export const DoctorApp = () => {
   const [tab, setTab] = useState("home");
