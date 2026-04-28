@@ -37,6 +37,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { MeStats } from "@/components/app/MeStats";
 
 const NURSE_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: HomeIcon },
