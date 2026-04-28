@@ -400,8 +400,8 @@ const TherapistPickerDialog = ({
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
-          <AlertDialogTitle>指定治疗师</AlertDialogTitle>
-          <AlertDialogDescription>请选择治疗类型（PT / OT / ST），并为每种类型指定治疗师。</AlertDialogDescription>
+          <AlertDialogTitle>指派治疗师</AlertDialogTitle>
+          <AlertDialogDescription>评估已确认。请选择治疗类型（PT / OT / ST），并为每种类型指派治疗师。</AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-3">
           <div className="flex gap-2">
