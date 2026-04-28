@@ -116,26 +116,42 @@ export const WorkbenchTile = ({
 
 export const PendingStatRow = ({
   items,
+  variant = "glass",
+  accent = "doctor",
 }: {
   items: { label: string; count: number; onClick?: () => void }[];
+  variant?: "glass" | "card";
+  accent?: "doctor" | "therapist" | "nurse";
 }) => {
   const cols =
     items.length >= 5 ? "grid-cols-5" :
     items.length === 4 ? "grid-cols-4" :
     items.length === 2 ? "grid-cols-2" : "grid-cols-3";
   const dense = items.length >= 5;
+  const isCard = variant === "card";
+  const numColor = isCard
+    ? accent === "therapist"
+      ? "text-secondary"
+      : accent === "nurse"
+        ? "text-success"
+        : "text-primary"
+    : "text-white";
+  const itemBg = isCard
+    ? "bg-card shadow-card border border-border/40"
+    : "bg-white/15 backdrop-blur";
+  const labelColor = isCard ? "text-muted-foreground" : "opacity-90";
   return (
     <div className={`relative grid ${cols} gap-1.5`}>
       {items.map((it) => (
         <button
           key={it.label}
           onClick={it.onClick}
-          className={`bg-white/15 backdrop-blur rounded-xl ${dense ? "px-1.5 py-2" : "p-2.5"} text-left active:scale-95 transition-transform relative min-w-0 flex flex-col justify-between min-h-[58px]`}
+          className={`${itemBg} rounded-xl ${dense ? "px-1.5 py-2" : "p-2.5"} text-left active:scale-95 transition-transform relative min-w-0 flex flex-col justify-between min-h-[64px]`}
         >
-          <div className={`${dense ? "text-[10px]" : "text-[10px]"} opacity-90 leading-[1.15] break-words`}>{it.label}</div>
-          <div className={`${dense ? "text-lg" : "text-xl"} font-bold mt-1 flex items-baseline gap-0.5 leading-none`}>
+          <div className={`text-[10px] ${labelColor} leading-[1.2] whitespace-nowrap overflow-visible`}>{it.label}</div>
+          <div className={`${dense ? "text-xl" : "text-2xl"} font-extrabold mt-1 flex items-baseline gap-0.5 leading-none ${numColor}`}>
             {it.count}
-            <ChevronRight className="w-3 h-3 opacity-70" />
+            <ChevronRight className={`w-3 h-3 ${isCard ? "text-muted-foreground" : "opacity-70"}`} />
           </div>
         </button>
       ))}
