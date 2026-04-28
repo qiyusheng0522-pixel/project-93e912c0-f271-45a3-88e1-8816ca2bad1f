@@ -325,7 +325,127 @@ export const DoctorApp = () => {
       <PhoneSheet open={sheet === "team"} onClose={close} title="团队管理" accent="doctor">
         <TeamManageSheet accent="doctor" />
       </PhoneSheet>
+
+      <TherapistPickerDialog
+        open={therapistPickerOpen}
+        onClose={() => setTherapistPickerOpen(false)}
+        onConfirm={(types, name) => {
+          setTherapistPickerOpen(false);
+          toast.success(`已指定 ${types.join("/")} 治疗师 · ${name}`);
+          close();
+        }}
+      />
     </ScreenShell>
+  );
+};
+
+/* ===== 线上会诊 · 患者选择 ===== */
+const VideoPatientPicker = ({ onPick }: { onPick: (p: Patient) => void }) => (
+  <div className="p-4 space-y-3">
+    <AICard title="发起线上会诊 · 先选择患者">
+      不同患者关联的协作角色不同，请先选择患者，系统会自动拉取该患者的医师 / 治疗师 / 护理 / 心理团队进入会诊。
+    </AICard>
+    <SectionTitle title={`患者列表 · ${PATIENTS.length}`} />
+    <div className="space-y-2">
+      {PATIENTS.map((p) => (
+        <button
+          key={p.id}
+          onClick={() => onPick(p)}
+          className="w-full bg-card rounded-2xl shadow-card p-3.5 text-left active:scale-[0.99] transition-transform flex items-center gap-3"
+        >
+          <div className="w-11 h-11 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold">{p.name[0]}</div>
+          <div className="flex-1 min-w-0">
+            <div className="text-[13px] font-semibold flex items-center gap-1.5">
+              {p.name}
+              <span className="text-[10px] text-muted-foreground font-normal">床{p.bed}</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">{p.status}</span>
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.condition} · {p.meta}</div>
+            <div className="text-[10px] text-muted-foreground mt-1 truncate">协作：{p.shared.join(" / ") || "暂无"}</div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+/* ===== 指定治疗师弹窗 ===== */
+const THERAPIST_OPTIONS: Record<"PT" | "OT" | "ST", string[]> = {
+  PT: ["王雅琴", "李建华"],
+  OT: ["陈治疗师", "周敏"],
+  ST: ["陈思雨", "刘语欣"],
+};
+
+const TherapistPickerDialog = ({
+  open,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onConfirm: (types: ("PT" | "OT" | "ST")[], name: string) => void;
+}) => {
+  const [types, setTypes] = useState<("PT" | "OT" | "ST")[]>([]);
+  const [picked, setPicked] = useState<Record<string, string>>({});
+  const toggle = (t: "PT" | "OT" | "ST") =>
+    setTypes((prev) => (prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]));
+  return (
+    <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
+      <AlertDialogContent className="max-w-sm">
+        <AlertDialogHeader>
+          <AlertDialogTitle>指定治疗师</AlertDialogTitle>
+          <AlertDialogDescription>请选择治疗类型（PT / OT / ST），并为每种类型指定治疗师。</AlertDialogDescription>
+        </AlertDialogHeader>
+        <div className="space-y-3">
+          <div className="flex gap-2">
+            {(["PT", "OT", "ST"] as const).map((t) => (
+              <button
+                key={t}
+                onClick={() => toggle(t)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border ${
+                  types.includes(t) ? "gradient-doctor text-white border-transparent" : "border-border text-foreground"
+                }`}
+              >
+                {t}
+              </button>
+            ))}
+          </div>
+          {types.map((t) => (
+            <div key={t} className="bg-muted rounded-xl p-3">
+              <div className="text-[11px] text-muted-foreground mb-2">{t} 治疗师</div>
+              <div className="flex flex-wrap gap-2">
+                {THERAPIST_OPTIONS[t].map((name) => (
+                  <button
+                    key={name}
+                    onClick={() => setPicked({ ...picked, [t]: name })}
+                    className={`text-[12px] px-3 py-1.5 rounded-lg border ${
+                      picked[t] === name ? "bg-primary text-primary-foreground border-transparent" : "border-border bg-card"
+                    }`}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onClose}>取消</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => {
+              if (types.length === 0) return;
+              const names = types.map((t) => picked[t] ?? THERAPIST_OPTIONS[t][0]).join(" / ");
+              onConfirm(types, names);
+              setTypes([]);
+              setPicked({});
+            }}
+          >
+            确认指派
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
