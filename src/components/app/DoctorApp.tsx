@@ -556,31 +556,85 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
 
 /* ===================== Sheets ===================== */
 
-const AssessSheet = ({ patient }: { patient?: string }) => (
-  <div className="p-4 space-y-3">
-    <div className="bg-card rounded-2xl shadow-card p-4">
-      <div className="text-sm font-semibold mb-1">{patient || "王秀英 · 女 68 岁"}</div>
-      <div className="text-[11px] text-muted-foreground">康复评估准备就绪</div>
-    </div>
-    <AICard title="AI 风险与病史智能分析">
-      检测：跌倒高风险 ★★★ · 深静脉血栓中风险 ★★ · 疼痛评分 6/10。建议优先评估关节 ROM 与负重耐受。
-    </AICard>
-    <SectionTitle title="评估量表（团队线上协同）" />
-    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <FormRow label="Harris 髋关节评分" value="待录入" hint="负责：王治疗师" />
-      <FormRow label="VAS 疼痛评分" value="6 / 10" hint="负责：赵护士 · 已完成" />
-      <FormRow label="Berg 平衡量表" value="32 分" hint="负责：王治疗师 · 已完成" />
-      <FormRow label="Barthel 指数" value="待录入" hint="负责：李医师" />
-    </div>
-    <AICard title="AI 评估结果初判" action={
-      <div className="flex gap-2">
-        <button className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold" onClick={() => toast("已发起再次线上评估")}>结果不确定 · 再评估</button>
+const AssessSheet = ({ patient }: { patient?: string }) => {
+  const name = patient ? patient.split(" ")[0] : "王秀英";
+  return (
+    <div className="p-4 space-y-3">
+      {/* 患者基本信息 */}
+      <div className="bg-card rounded-2xl shadow-card p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
+          <div className="flex-1">
+            <div className="text-sm font-bold">{patient || "王秀英 · 女 68 岁"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">床号 305 · 入院第 5 天 · 主管医师：李志远</div>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-primary-soft text-primary font-semibold">首次评估</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">身高/体重</div>
+            <div className="text-[11px] font-semibold mt-0.5">158 / 56</div>
+          </div>
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">血型 / 过敏</div>
+            <div className="text-[11px] font-semibold mt-0.5">A 型 / 无</div>
+          </div>
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">医保</div>
+            <div className="text-[11px] font-semibold mt-0.5">城镇职工</div>
+          </div>
+        </div>
       </div>
-    }>
-      综合判定：康复潜力良好，建议进入"目标设定 → 方案制定"环节。
-    </AICard>
-  </div>
-);
+
+      {/* 档案信息 */}
+      <SectionTitle title="档案信息" extra={<button onClick={() => toast("已查看完整电子病历")} className="text-[11px] text-primary font-semibold flex items-center"><FileHeart className="w-3 h-3 mr-1" />完整病历</button>} />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="主诉" value="右髋疼痛伴活动受限 3 个月" />
+        <FormRow label="现病史" value="跌倒致伤 ▾" hint="术前 X 线示右股骨颈骨折" />
+        <FormRow label="既往史" value="高血压 8 年 · 2 型糖尿病 5 年" hint="降压、降糖药规律服用" />
+        <FormRow label="手术史" value="2026-04-23 右髋关节置换术" />
+        <FormRow label="家族史" value="父：脑卒中；母：冠心病" />
+        <FormRow label="过敏史" value="无" />
+      </div>
+
+      {/* 病症与体征 */}
+      <SectionTitle title="入院病症与体征" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="意识 / 认知" value="清醒 · MMSE 28" />
+        <FormRow label="肌力（右下肢）" value="III 级" hint="髋屈 / 伸 III 级，膝伸 IV 级" />
+        <FormRow label="ROM 屈曲" value="60° / 100°" hint="左 / 右" />
+        <FormRow label="肌张力 (MAS)" value="0 级" />
+        <FormRow label="负重耐受" value="患肢 30%" hint="术后渐进负重" />
+        <FormRow label="感觉" value="正常" />
+        <FormRow label="伤口情况" value="愈合良好" />
+        <FormRow label="并发症风险" value="DVT 中风险 · 跌倒高风险" />
+      </div>
+
+      <AICard title="AI 风险与病史智能分析">
+        基于上述基本信息 + 档案 + 体征：跌倒高风险 ★★★ · DVT 中风险 ★★ · 疼痛 6/10。
+        合并糖尿病：建议关注伤口愈合与运动负荷；高血压：注意运动中血压监测。
+        推荐优先评估：Harris 髋关节、Berg 平衡、Barthel ADL、ROM。
+      </AICard>
+
+      <SectionTitle title="评估量表（团队线上协同）" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="Harris 髋关节评分" value="65 ✓" hint="负责：王治疗师 · 已完成" />
+        <FormRow label="VAS 疼痛评分" value="6 / 10" hint="负责：赵护士 · 已完成" />
+        <FormRow label="Berg 平衡量表" value="32 分" hint="负责：王治疗师 · 已完成" />
+        <FormRow label="Barthel 指数" value="55 分" hint="负责：李医师 · 已完成" />
+        <FormRow label="DVT Wells" value="2 分（中）" hint="负责：赵护士 · 已完成" />
+      </div>
+
+      <AICard title="AI 评估结果初判" action={
+        <div className="flex gap-2">
+          <button className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold" onClick={() => toast("已发起再次线上评估")}>结果不确定 · 再评估</button>
+        </div>
+      }>
+        综合判定：术后早期，疼痛是主要限制因素；康复潜力良好。建议进入「目标设定 → 方案制定」，重点：疼痛干预 + 渐进负重 + 平衡训练。
+      </AICard>
+    </div>
+  );
+};
 
 const GoalSheet = () => (
   <div className="p-4 space-y-3">
