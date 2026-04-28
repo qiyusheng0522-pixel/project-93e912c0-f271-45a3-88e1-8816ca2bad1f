@@ -1,0 +1,137 @@
+import { ReactNode } from "react";
+import { ChevronRight, Clock, AlertCircle } from "lucide-react";
+
+export interface TodoItem {
+  id: string;
+  patient: string;
+  meta: string;
+  detail: string;
+  time?: string;
+  urgency?: "high" | "medium" | "low";
+}
+
+/**
+ * Queue list rendered inside a PhoneSheet. Tapping a row opens the
+ * single-patient confirmation sheet.
+ */
+export const TodoQueueList = ({
+  items,
+  onPick,
+  accent = "doctor",
+  emptyHint = "暂无待办",
+}: {
+  items: TodoItem[];
+  onPick: (item: TodoItem) => void;
+  accent?: "doctor" | "therapist" | "nurse";
+  emptyHint?: string;
+}) => {
+  const grad = {
+    doctor: "gradient-doctor",
+    therapist: "gradient-therapist",
+    nurse: "gradient-nurse",
+  }[accent];
+
+  if (items.length === 0) {
+    return (
+      <div className="p-8 text-center text-xs text-muted-foreground">{emptyHint}</div>
+    );
+  }
+
+  return (
+    <div className="p-4 space-y-2">
+      <div className="flex items-center justify-between mb-1 px-1">
+        <span className="text-[11px] text-muted-foreground">共 {items.length} 项 · 按优先级排序</span>
+        <span className="text-[11px] text-muted-foreground">逐项确认</span>
+      </div>
+      {items.map((it, idx) => {
+        const u = it.urgency ?? "medium";
+        const uColor =
+          u === "high"
+            ? "bg-destructive/10 text-destructive"
+            : u === "medium"
+              ? "bg-warning/15 text-warning"
+              : "bg-primary/10 text-primary";
+        const uLabel = u === "high" ? "紧急" : u === "medium" ? "重要" : "常规";
+        return (
+          <button
+            key={it.id}
+            onClick={() => onPick(it)}
+            className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99] transition-transform flex items-start gap-3"
+          >
+            <div className={`w-9 h-9 rounded-xl ${grad} text-white flex items-center justify-center text-xs font-bold shrink-0`}>
+              {idx + 1}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[13px] font-semibold truncate">{it.patient}</span>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${uColor}`}>{uLabel}</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{it.meta}</div>
+              <div className="text-[12px] text-foreground/80 mt-1 line-clamp-2">{it.detail}</div>
+              {it.time && (
+                <div className="text-[10px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> {it.time}
+                </div>
+              )}
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground mt-1" />
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+/**
+ * Workbench grid item with badge count. Tapping opens the queue list sheet.
+ */
+export const WorkbenchTile = ({
+  icon: Icon,
+  label,
+  color,
+  count,
+  onClick,
+}: {
+  icon: any;
+  label: string;
+  color: string;
+  count?: number;
+  onClick?: () => void;
+}) => (
+  <button
+    onClick={onClick}
+    className="relative flex flex-col items-center gap-1.5 py-3 bg-card rounded-2xl shadow-card active:scale-95 transition-transform"
+  >
+    <div className={`relative w-9 h-9 rounded-xl ${color} flex items-center justify-center`}>
+      <Icon className="w-[18px] h-[18px]" strokeWidth={2.2} />
+      {count !== undefined && count > 0 && (
+        <span className="absolute -top-1.5 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-white text-[10px] font-bold flex items-center justify-center border-2 border-card">
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </div>
+    <span className="text-[11px] text-foreground font-medium">{label}</span>
+  </button>
+);
+
+export const PendingStatRow = ({
+  items,
+}: {
+  items: { label: string; count: number; onClick?: () => void }[];
+}) => (
+  <div className="relative grid grid-cols-3 gap-2">
+    {items.map((it) => (
+      <button
+        key={it.label}
+        onClick={it.onClick}
+        className="bg-white/15 backdrop-blur rounded-xl p-3 text-left active:scale-95 transition-transform relative"
+      >
+        <div className="text-[11px] opacity-80">{it.label}</div>
+        <div className="text-2xl font-bold mt-0.5 flex items-baseline gap-1">
+          {it.count}
+          <ChevronRight className="w-3 h-3 opacity-70" />
+        </div>
+      </button>
+    ))}
+  </div>
+);
