@@ -11,22 +11,20 @@ import {
   IMChatSheet,
   TeamMeetingListSheet,
   NewMeetingSheet,
+  PatientChatListSheet,
+  PatientChatSheet,
   Patient,
   PatientFilter,
   PATIENTS,
   NEW_PATIENT_COUNT,
   FIRST_ASSESS_COUNT,
+  PATIENT_UNREAD,
   DEFAULT_MEETING_MSGS,
   DEFAULT_VIDEO_MSGS,
   DEFAULT_MEETINGS,
   TeamMeeting,
 } from "@/components/app/PatientsModule";
-import {
-  RehabPlanModule,
-  AIRxModule,
-  PlanStage,
-  AIRxBucket,
-} from "@/components/app/RehabPlanModule";
+import { RehabPlanModule, PlanStage } from "@/components/app/RehabPlanModule";
 import { toast } from "sonner";
 import {
   Bell,
@@ -37,19 +35,18 @@ import {
   Users,
   Sparkles,
   CheckCircle2,
-  Activity,
   Stethoscope,
   Calendar,
-  TrendingUp,
   Video,
   Plus,
   Edit3,
-  Send,
   Home as HomeIcon,
   UsersRound,
   FileHeart,
   AlertTriangle,
   User as UserIcon,
+  LogOut,
+  MessageCircle,
 } from "lucide-react";
 
 type SheetKey =
@@ -61,18 +58,19 @@ type SheetKey =
   | "newMeeting"
   | "meeting"
   | "rx"
-  | "monitor"
   | "discharge"
   | "video"
   | "patientDetail"
   | "addNote"
-  | "team";
+  | "team"
+  | "patientChatList"
+  | "patientChat";
 
 const DOCTOR_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: HomeIcon },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
-  { key: "ai", label: "AI康复处方", icon: Sparkles },
+  { key: "discharge", label: "出院方案", icon: LogOut },
   { key: "me", label: "我的", icon: UserIcon },
 ];
 
@@ -81,6 +79,7 @@ export const DoctorApp = () => {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [activePatient, setActivePatient] = useState<string>("");
   const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
   const [patientsFilter, setPatientsFilter] = useState<PatientFilter>("all");
   const [planStage, setPlanStage] = useState<PlanStage>("plan");
@@ -107,11 +106,12 @@ export const DoctorApp = () => {
     setActivePatient(`${p.name} · 床${p.bed}`);
     if (stage === "goal") setSheet("goal");
     else if (stage === "plan") setSheet("plan");
+    else if (stage === "airx") setSheet("rx");
     else setSheet("discharge");
   };
-  const pickRxPatient = (b: AIRxBucket, p: Patient) => {
+  const pickDischargePatient = (_s: PlanStage, p: Patient) => {
     setActivePatient(`${p.name} · 床${p.bed}`);
-    setSheet("rx");
+    setSheet("discharge");
   };
 
   return (
@@ -121,15 +121,32 @@ export const DoctorApp = () => {
           onOpen={open}
           onGoPatients={goPatients}
           onGoPlan={goPlan}
-          onGoAIRx={() => setTab("ai")}
+          onGoDischarge={() => setTab("discharge")}
         />
       )}
       {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} initialFilter={patientsFilter} />}
-      {tab === "plan" && <RehabPlanModule accent="doctor" onPickPlan={pickPlanPatient} initialStage={planStage} />}
-      {tab === "ai" && <AIRxModule accent="doctor" onPick={pickRxPatient} />}
+      {tab === "plan" && (
+        <RehabPlanModule
+          accent="doctor"
+          onPickPlan={pickPlanPatient}
+          initialStage={planStage}
+          stages={["goal", "plan", "airx"]}
+          title="康复方案"
+          subtitle="目标 / 方案 / AI 处方"
+        />
+      )}
+      {tab === "discharge" && (
+        <RehabPlanModule
+          accent="doctor"
+          onPickPlan={pickDischargePatient}
+          initialStage="discharge"
+          stages={["discharge"]}
+          title="出院方案"
+          subtitle="AI 二级方案 · 需医师二次确认"
+        />
+      )}
       {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
-      {/* ===== Single-patient confirmation sheets ===== */}
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认"); close(); }}>确认评估结果</PrimaryBtn>}>
         <AssessSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
@@ -138,7 +155,7 @@ export const DoctorApp = () => {
       <PhoneSheet open={sheet === "goal"} onClose={close} title={`AI 康复目标${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
         footer={
           <div className="flex gap-2">
-            <button onClick={() => { toast("已切换到手动调整"); }} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">手动调整</button>
+            <button onClick={() => toast("已切换到手动调整")} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">手动调整</button>
             <button onClick={() => { toast.success("康复目标已同步治疗师"); close(); }} className="flex-1 gradient-ai text-white rounded-2xl py-3 text-sm font-semibold">同步治疗师</button>
           </div>
         }>
@@ -150,7 +167,6 @@ export const DoctorApp = () => {
         <PlanSheet patient={activePatient} />
       </PhoneSheet>
 
-      {/* === 团队会议列表 + 新增 === */}
       <PhoneSheet open={sheet === "meetingList"} onClose={close} title="团队会议" accent="doctor">
         <TeamMeetingListSheet
           accent="doctor"
@@ -195,12 +211,13 @@ export const DoctorApp = () => {
         <RxSheet patient={activePatient} />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "monitor"} onClose={close} title="持续评估" accent="doctor">
-        <MonitorSheet />
-      </PhoneSheet>
-
       <PhoneSheet open={sheet === "discharge"} onClose={close} title={`出院二级方案${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
-        footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("二级方案已确认 · 转社区"); close(); }}>确认 · 转社区</PrimaryBtn>}>
+        footer={
+          <div className="flex gap-2">
+            <button onClick={() => toast("已请 AI 重新生成")} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">AI 重新生成</button>
+            <button onClick={() => { toast.success("AI 出院方案二次确认通过 · 转社区"); close(); }} className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold">二次确认 · 转社区</button>
+          </div>
+        }>
         <DischargeSheet />
       </PhoneSheet>
 
@@ -217,7 +234,14 @@ export const DoctorApp = () => {
         />
       </PhoneSheet>
 
-      {/* === 患者详情 / 备注 / 团队管理 === */}
+      <PhoneSheet open={sheet === "patientChatList"} onClose={close} title="患者沟通" accent="doctor">
+        <PatientChatListSheet accent="doctor" onPick={(p) => { setChatPatient(p); setSheet("patientChat"); }} />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "patientChat"} onClose={() => setSheet("patientChatList")} title="患者沟通" accent="doctor" flush hideHeader>
+        <PatientChatSheet accent="doctor" patient={chatPatient} onClose={() => setSheet("patientChatList")} />
+      </PhoneSheet>
+
       <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="doctor">
         <PatientDetailSheet
           patient={pickedPatient}
@@ -254,36 +278,49 @@ const DoctorHome = ({
   onOpen,
   onGoPatients,
   onGoPlan,
-  onGoAIRx,
+  onGoDischarge,
 }: {
   onOpen: (k: SheetKey) => void;
   onGoPatients: (filter?: PatientFilter) => void;
   onGoPlan: (stage: PlanStage) => void;
-  onGoAIRx: () => void;
+  onGoDischarge: () => void;
 }) => {
+  // 工作台顺序：患者管理 → 首次评估 → 康复目标 → 康复方案 → AI处方(并入康复方案) → 出院方案 → 团队会议 → 患者沟通 → 线上会诊
   const tiles = [
-    { icon: ClipboardCheck, label: "首次评估", color: "text-primary bg-primary-soft", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
-    { icon: Target, label: "康复目标", color: "text-secondary bg-secondary-soft", count: 3, onClick: () => onGoPlan("goal") },
+    { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
+    { icon: ClipboardCheck, label: "首次评估", color: "text-secondary bg-secondary-soft", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
+    { icon: Target, label: "康复目标", color: "text-primary bg-primary-soft", count: 3, onClick: () => onGoPlan("goal") },
     { icon: FileText, label: "康复方案", color: "text-ai bg-ai-soft", count: 3, onClick: () => onGoPlan("plan") },
+    { icon: Sparkles, label: "AI 处方", color: "text-success bg-success-soft", count: 4, onClick: () => onGoPlan("airx") },
+    { icon: LogOut, label: "出院方案", color: "text-secondary bg-secondary-soft", count: 2, onClick: onGoDischarge },
     { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
-    { icon: Stethoscope, label: "AI康复处方", color: "text-success bg-success-soft", count: 5, onClick: onGoAIRx },
-    { icon: Activity, label: "持续评估", color: "text-primary bg-primary-soft", count: 4, onClick: () => onOpen("monitor") },
-    { icon: TrendingUp, label: "出院方案", color: "text-secondary bg-secondary-soft", count: 2, onClick: () => onGoPlan("discharge") },
-    { icon: Video, label: "线上会诊", color: "text-ai bg-ai-soft", onClick: () => onOpen("video") },
+    { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
+    { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("video") },
   ];
   return (
     <div className="pb-4">
-      <div className="gradient-doctor px-5 pt-2 pb-8 text-white relative overflow-hidden">
+      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠 */}
+      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
             <div className="text-xs opacity-80">早上好</div>
             <div className="text-xl font-bold mt-0.5">李医师 👋</div>
           </div>
-          <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button onClick={() => onOpen("patientChatList")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+              <MessageCircle className="w-4 h-4" />
+              {PATIENT_UNREAD > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-warning text-white text-[10px] font-bold flex items-center justify-center">
+                  {PATIENT_UNREAD}
+                </span>
+              )}
+            </button>
+            <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+              <Bell className="w-4 h-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
+            </button>
+          </div>
         </div>
 
         <div className="relative mt-5">
@@ -291,13 +328,13 @@ const DoctorHome = ({
             items={[
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
               { label: "待确认方案", count: 3, onClick: () => onGoPlan("plan") },
-              { label: "待确认 AI 处方", count: 5, onClick: onGoAIRx },
+              { label: "待确认 AI 处方", count: 4, onClick: () => onGoPlan("airx") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
+      <div className="px-4 -mt-5 space-y-4">
         {NEW_PATIENT_COUNT > 0 && (
           <button
             onClick={() => onGoPatients("新患者")}
@@ -338,28 +375,7 @@ const DoctorHome = ({
           <div className="space-y-2">
             <PatientTaskCard onClick={() => onGoPlan("plan")} patient="待确认 AI 方案" tag="共 3 位患者" task="点击进入方案确认列表，逐位审核" urgency="high" time="10:30 团队会议" />
             <PatientTaskCard onClick={() => onGoPatients("待首次评估")} patient="待首次评估" tag={`共 ${FIRST_ASSESS_COUNT} 位患者`} task="团队线上接入 · 进入患者列表" urgency="medium" time="今日" />
-            <PatientTaskCard onClick={() => onGoPlan("discharge")} patient="待生成出院方案" tag="共 2 位患者" task="AI 二级方案待调整确认" urgency="low" time="今日" />
-          </div>
-        </div>
-
-        <div>
-          <SectionTitle title="今日康复进展" />
-          <div className="bg-card rounded-2xl shadow-card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold">第 38 周 · 平均达成率</span>
-              </div>
-              <span className="text-success text-sm font-bold">↑ 12%</span>
-            </div>
-            <div className="flex items-end gap-1.5 h-20">
-              {[40, 55, 48, 70, 65, 82, 78].map((h, i) => (
-                <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                  <div className="w-full rounded-t-md gradient-doctor opacity-90" style={{ height: `${h}%` }} />
-                  <span className="text-[9px] text-muted-foreground">{["一", "二", "三", "四", "五", "六", "日"][i]}</span>
-                </div>
-              ))}
-            </div>
+            <PatientTaskCard onClick={onGoDischarge} patient="待二次确认出院方案" tag="共 2 位患者" task="AI 二级方案待医师二次确认" urgency="low" time="今日" />
           </div>
         </div>
       </div>
@@ -431,7 +447,6 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
   const name = patient ? patient.split(" ")[0] : "王秀英";
   return (
     <div className="p-4 space-y-3">
-      {/* 顶部：发起团队会议 入口 */}
       <button
         onClick={onLaunchMeeting}
         className="w-full bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]"
@@ -446,7 +461,6 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
         <ChevronRight className="w-4 h-4 text-warning" />
       </button>
 
-      {/* 患者基本信息 */}
       <div className="bg-card rounded-2xl shadow-card p-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
@@ -457,18 +471,9 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
           <span className="text-[10px] px-2 py-1 rounded-full bg-primary-soft text-primary font-semibold">首次评估</span>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-          <div className="bg-muted rounded-xl py-2">
-            <div className="text-[9px] text-muted-foreground">身高/体重</div>
-            <div className="text-[11px] font-semibold mt-0.5">158 / 56</div>
-          </div>
-          <div className="bg-muted rounded-xl py-2">
-            <div className="text-[9px] text-muted-foreground">血型 / 过敏</div>
-            <div className="text-[11px] font-semibold mt-0.5">A 型 / 无</div>
-          </div>
-          <div className="bg-muted rounded-xl py-2">
-            <div className="text-[9px] text-muted-foreground">医保</div>
-            <div className="text-[11px] font-semibold mt-0.5">城镇职工</div>
-          </div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">身高/体重</div><div className="text-[11px] font-semibold mt-0.5">158 / 56</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">血型 / 过敏</div><div className="text-[11px] font-semibold mt-0.5">A 型 / 无</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">医保</div><div className="text-[11px] font-semibold mt-0.5">城镇职工</div></div>
         </div>
       </div>
 
@@ -608,36 +613,10 @@ const RxSheet = ({ patient }: { patient?: string }) => (
   </div>
 );
 
-const MonitorSheet = () => (
-  <div className="p-4 space-y-3">
-    <AICard title="AI 持续评估提示">
-      患者 FMA 周提升 +8，符合预期。Barthel 已达 70，距离出院标准（≥75）还差 5 分。
-    </AICard>
-    <div className="bg-card rounded-2xl shadow-card p-4">
-      <div className="text-sm font-semibold mb-3">关键指标趋势 · 近 14 天</div>
-      <div className="space-y-3">
-        {[{ name: "FMA", v: 65 }, { name: "Barthel", v: 78 }, { name: "Berg", v: 60 }, { name: "VAS 疼痛", v: 30 }].map((m) => (
-          <div key={m.name}>
-            <div className="flex justify-between text-[11px] mb-1"><span>{m.name}</span><span className="text-foreground/60">{m.v}%</span></div>
-            <div className="h-2 bg-muted rounded-full overflow-hidden"><div className="h-full gradient-doctor" style={{ width: `${m.v}%` }} /></div>
-          </div>
-        ))}
-      </div>
-    </div>
-    <SectionTitle title="出院条件检查" />
-    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <FormRow label="独立步行 ≥ 50m" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
-      <FormRow label="Barthel ≥ 75" value={<span className="text-warning text-xs font-semibold">差 5 分</span>} />
-      <FormRow label="家属照护培训完成" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
-      <FormRow label="无急性并发症" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
-    </div>
-  </div>
-);
-
 const DischargeSheet = () => (
   <div className="p-4 space-y-3">
-    <AICard title="AI 生成的院外二级方案">
-      包含：家庭训练计划、远程随访周期、紧急情况预警、社区康复对接。
+    <AICard title="AI 生成的院外二级方案 · 待二次确认">
+      包含：家庭训练计划、远程随访周期、紧急情况预警、社区康复对接。AI 已基于近 14 天评估趋势完成生成，请医师二次确认。
     </AICard>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <FormRow label="家庭训练" value="每日 60 min" hint="PT 视频指导 × 3 节" />
@@ -645,6 +624,13 @@ const DischargeSheet = () => (
       <FormRow label="紧急预警" value="跌倒 / 疼痛突增" hint="自动通知医师 + 家属" />
       <FormRow label="社区对接" value="徐汇康复站" hint="每周 2 次门诊治疗" />
       <FormRow label="复诊节点" value="2 / 4 / 8 周" />
+    </div>
+    <SectionTitle title="出院条件复核" />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <FormRow label="独立步行 ≥ 50m" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
+      <FormRow label="Barthel ≥ 75" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
+      <FormRow label="家属照护培训完成" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
+      <FormRow label="无急性并发症" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
     </div>
   </div>
 );
