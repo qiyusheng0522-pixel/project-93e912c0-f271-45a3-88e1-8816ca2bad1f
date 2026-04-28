@@ -239,16 +239,29 @@ export const DoctorApp = () => {
         <DischargeSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "video"} onClose={close} title="线上会诊" accent="doctor" flush hideHeader>
+      <PhoneSheet open={sheet === "videoPicker"} onClose={close} title="线上会诊 · 选择患者" accent="doctor">
+        <VideoPatientPicker
+          onPick={(p) => {
+            setVideoPatient(p);
+            setSheet("video");
+          }}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "video"} onClose={() => setSheet("videoPicker")} title="线上会诊" accent="doctor" flush hideHeader>
         <IMChatSheet
           accent="doctor"
-          title="线上团队会诊"
-          subtitle="王秀英 · 髋关节术后会诊"
-          participants={["李医师", "王治疗师", "赵护士"]}
+          title={`线上会诊 · ${videoPatient?.name ?? "王秀英"}`}
+          subtitle={`${videoPatient?.condition ?? "髋关节术后会诊"} · 床${videoPatient?.bed ?? "305"}`}
+          participants={
+            videoPatient?.shared && videoPatient.shared.length > 0
+              ? ["李医师", ...videoPatient.shared]
+              : ["李医师", "王治疗师", "赵护士"]
+          }
           initialMessages={DEFAULT_VIDEO_MSGS}
           onAISummary={() => {}}
           enablePatientReminder
-          onClose={close}
+          onClose={() => setSheet("videoPicker")}
         />
       </PhoneSheet>
 
@@ -260,7 +273,31 @@ export const DoctorApp = () => {
         <PatientChatSheet accent="doctor" patient={chatPatient} onClose={() => setSheet("patientChatList")} />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="doctor">
+      <PhoneSheet
+        open={sheet === "patientDetail"}
+        onClose={close}
+        title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`}
+        accent="doctor"
+        footer={
+          pickedPatient?.needFirstAssess ? (
+            <div className="flex gap-2">
+              <button
+                onClick={() => setTherapistPickerOpen(true)}
+                className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-1"
+              >
+                <UserPlus className="w-4 h-4" />指定治疗师
+                <span className="text-[10px] text-muted-foreground">（可选）</span>
+              </button>
+              <button
+                onClick={() => { toast.success("首次评估已确认 · 进入目标设定"); close(); }}
+                className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+              >
+                确认
+              </button>
+            </div>
+          ) : undefined
+        }
+      >
         <PatientDetailSheet
           patient={pickedPatient}
           accent="doctor"
