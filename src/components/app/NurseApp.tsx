@@ -42,7 +42,10 @@ type SheetKey =
   | "order"
   | "patient"
   | "eduDetail"
-  | "execTask";
+  | "execTask"
+  | "patientDetail"
+  | "addNote"
+  | "team";
 
 type QueueKey = "med" | "vitals" | "inject" | "obs" | "edu" | "execTask" | "order";
 
