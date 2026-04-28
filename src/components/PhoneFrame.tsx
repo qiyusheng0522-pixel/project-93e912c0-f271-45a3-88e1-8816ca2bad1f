@@ -39,7 +39,7 @@ export const PhoneFrame = ({ children, label, time = "9:41" }: PhoneFrameProps) 
 
             {/* Content area */}
             <div className="absolute inset-0 pt-[54px] pb-0 overflow-hidden">
-              <div className="h-full overflow-y-auto scrollbar-hide">{children}</div>
+              <div className="h-full">{children}</div>
             </div>
 
             {/* Home indicator */}
