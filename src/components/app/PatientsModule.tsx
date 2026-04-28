@@ -20,33 +20,66 @@ import { toast } from "sonner";
 
 export type Accent = "doctor" | "therapist" | "nurse";
 
+export type PatientFilter =
+  | "all"
+  | "新患者"
+  | "待首次评估"
+  | "康复中"
+  | "待出院"
+  | "已出院";
+
 export type Patient = {
   id: string;
   name: string;
   bed: string;
   meta: string;
   status: "新患者" | "康复中" | "待出院" | "已出院";
-  shared: string[]; // member names
+  condition: string; // 病症 用于筛选
+  admitDays: number; // 入院天数
+  needFirstAssess?: boolean; // 是否待首次评估
+  shared: string[];
   notes: { author: string; time: string; text: string }[];
   isNew?: boolean;
+  therapyRecords?: { type: "PT" | "OT" | "ST"; author: string; time: string; text: string }[];
+  summaries?: { author: string; time: string; text: string }[];
+  medChanges?: { author: string; time: string; text: string }[];
+  checkins?: { time: string; task: string; author: string }[];
 };
 
 export const PATIENTS: Patient[] = [
-  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 膝关节置换术后 · 今日入院", status: "新患者", shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
-  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 颅脑外伤 · 今日入院", status: "新患者", shared: ["李医师"], notes: [], isNew: true },
-  { id: "p1", name: "张建国", bed: "303", meta: "男 56 · 脑卒中后偏瘫 · 入院第 12 天", status: "康复中", shared: ["李医师", "王治疗师", "陈治疗师", "赵护士"], notes: [
-    { author: "李医师", time: "今日 09:20", text: "FMA 提升明显，下周复评后可考虑加强 OT 训练。" },
-    { author: "王治疗师", time: "昨日 16:40", text: "步态稳定性进步，建议加入双任务训练。" },
-  ] },
-  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", shared: ["李医师", "王治疗师", "赵护士"], notes: [
+  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 膝关节置换术后 · 今日入院", status: "新患者", condition: "膝关节置换", admitDays: 0, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
+  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 颅脑外伤 · 今日入院", status: "新患者", condition: "颅脑外伤", admitDays: 0, needFirstAssess: true, shared: ["李医师"], notes: [], isNew: true },
+  { id: "p1", name: "张建国", bed: "303", meta: "男 56 · 脑卒中后偏瘫 · 入院第 12 天", status: "康复中", condition: "脑卒中", admitDays: 12, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士"],
+    notes: [
+      { author: "李医师", time: "今日 09:20", text: "FMA 提升明显，下周复评后可考虑加强 OT 训练。" },
+      { author: "王治疗师", time: "昨日 16:40", text: "步态稳定性进步，建议加入双任务训练。" },
+    ],
+    therapyRecords: [
+      { type: "PT", author: "王治疗师", time: "今日 09:30", text: "步态训练 30min · 患者步频提高 8%，重心转移好。" },
+      { type: "OT", author: "陈治疗师", time: "今日 11:00", text: "ADL 穿衣训练 20min · 上肢动作流畅度改善。" },
+    ],
+    summaries: [
+      { author: "王治疗师", time: "昨日 17:30", text: "完成 PT/OT 5/5 项，Borg 9，建议明日加入双任务训练。" },
+    ],
+    medChanges: [
+      { author: "王治疗师", time: "昨日 14:00", text: "建议医师评估巴氯芬剂量：肌张力 MAS 1+ → 1。" },
+    ],
+    checkins: [
+      { time: "今日 09:15", task: "PT 步态训练", author: "系统自动 · 任务执行" },
+      { time: "今日 11:00", task: "OT ADL 训练", author: "系统自动 · 任务执行" },
+    ],
+  },
+  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", condition: "髋关节置换", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间疼痛缓解，VAS 由 6 降至 3。" },
   ] },
-  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", shared: ["李医师", "王治疗师", "赵护士"], notes: [] },
-  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", shared: ["李医师", "陈治疗师"], notes: [] },
-  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", shared: ["李医师", "王治疗师"], notes: [] },
+  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "赵护士"], notes: [] },
+  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
+  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
 ];
 
 export const NEW_PATIENT_COUNT = PATIENTS.filter(p => p.isNew).length;
+export const FIRST_ASSESS_COUNT = PATIENTS.filter(p => p.needFirstAssess).length;
+export const ALL_CONDITIONS = Array.from(new Set(PATIENTS.map(p => p.condition)));
 
 const accentBg: Record<Accent, string> = {
   doctor: "gradient-doctor",
