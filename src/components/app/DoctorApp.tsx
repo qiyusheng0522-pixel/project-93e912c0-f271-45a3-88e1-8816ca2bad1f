@@ -632,8 +632,56 @@ const RxSheet = ({ patient }: { patient?: string }) => (
 
 const DischargeSheet = () => (
   <div className="p-4 space-y-3">
+    {/* 患者基本信息 */}
+    <div className="bg-card rounded-2xl shadow-card p-4">
+      <div className="flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold text-lg">李</div>
+        <div className="flex-1">
+          <div className="text-sm font-bold">李 强 · 男 42 · 床307</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天 · 主管医师：李志远</div>
+        </div>
+        <span className="text-[10px] px-2 py-1 rounded-full bg-success-soft text-success font-semibold">待出院</span>
+      </div>
+      <div className="mt-3 grid grid-cols-4 gap-2">
+        <StatChip label="FMA" value="58" accent="primary" />
+        <StatChip label="Barthel" value="85" accent="success" />
+        <StatChip label="Berg" value="48" accent="success" />
+        <StatChip label="VAS" value="1" accent="warning" />
+      </div>
+    </div>
+
+    <SectionTitle title="档案 / 在院信息" extra={<span className="text-[10px] text-muted-foreground">完整电子病历</span>} />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <FormRow label="主诉" value="T10 平面以下运动障碍 4 个月" />
+      <FormRow label="既往史" value="无特殊" hint="否认高血压 / 糖尿病" />
+      <FormRow label="手术史" value="2026-04-01 椎管减压 + 内固定" />
+      <FormRow label="入院诊断" value="不完全性脊髓损伤 · ASIA C" />
+      <FormRow label="并发症筛查" value="DVT 阴性 · 压疮 0 期" />
+      <FormRow label="过敏 / 医保" value="无 · 城镇职工" />
+    </div>
+
+    <SectionTitle title="多角色康复方案汇总" extra={<span className="text-[10px] text-muted-foreground">医师 / PT / OT / ST / 护理</span>} />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <FormRow label="医师 · 总体方案" value="渐进负重 + 神经促通" hint="李志远 · 第 4 周方案" />
+      <FormRow label="PT · 物理治疗" value="60 min × 5/周" hint="步态 + 平衡 + 力量 · 王雅琴" />
+      <FormRow label="OT · 作业治疗" value="45 min × 5/周" hint="ADL + 厨房 · 陈治疗师" />
+      <FormRow label="ST · 言语治疗" value="30 min × 3/周" hint="构音 · 陈思雨" />
+      <FormRow label="护理 · 康复护理" value="q4h 体位 + 皮肤护理" hint="赵静怡 · 主管护师" />
+      <FormRow label="心理 · 出院适应" value="家属同伴支持" hint="孙博士" />
+    </div>
+
+    <SectionTitle title="近 7 日康复执行 / 用药记录" />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <FormRow label="今日 PT" value="步行 60m" hint="独立完成 · Borg 9" />
+      <FormRow label="今日 OT" value="厨房 ADL" hint="独立完成 · 30 min" />
+      <FormRow label="昨日 PT" value="上下楼" hint="扶手辅助 · 双足交替" />
+      <FormRow label="昨日 ST" value="构音清晰度 92%" hint="EAT-10：2" />
+      <FormRow label="本周用药" value="停巴氯芬 / 加 VitB" hint="李医师 · 本周三调整" />
+      <FormRow label="护理打卡" value="14 / 14 项" hint="系统自动记录" />
+    </div>
+
     <AICard title="AI 生成的院外二级方案 · 待二次确认">
-      包含：家庭训练计划、远程随访周期、紧急情况预警、社区康复对接。AI 已基于近 14 天评估趋势完成生成，请医师二次确认。
+      AI 综合上述在院档案、5 角色方案及 28 天康复执行数据生成院外二级方案，请医师二次确认。
     </AICard>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <FormRow label="家庭训练" value="每日 60 min" hint="PT 视频指导 × 3 节" />
@@ -641,11 +689,13 @@ const DischargeSheet = () => (
       <FormRow label="紧急预警" value="跌倒 / 疼痛突增" hint="自动通知医师 + 家属" />
       <FormRow label="社区对接" value="徐汇康复站" hint="每周 2 次门诊治疗" />
       <FormRow label="复诊节点" value="2 / 4 / 8 周" />
+      <FormRow label="家属培训" value="跌倒预防 + 转移技巧" hint="出院前 1 日完成" />
     </div>
+
     <SectionTitle title="出院条件复核" />
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <FormRow label="独立步行 ≥ 50m" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
-      <FormRow label="Barthel ≥ 75" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
+      <FormRow label="独立步行 ≥ 50m" value={<CheckCircle2 className="w-4 h-4 text-success" />} hint="实测 60m" />
+      <FormRow label="Barthel ≥ 75" value={<CheckCircle2 className="w-4 h-4 text-success" />} hint="实测 85" />
       <FormRow label="家属照护培训完成" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
       <FormRow label="无急性并发症" value={<CheckCircle2 className="w-4 h-4 text-success" />} />
     </div>
