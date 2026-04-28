@@ -44,6 +44,7 @@ export type Patient = {
   summaries?: { author: string; time: string; text: string }[];
   medChanges?: { author: string; time: string; text: string }[];
   checkins?: { time: string; task: string; author: string }[];
+  currentPlan?: { label: string; value: string; hint?: string }[];
 };
 
 export const PATIENTS: Patient[] = [
@@ -68,11 +69,52 @@ export const PATIENTS: Patient[] = [
       { time: "今日 09:15", task: "PT 步态训练", author: "系统自动 · 任务执行" },
       { time: "今日 11:00", task: "OT ADL 训练", author: "系统自动 · 任务执行" },
     ],
+    currentPlan: [
+      { label: "医师 · 总体方案", value: "渐进强化 V2", hint: "李志远 · 第 2 周方案" },
+      { label: "PT · 物理治疗", value: "60 min × 5/周", hint: "步态 + 平衡 · 王雅琴" },
+      { label: "OT · 作业治疗", value: "45 min × 5/周", hint: "ADL + 厨房 · 陈治疗师" },
+      { label: "ST · 言语治疗", value: "30 min × 3/周", hint: "构音 · 陈思雨" },
+      { label: "护理 · 康复护理", value: "q4h 体位 + 跌倒预防", hint: "赵静怡" },
+    ],
   },
   { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", condition: "髋关节置换", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间疼痛缓解，VAS 由 6 降至 3。" },
   ] },
-  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "赵护士"], notes: [] },
+  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
+    notes: [
+      { author: "李医师", time: "今日 08:30", text: "Barthel 已达 85，符合出院条件，准备启动院外二级方案。" },
+      { author: "王治疗师", time: "昨日 17:00", text: "下肢肌力 IV 级，独立步行 60m，平衡 Berg 48。" },
+      { author: "孙博士", time: "前日 16:20", text: "患者出院焦虑下降，家属支持充足。" },
+    ],
+    therapyRecords: [
+      { type: "PT", author: "王治疗师", time: "今日 09:00", text: "步行训练 40min · 独立步行 60m，无跌倒。" },
+      { type: "OT", author: "陈治疗师", time: "今日 10:30", text: "厨房 ADL 训练 30min · 可独立完成切配 + 烹饪。" },
+      { type: "ST", author: "陈思雨", time: "昨日 15:00", text: "构音清晰度 92%，吞咽 EAT-10：2 分。" },
+      { type: "PT", author: "王治疗师", time: "昨日 09:00", text: "上下楼梯训练 20min · 双足交替，扶手辅助。" },
+    ],
+    summaries: [
+      { author: "王治疗师", time: "今日 17:30", text: "本周 PT/OT 完成率 100%，目标基本达成，建议进入出院准备。" },
+      { author: "陈治疗师", time: "本周一 17:30", text: "OT 厨房训练顺利，建议加入家属指导课。" },
+    ],
+    medChanges: [
+      { author: "李医师", time: "本周三 10:00", text: "停用巴氯芬，加用维生素 B 族口服。" },
+      { author: "李医师", time: "上周一 09:30", text: "降压药调整：氨氯地平 5mg qd → 2.5mg qd。" },
+    ],
+    checkins: [
+      { time: "今日 09:15", task: "PT 步行训练", author: "系统自动 · 任务执行" },
+      { time: "今日 10:30", task: "OT 厨房 ADL", author: "系统自动 · 任务执行" },
+      { time: "昨日 09:15", task: "PT 上下楼梯", author: "系统自动 · 任务执行" },
+      { time: "昨日 14:00", task: "ST 构音训练", author: "系统自动 · 任务执行" },
+    ],
+    currentPlan: [
+      { label: "医师 · 总体方案", value: "出院过渡 · 第 4 周", hint: "李志远" },
+      { label: "PT · 物理治疗", value: "60 min × 5/周", hint: "步态 + 楼梯 · 王雅琴" },
+      { label: "OT · 作业治疗", value: "45 min × 5/周", hint: "ADL + 厨房 · 陈治疗师" },
+      { label: "ST · 言语治疗", value: "30 min × 3/周", hint: "构音 · 陈思雨" },
+      { label: "护理 · 康复护理", value: "q6h 体位 + 皮肤护理", hint: "赵静怡" },
+      { label: "心理 · 出院适应", value: "家属同伴支持", hint: "孙博士" },
+    ],
+  },
   { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
   { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
 ];
@@ -275,12 +317,37 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
       <div className={`rounded-2xl ${accentBg[accent]} p-5 text-white`}>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-lg font-bold">{patient.name[0]}</div>
-          <div>
+          <div className="flex-1">
             <div className="text-base font-bold">{patient.name} · 床 {patient.bed}</div>
             <div className="text-[11px] opacity-90 mt-0.5">{patient.meta}</div>
           </div>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{patient.status}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">入院天数</div><div className="text-[12px] font-semibold mt-0.5">{patient.admitDays} 天</div></div>
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">病症</div><div className="text-[12px] font-semibold mt-0.5">{patient.condition}</div></div>
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">协作成员</div><div className="text-[12px] font-semibold mt-0.5">{patient.shared.length} 人</div></div>
         </div>
       </div>
+
+      <SectionTitle title="档案 / 就诊信息" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
+        <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
+        <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="过敏 / 医保" value="无 · 城镇职工" />
+      </div>
+
+      {patient.currentPlan && patient.currentPlan.length > 0 && (
+        <>
+          <SectionTitle title="当前康复方案 · 多角色" extra={<span className="text-[10px] text-muted-foreground">医师 / PT / OT / ST / 护理</span>} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.currentPlan.map((row, i) => (
+              <FormRow key={i} label={row.label} value={row.value} hint={row.hint} />
+            ))}
+          </div>
+        </>
+      )}
 
       <SectionTitle title="共享团队成员" extra={<button onClick={onShare} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Share2 className="w-3 h-3" />共享设置</button>} />
       <div className="bg-card rounded-2xl shadow-card p-3 flex flex-wrap gap-1.5">
@@ -478,6 +545,7 @@ export const IMChatSheet = ({
   initialMessages,
   onAISummary,
   enablePatientReminder,
+  enablePlanConfirm,
   onClose,
 }: {
   accent: Accent;
@@ -487,12 +555,14 @@ export const IMChatSheet = ({
   initialMessages: ChatMessage[];
   onAISummary: (summary: string) => void;
   enablePatientReminder?: boolean;
+  enablePlanConfirm?: boolean;
   onClose?: () => void;
 }) => {
   const [msgs, setMsgs] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [summary, setSummary] = useState<string | null>(null);
   const [reminderSent, setReminderSent] = useState(false);
+  const [planConfirmed, setPlanConfirmed] = useState(false);
 
   const send = () => {
     if (!input.trim()) return;
@@ -557,17 +627,25 @@ export const IMChatSheet = ({
         )}
       </div>
 
-      {/* AI / patient reminder bar */}
-      <div className="px-3 py-2 bg-card border-t border-border/60 flex gap-2">
-        <button onClick={generateSummary} className="flex-1 gradient-ai text-white text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1">
+      {/* AI / patient reminder / plan confirm bar */}
+      <div className="px-3 py-2 bg-card border-t border-border/60 flex gap-2 flex-wrap">
+        <button onClick={generateSummary} className="flex-1 min-w-[110px] gradient-ai text-white text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1">
           <Sparkles className="w-3.5 h-3.5" /> AI 总结并更新档案
         </button>
         {enablePatientReminder && (
           <button
             onClick={() => { setReminderSent(true); toast.success("已发送沟通提醒到患者及家属"); }}
-            className={`flex-1 text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${reminderSent ? "bg-success-soft text-success" : "border border-border"}`}
+            className={`flex-1 min-w-[100px] text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${reminderSent ? "bg-success-soft text-success" : "border border-border"}`}
           >
             <Bell className="w-3.5 h-3.5" /> {reminderSent ? "已提醒患者" : "患者沟通提醒"}
+          </button>
+        )}
+        {enablePlanConfirm && (
+          <button
+            onClick={() => { setPlanConfirmed(true); toast.success("会议中已确认康复方案 · 已推送治疗师"); }}
+            className={`flex-1 min-w-[110px] text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${planConfirmed ? "bg-success-soft text-success" : `${accentBg[accent]} text-white`}`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" /> {planConfirmed ? "方案已确认" : "确认康复方案"}
           </button>
         )}
       </div>
