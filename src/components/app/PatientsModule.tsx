@@ -15,6 +15,9 @@ import {
   Share2,
   CheckCircle2,
   Trash2,
+  Edit3 as Edit3Icon,
+  Mic,
+  Eraser,
 } from "lucide-react";
 import { toast } from "sonner";
 
