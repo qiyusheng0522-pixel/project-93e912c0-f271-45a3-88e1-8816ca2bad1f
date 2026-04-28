@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScreenShell, TabBar } from "@/components/app/TabBar";
+import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
@@ -9,8 +9,18 @@ import {
   AddNoteSheet,
   TeamManageSheet,
   Patient,
+  PatientFilter,
   NEW_PATIENT_COUNT,
 } from "@/components/app/PatientsModule";
+import { RehabPlanModule, AIRxModule, PlanStage, AIRxBucket } from "@/components/app/RehabPlanModule";
+import { Home as HomeIcon, UsersRound, FileHeart, Sparkles, User as UserIcon } from "lucide-react";
+const THERAPIST_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: HomeIcon },
+  { key: "patients", label: "患者管理", icon: UsersRound },
+  { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "ai", label: "AI康复处方", icon: Sparkles },
+  { key: "me", label: "我的", icon: UserIcon },
+];
 import { toast } from "sonner";
 import {
   Bell,
@@ -27,7 +37,7 @@ import {
   ArrowRight,
   PlayCircle,
   Edit3,
-  UsersRound,
+  Stethoscope,
   Users,
   AlertTriangle,
 } from "lucide-react";
@@ -121,11 +131,11 @@ export const TherapistApp = () => {
   };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} />}>
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
       {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
-      {tab === "tasks" && <TaskList onOpen={open} onOpenQueue={openQueue} />}
       {tab === "patients" && <PatientsPage accent="therapist" onPick={pickPatient} />}
-      {tab === "ai" && <AIPanel onOpen={open} />}
+      {tab === "plan" && <RehabPlanModule accent="therapist" initialStage="goal" onPickPlan={(_s, p) => { setActivePatient(`${p.name} · 床${p.bed}`); setSheet("goal"); }} />}
+      {tab === "ai" && <AIRxModule accent="therapist" onPick={(_b, p) => { setActivePatient(`${p.name} · 床${p.bed}`); setSheet("rx"); }} />}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["confirmAssess", "goal", "rx", "exec", "summary", "med"] as QueueKey[]).map((k) => (

@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { ReactNode } from "react";
+import { forwardRef, ReactNode } from "react";
 
 export const AICard = ({
   title,
@@ -41,25 +41,26 @@ export const SectionTitle = ({
   </div>
 );
 
-export const StatChip = ({
-  label,
-  value,
-  accent = "primary",
-}: {
+interface StatChipProps {
   label: string;
   value: string | number;
   accent?: "primary" | "success" | "warning" | "ai";
-}) => {
-  const colorMap = {
-    primary: "text-primary bg-primary-soft",
-    success: "text-success bg-success-soft",
-    warning: "text-warning bg-warning-soft",
-    ai: "text-ai bg-ai-soft",
-  };
-  return (
-    <div className={`flex-1 rounded-xl p-3 ${colorMap[accent]}`}>
-      <div className="text-[11px] font-medium opacity-80">{label}</div>
-      <div className="text-xl font-bold mt-0.5">{value}</div>
-    </div>
-  );
-};
+}
+
+export const StatChip = forwardRef<HTMLDivElement, StatChipProps>(
+  ({ label, value, accent = "primary" }, ref) => {
+    const colorMap = {
+      primary: "text-primary bg-primary-soft",
+      success: "text-success bg-success-soft",
+      warning: "text-warning bg-warning-soft",
+      ai: "text-ai bg-ai-soft",
+    };
+    return (
+      <div ref={ref} className={`flex-1 rounded-xl p-3 ${colorMap[accent]}`}>
+        <div className="text-[11px] font-medium opacity-80">{label}</div>
+        <div className="text-xl font-bold mt-0.5">{value}</div>
+      </div>
+    );
+  }
+);
+StatChip.displayName = "StatChip";

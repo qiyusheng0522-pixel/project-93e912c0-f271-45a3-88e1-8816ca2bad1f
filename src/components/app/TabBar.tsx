@@ -1,21 +1,33 @@
 import { ReactNode } from "react";
-import { Home, ClipboardList, Sparkles, User, UsersRound } from "lucide-react";
+import { Home, UsersRound, FileHeart, Sparkles, User, type LucideIcon } from "lucide-react";
+
+export interface TabBarItem {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  badge?: number;
+}
 
 interface TabBarProps {
   active: string;
   accent: "doctor" | "therapist" | "nurse";
   onChange?: (key: string) => void;
   newPatientCount?: number;
+  items?: TabBarItem[];
 }
 
-export const TabBar = ({ active, accent, onChange, newPatientCount = 0 }: TabBarProps) => {
-  const items = [
-    { key: "home", label: "工作台", icon: Home },
-    { key: "tasks", label: "任务", icon: ClipboardList },
-    { key: "patients", label: "患者", icon: UsersRound, badge: newPatientCount },
-    { key: "ai", label: "AI助手", icon: Sparkles },
-    { key: "me", label: "我的", icon: User },
-  ];
+export const DEFAULT_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: Home },
+  { key: "patients", label: "患者管理", icon: UsersRound },
+  { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "ai", label: "AI康复处方", icon: Sparkles },
+  { key: "me", label: "我的", icon: User },
+];
+
+export const TabBar = ({ active, accent, onChange, newPatientCount = 0, items }: TabBarProps) => {
+  const list = (items ?? DEFAULT_TABS).map((it) =>
+    it.key === "patients" ? { ...it, badge: it.badge ?? newPatientCount } : it
+  );
   const accentClass = {
     doctor: "text-role-doctor",
     therapist: "text-role-therapist",
@@ -23,17 +35,17 @@ export const TabBar = ({ active, accent, onChange, newPatientCount = 0 }: TabBar
   }[accent];
 
   return (
-    <div className="shrink-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-2 pt-2 pb-5 z-20">
+    <div className="shrink-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-1 pt-2 pb-5 z-20">
       <div className="flex items-center justify-around">
-        {items.map((it) => {
+        {list.map((it) => {
           const Icon = it.icon;
           const isActive = active === it.key;
-          const badge = (it as any).badge as number | undefined;
+          const badge = it.badge;
           return (
             <button
               key={it.key}
               onClick={() => onChange?.(it.key)}
-              className="flex flex-col items-center gap-1 px-2 py-1 transition-all relative"
+              className="flex flex-col items-center gap-1 px-1.5 py-1 transition-all relative"
             >
               <div className="relative">
                 <Icon
@@ -49,7 +61,7 @@ export const TabBar = ({ active, accent, onChange, newPatientCount = 0 }: TabBar
                 ) : null}
               </div>
               <span
-                className={`text-[10px] font-medium ${
+                className={`text-[10px] font-medium whitespace-nowrap ${
                   isActive ? accentClass : "text-muted-foreground"
                 }`}
               >

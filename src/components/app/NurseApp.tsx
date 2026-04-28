@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScreenShell, TabBar } from "@/components/app/TabBar";
+import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
@@ -11,6 +11,15 @@ import {
   Patient,
   NEW_PATIENT_COUNT,
 } from "@/components/app/PatientsModule";
+import { RehabPlanModule, AIRxModule } from "@/components/app/RehabPlanModule";
+import { Home as HomeIcon, UsersRound as UR2, FileHeart as FH2, Sparkles as SP2, User as UserIcon } from "lucide-react";
+const NURSE_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: HomeIcon },
+  { key: "patients", label: "患者管理", icon: UR2 },
+  { key: "plan", label: "康复方案", icon: FH2 },
+  { key: "ai", label: "AI康复处方", icon: SP2 },
+  { key: "me", label: "我的", icon: UserIcon },
+];
 import { toast } from "sonner";
 import {
   Bell,
@@ -132,11 +141,11 @@ export const NurseApp = () => {
   };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} />}>
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} items={NURSE_TABS} />}>
       {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
-      {tab === "tasks" && <Tasks onOpenQueue={openQueue} />}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
-      {tab === "ai" && <Edu onOpen={open} onOpenQueue={openQueue} />}
+      {tab === "plan" && <RehabPlanModule accent="nurse" initialStage="plan" onPickPlan={() => toast("请由康复医师调整方案")} />}
+      {tab === "ai" && <AIRxModule accent="nurse" onPick={() => toast("请由康复医师确认 AI 处方")} />}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["med", "vitals", "inject", "obs", "edu", "execTask", "order"] as QueueKey[]).map((k) => (
@@ -370,7 +379,7 @@ const Edu = ({
   </div>
 );
 
-const Me = () => (
+const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
   <div className="px-4 pt-4 pb-4 space-y-4">
     <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
       <div className="w-16 h-16 rounded-2xl gradient-nurse flex items-center justify-center text-white text-xl font-bold">赵</div>
@@ -380,6 +389,14 @@ const Me = () => (
       </div>
     </div>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-role-nurse" />
+          <span className="text-sm">团队管理</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">配置成员 · 共享患者</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
       {["护理记录", "给药历史", "宣教记录", "排班", "设置"].map((it) => (
         <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
           <span className="text-sm">{it}</span>
