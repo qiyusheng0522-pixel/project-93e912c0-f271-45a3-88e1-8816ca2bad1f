@@ -3,6 +3,18 @@ import { ScreenShell, TabBar } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import {
+  PatientsPage,
+  PatientDetailSheet,
+  AddNoteSheet,
+  TeamManageSheet,
+  IMChatSheet,
+  Patient,
+  PATIENTS,
+  NEW_PATIENT_COUNT,
+  DEFAULT_MEETING_MSGS,
+  DEFAULT_VIDEO_MSGS,
+} from "@/components/app/PatientsModule";
 import { toast } from "sonner";
 import {
   Bell,
@@ -23,6 +35,11 @@ import {
   Edit3,
   Send,
   Home as HomeIcon,
+  UsersRound,
+  HeartHandshake,
+  FileHeart,
+  Pill,
+  AlertTriangle,
 } from "lucide-react";
 
 type SheetKey =
@@ -37,7 +54,10 @@ type SheetKey =
   | "video"
   | "patient"
   | "aiUpdate"
-  | "aiDischarge";
+  | "aiDischarge"
+  | "patientDetail"
+  | "addNote"
+  | "team";
 
 type QueueKey =
   | "assess"
@@ -105,6 +125,9 @@ export const DoctorApp = () => {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
+  const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
+
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
   const openQueue = (k: QueueKey) => setQueue(k);
@@ -114,13 +137,19 @@ export const DoctorApp = () => {
     setQueue(null);
     setSheet(sheetKey);
   };
+  const pickPatient = (p: Patient) => {
+    const merged = { ...p, notes: patientNotes[p.id] ?? p.notes };
+    setPickedPatient(merged);
+    setSheet("patientDetail");
+  };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="doctor" />}>
-      {tab === "home" && <DoctorHome onOpen={open} onOpenQueue={openQueue} />}
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="doctor" newPatientCount={NEW_PATIENT_COUNT} />}>
+      {tab === "home" && <DoctorHome onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
       {tab === "tasks" && <DoctorTasks onOpen={open} onOpenQueue={openQueue} />}
+      {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} />}
       {tab === "ai" && <DoctorAI onOpen={open} />}
-      {tab === "me" && <DoctorMe />}
+      {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
       {/* ===== Queue Sheets (列表) ===== */}
       {(["assess", "goal", "plan", "meeting", "rx", "monitor", "discharge"] as QueueKey[]).map((k) => (
@@ -135,7 +164,7 @@ export const DoctorApp = () => {
 
       {/* ===== Single-patient confirmation sheets ===== */}
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认，进入目标设定"); close(); }}>确认评估结果 · 进入目标设定</PrimaryBtn>}>
+        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认"); close(); }}>确认评估结果</PrimaryBtn>}>
         <AssessSheet patient={activePatient} />
       </PhoneSheet>
 
@@ -154,9 +183,18 @@ export const DoctorApp = () => {
         <PlanSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "meeting"} onClose={close} title="团队会议确认" accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("方案已通过 · AI 处方已生成"); close(); }}>通过方案 · 生成 AI 处方</PrimaryBtn>}>
-        <MeetingSheet />
+      {/* === 团队会议 IM 聊天 === */}
+      <PhoneSheet open={sheet === "meeting"} onClose={close} title="团队会议" accent="doctor" flush hideHeader>
+        <IMChatSheet
+          accent="doctor"
+          title={`团队会议 · ${activePatient ? activePatient.split(" ")[0] : "张建国"}`}
+          subtitle="V2 方案确认"
+          participants={["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"]}
+          initialMessages={DEFAULT_MEETING_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={close}
+        />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认 AI 处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
@@ -178,9 +216,18 @@ export const DoctorApp = () => {
         <DischargeSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "video"} onClose={close} title="线上团队会诊" accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("已发起会诊"); close(); }}>立即发起</PrimaryBtn>}>
-        <VideoSheet />
+      {/* === 线上会诊 IM 聊天 === */}
+      <PhoneSheet open={sheet === "video"} onClose={close} title="线上会诊" accent="doctor" flush hideHeader>
+        <IMChatSheet
+          accent="doctor"
+          title="线上团队会诊"
+          subtitle="王秀英 · 髋关节术后会诊"
+          participants={["李医师", "王治疗师", "赵护士"]}
+          initialMessages={DEFAULT_VIDEO_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={close}
+        />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "patient"} onClose={close} title="患者详情 · 张建国" accent="doctor">
@@ -196,6 +243,36 @@ export const DoctorApp = () => {
         footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("已生成二级方案，去调整"); close(); }}>去调整确认</PrimaryBtn>}>
         <DischargeSheet />
       </PhoneSheet>
+
+      {/* === 患者详情 / 备注 / 团队管理 === */}
+      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="doctor">
+        <PatientDetailSheet
+          patient={pickedPatient}
+          accent="doctor"
+          onAddNote={() => setSheet("addNote")}
+          onShare={() => toast.success("已打开共享设置")}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "addNote"} onClose={() => setSheet("patientDetail")} title="添加患者备注" accent="doctor">
+        <AddNoteSheet
+          patient={pickedPatient}
+          accent="doctor"
+          onSave={(text) => {
+            if (!pickedPatient) return;
+            const newNote = { author: "李医师", time: "刚刚", text };
+            const updated = [newNote, ...(patientNotes[pickedPatient.id] ?? pickedPatient.notes)];
+            setPatientNotes({ ...patientNotes, [pickedPatient.id]: updated });
+            setPickedPatient({ ...pickedPatient, notes: updated });
+            toast.success("备注已保存并共享给团队");
+            setSheet("patientDetail");
+          }}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "team"} onClose={close} title="团队管理" accent="doctor">
+        <TeamManageSheet accent="doctor" />
+      </PhoneSheet>
     </ScreenShell>
   );
 };
@@ -203,9 +280,11 @@ export const DoctorApp = () => {
 const DoctorHome = ({
   onOpen,
   onOpenQueue,
+  onGoPatients,
 }: {
   onOpen: (k: SheetKey) => void;
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: () => void;
 }) => {
   const tiles: { icon: any; label: string; color: string; k: QueueKey }[] = [
     { icon: ClipboardCheck, label: "首次评估", color: "text-primary bg-primary-soft", k: "assess" },
@@ -222,8 +301,8 @@ const DoctorHome = ({
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">早上好，李医师</div>
-            <div className="text-lg font-semibold mt-0.5">仁济康复医院 · 神经康复科</div>
+            <div className="text-xs opacity-80">早上好</div>
+            <div className="text-xl font-bold mt-0.5">李医师 👋</div>
           </div>
           <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
@@ -243,16 +322,22 @@ const DoctorHome = ({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
-        <AICard
-          title="AI 智能提醒"
-          action={
-            <button onClick={() => onOpen("aiUpdate")} className="w-full bg-ai text-ai-foreground rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-1">
-              立即处理 <ArrowRight className="w-4 h-4" />
-            </button>
-          }
-        >
-          患者 <b>张建国</b> 的 FMA 评分较上周提升 8 分，建议在线召开团队评估，更新康复方案。
-        </AICard>
+        {/* 新患者提醒 */}
+        {NEW_PATIENT_COUNT > 0 && (
+          <button
+            onClick={onGoPatients}
+            className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]"
+          >
+            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者待接入</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">点击进入患者管理 · 安排首次评估</div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
 
         <div>
           <SectionTitle title="医师工作台 · 点击查看待办列表" />
@@ -272,6 +357,13 @@ const DoctorHome = ({
               label="线上会诊"
               color="text-ai bg-ai-soft"
               onClick={() => onOpen("video")}
+            />
+            <WorkbenchTile
+              icon={UsersRound}
+              label="患者管理"
+              color="text-role-doctor bg-primary-soft"
+              count={NEW_PATIENT_COUNT}
+              onClick={onGoPatients}
             />
           </div>
         </div>
@@ -430,7 +522,7 @@ const DoctorAI = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => {
   );
 };
 
-const DoctorMe = () => (
+const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
   <div className="px-4 pt-4 pb-4 space-y-4">
     <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
       <div className="w-16 h-16 rounded-2xl gradient-doctor flex items-center justify-center text-white text-xl font-bold">李</div>
@@ -444,7 +536,15 @@ const DoctorMe = () => (
       </div>
     </div>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      {["我的患者", "评估记录", "团队管理", "AI 偏好设置", "帮助与反馈"].map((it) => (
+      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-role-doctor" />
+          <span className="text-sm">团队管理</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">配置成员 · 共享患者</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
+      {["我的患者", "评估记录", "AI 偏好设置", "帮助与反馈"].map((it) => (
         <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
           <span className="text-sm">{it}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
@@ -456,31 +556,85 @@ const DoctorMe = () => (
 
 /* ===================== Sheets ===================== */
 
-const AssessSheet = ({ patient }: { patient?: string }) => (
-  <div className="p-4 space-y-3">
-    <div className="bg-card rounded-2xl shadow-card p-4">
-      <div className="text-sm font-semibold mb-1">{patient || "王秀英 · 女 68 岁"}</div>
-      <div className="text-[11px] text-muted-foreground">康复评估准备就绪</div>
-    </div>
-    <AICard title="AI 风险与病史智能分析">
-      检测：跌倒高风险 ★★★ · 深静脉血栓中风险 ★★ · 疼痛评分 6/10。建议优先评估关节 ROM 与负重耐受。
-    </AICard>
-    <SectionTitle title="评估量表（团队线上协同）" />
-    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <FormRow label="Harris 髋关节评分" value="待录入" hint="负责：王治疗师" />
-      <FormRow label="VAS 疼痛评分" value="6 / 10" hint="负责：赵护士 · 已完成" />
-      <FormRow label="Berg 平衡量表" value="32 分" hint="负责：王治疗师 · 已完成" />
-      <FormRow label="Barthel 指数" value="待录入" hint="负责：李医师" />
-    </div>
-    <AICard title="AI 评估结果初判" action={
-      <div className="flex gap-2">
-        <button className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold" onClick={() => toast("已发起再次线上评估")}>结果不确定 · 再评估</button>
+const AssessSheet = ({ patient }: { patient?: string }) => {
+  const name = patient ? patient.split(" ")[0] : "王秀英";
+  return (
+    <div className="p-4 space-y-3">
+      {/* 患者基本信息 */}
+      <div className="bg-card rounded-2xl shadow-card p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
+          <div className="flex-1">
+            <div className="text-sm font-bold">{patient || "王秀英 · 女 68 岁"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">床号 305 · 入院第 5 天 · 主管医师：李志远</div>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-primary-soft text-primary font-semibold">首次评估</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">身高/体重</div>
+            <div className="text-[11px] font-semibold mt-0.5">158 / 56</div>
+          </div>
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">血型 / 过敏</div>
+            <div className="text-[11px] font-semibold mt-0.5">A 型 / 无</div>
+          </div>
+          <div className="bg-muted rounded-xl py-2">
+            <div className="text-[9px] text-muted-foreground">医保</div>
+            <div className="text-[11px] font-semibold mt-0.5">城镇职工</div>
+          </div>
+        </div>
       </div>
-    }>
-      综合判定：康复潜力良好，建议进入"目标设定 → 方案制定"环节。
-    </AICard>
-  </div>
-);
+
+      {/* 档案信息 */}
+      <SectionTitle title="档案信息" extra={<button onClick={() => toast("已查看完整电子病历")} className="text-[11px] text-primary font-semibold flex items-center"><FileHeart className="w-3 h-3 mr-1" />完整病历</button>} />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="主诉" value="右髋疼痛伴活动受限 3 个月" />
+        <FormRow label="现病史" value="跌倒致伤 ▾" hint="术前 X 线示右股骨颈骨折" />
+        <FormRow label="既往史" value="高血压 8 年 · 2 型糖尿病 5 年" hint="降压、降糖药规律服用" />
+        <FormRow label="手术史" value="2026-04-23 右髋关节置换术" />
+        <FormRow label="家族史" value="父：脑卒中；母：冠心病" />
+        <FormRow label="过敏史" value="无" />
+      </div>
+
+      {/* 病症与体征 */}
+      <SectionTitle title="入院病症与体征" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="意识 / 认知" value="清醒 · MMSE 28" />
+        <FormRow label="肌力（右下肢）" value="III 级" hint="髋屈 / 伸 III 级，膝伸 IV 级" />
+        <FormRow label="ROM 屈曲" value="60° / 100°" hint="左 / 右" />
+        <FormRow label="肌张力 (MAS)" value="0 级" />
+        <FormRow label="负重耐受" value="患肢 30%" hint="术后渐进负重" />
+        <FormRow label="感觉" value="正常" />
+        <FormRow label="伤口情况" value="愈合良好" />
+        <FormRow label="并发症风险" value="DVT 中风险 · 跌倒高风险" />
+      </div>
+
+      <AICard title="AI 风险与病史智能分析">
+        基于上述基本信息 + 档案 + 体征：跌倒高风险 ★★★ · DVT 中风险 ★★ · 疼痛 6/10。
+        合并糖尿病：建议关注伤口愈合与运动负荷；高血压：注意运动中血压监测。
+        推荐优先评估：Harris 髋关节、Berg 平衡、Barthel ADL、ROM。
+      </AICard>
+
+      <SectionTitle title="评估量表（团队线上协同）" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="Harris 髋关节评分" value="65 ✓" hint="负责：王治疗师 · 已完成" />
+        <FormRow label="VAS 疼痛评分" value="6 / 10" hint="负责：赵护士 · 已完成" />
+        <FormRow label="Berg 平衡量表" value="32 分" hint="负责：王治疗师 · 已完成" />
+        <FormRow label="Barthel 指数" value="55 分" hint="负责：李医师 · 已完成" />
+        <FormRow label="DVT Wells" value="2 分（中）" hint="负责：赵护士 · 已完成" />
+      </div>
+
+      <AICard title="AI 评估结果初判" action={
+        <div className="flex gap-2">
+          <button className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold" onClick={() => toast("已发起再次线上评估")}>结果不确定 · 再评估</button>
+        </div>
+      }>
+        综合判定：术后早期，疼痛是主要限制因素；康复潜力良好。建议进入「目标设定 → 方案制定」，重点：疼痛干预 + 渐进负重 + 平衡训练。
+      </AICard>
+    </div>
+  );
+};
 
 const GoalSheet = () => (
   <div className="p-4 space-y-3">

@@ -12,6 +12,8 @@ export const PhoneSheet = ({
   children,
   accent = "doctor",
   footer,
+  flush = false,
+  hideHeader = false,
 }: {
   open: boolean;
   title: string;
@@ -19,6 +21,8 @@ export const PhoneSheet = ({
   children: ReactNode;
   accent?: "doctor" | "therapist" | "nurse" | "ai";
   footer?: ReactNode;
+  flush?: boolean;
+  hideHeader?: boolean;
 }) => {
   useEffect(() => {
     if (!open) return;
@@ -40,17 +44,23 @@ export const PhoneSheet = ({
         open ? "translate-y-0 opacity-100" : "translate-y-full opacity-0 pointer-events-none"
       }`}
     >
-      <div className={`${grad} text-white px-4 pt-3 pb-4 flex items-center gap-2`}>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <span className="text-sm font-semibold">{title}</span>
-      </div>
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-24">{children}</div>
-      {footer && (
+      {!hideHeader && (
+        <div className={`${grad} text-white px-4 pt-3 pb-4 flex items-center gap-2`}>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-white/20 backdrop-blur flex items-center justify-center"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <span className="text-sm font-semibold">{title}</span>
+        </div>
+      )}
+      {flush ? (
+        <div className="flex-1 min-h-0 overflow-hidden">{children}</div>
+      ) : (
+        <div className="flex-1 overflow-y-auto scrollbar-hide pb-24">{children}</div>
+      )}
+      {footer && !flush && (
         <div className="absolute left-0 right-0 bottom-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-4 py-3 pb-6">
           {footer}
         </div>
