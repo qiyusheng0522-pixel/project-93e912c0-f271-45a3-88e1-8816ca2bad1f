@@ -27,6 +27,16 @@ import {
 import { RehabPlanModule, PlanStage } from "@/components/app/RehabPlanModule";
 import { toast } from "sonner";
 import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import {
   Bell,
   ChevronRight,
   ClipboardCheck,
