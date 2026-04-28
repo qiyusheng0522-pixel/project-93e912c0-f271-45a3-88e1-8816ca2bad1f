@@ -12,6 +12,8 @@ export const PhoneSheet = ({
   children,
   accent = "doctor",
   footer,
+  flush = false,
+  hideHeader = false,
 }: {
   open: boolean;
   title: string;
@@ -19,6 +21,8 @@ export const PhoneSheet = ({
   children: ReactNode;
   accent?: "doctor" | "therapist" | "nurse" | "ai";
   footer?: ReactNode;
+  flush?: boolean;
+  hideHeader?: boolean;
 }) => {
   useEffect(() => {
     if (!open) return;
