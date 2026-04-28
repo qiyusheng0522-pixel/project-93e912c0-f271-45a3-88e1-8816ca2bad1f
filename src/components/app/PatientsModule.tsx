@@ -295,6 +295,80 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
         ))}
       </div>
 
+      {/* 治疗师档案：PT/OT/ST 治疗记录 */}
+      {patient.therapyRecords && patient.therapyRecords.length > 0 && (
+        <>
+          <SectionTitle title={`治疗记录 · ${patient.therapyRecords.length}`} extra={<span className="text-[10px] text-muted-foreground">PT / OT / ST · 医师可查看</span>} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.therapyRecords.map((r, i) => {
+              const tagColor = { PT: "bg-secondary-soft text-secondary", OT: "bg-primary-soft text-primary", ST: "bg-ai-soft text-ai" }[r.type];
+              return (
+                <div key={i} className="p-3.5">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${tagColor}`}>{r.type}</span>
+                    <span className="text-[12px] font-semibold">{r.author}</span>
+                    <span className="text-[10px] text-muted-foreground ml-auto">{r.time}</span>
+                  </div>
+                  <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{r.text}</div>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {patient.summaries && patient.summaries.length > 0 && (
+        <>
+          <SectionTitle title={`工作小结 · ${patient.summaries.length}`} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.summaries.map((s, i) => (
+              <div key={i} className="p-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="text-[12px] font-semibold">{s.author}</div>
+                  <div className="text-[10px] text-muted-foreground">{s.time}</div>
+                </div>
+                <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{s.text}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {patient.medChanges && patient.medChanges.length > 0 && (
+        <>
+          <SectionTitle title={`药物变动记录 · ${patient.medChanges.length}`} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.medChanges.map((m, i) => (
+              <div key={i} className="p-3.5">
+                <div className="flex items-center justify-between">
+                  <div className="text-[12px] font-semibold">{m.author}</div>
+                  <div className="text-[10px] text-muted-foreground">{m.time}</div>
+                </div>
+                <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{m.text}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {patient.checkins && patient.checkins.length > 0 && (
+        <>
+          <SectionTitle title={`任务执行打卡 · ${patient.checkins.length}`} extra={<span className="text-[10px] text-muted-foreground">系统自动记录</span>} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.checkins.map((c, i) => (
+              <div key={i} className="flex items-center gap-3 p-3">
+                <CheckCircle2 className="w-4 h-4 text-success" />
+                <div className="flex-1">
+                  <div className="text-[12px] font-semibold">{c.task}</div>
+                  <div className="text-[10px] text-muted-foreground">{c.author}</div>
+                </div>
+                <div className="text-[10px] text-muted-foreground">{c.time}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
       {patient.isNew && (
         <AICard title="新患者接入提醒">
           AI 已根据入院信息生成首次评估排期建议，建议尽快组织团队线上评估。
