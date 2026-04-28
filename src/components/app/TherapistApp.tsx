@@ -339,7 +339,7 @@ const TherapistHome = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
+      <div className="px-4 mt-3 space-y-4">
         <div>
           <SectionTitle title="待执行任务 · OT / PT / ST" extra={<button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-semibold flex items-center">全部 <ChevronRight className="w-3 h-3" /></button>} />
           <div className="grid grid-cols-3 gap-2">
