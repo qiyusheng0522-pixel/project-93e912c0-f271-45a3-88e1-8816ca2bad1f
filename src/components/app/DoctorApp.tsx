@@ -601,6 +601,31 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
       </div>
     </div>
+
+    <MeStats
+      accent="doctor"
+      tiles={[
+        { label: "本月接诊", value: 86, sub: "患者人次" },
+        { label: "方案确认", value: 124, sub: "AI 方案" },
+        { label: "团队会议", value: 18, sub: "次" },
+      ]}
+      trend={[
+        { day: "一", value: 12 }, { day: "二", value: 15 }, { day: "三", value: 9 },
+        { day: "四", value: 18 }, { day: "五", value: 14 }, { day: "六", value: 6 }, { day: "日", value: 4 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "32,580",
+        today: "1,240",
+        pending: "4,860",
+        breakdown: [
+          { label: "门诊 / 评估", value: "12,400" },
+          { label: "方案确认", value: "9,800" },
+          { label: "线上会诊", value: "10,380" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">
