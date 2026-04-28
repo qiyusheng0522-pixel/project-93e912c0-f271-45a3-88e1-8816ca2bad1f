@@ -86,6 +86,8 @@ export const DoctorApp = () => {
   const [planStage, setPlanStage] = useState<PlanStage>("plan");
   const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
+  const [therapistPickerOpen, setTherapistPickerOpen] = useState(false);
+  const [videoPatient, setVideoPatient] = useState<Patient | null>(null);
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
