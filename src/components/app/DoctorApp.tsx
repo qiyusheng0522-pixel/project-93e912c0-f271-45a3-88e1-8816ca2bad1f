@@ -57,7 +57,6 @@ import {
   User as UserIcon,
   LogOut,
   MessageCircle,
-  UserPlus,
 } from "lucide-react";
 
 type SheetKey =
