@@ -42,7 +42,10 @@ type SheetKey =
   | "summary"
   | "checkin"
   | "med"
-  | "patient";
+  | "patient"
+  | "patientDetail"
+  | "addNote"
+  | "team";
 
 type QueueKey =
   | "confirmAssess"
