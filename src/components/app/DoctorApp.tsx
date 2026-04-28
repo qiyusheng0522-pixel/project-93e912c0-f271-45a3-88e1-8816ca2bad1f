@@ -185,10 +185,7 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "goal"} onClose={close} title={`AI 康复目标${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
         footer={
-          <div className="flex gap-2">
-            <button onClick={() => toast("已切换到手动调整")} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">手动调整</button>
-            <button onClick={() => { toast.success("康复目标已同步治疗师"); close(); }} className="flex-1 gradient-ai text-white rounded-2xl py-3 text-sm font-semibold">同步治疗师</button>
-          </div>
+          <button onClick={() => { toast.success("康复目标已同步治疗师"); close(); }} className="w-full gradient-ai text-white rounded-2xl py-3 text-sm font-semibold">同步治疗师</button>
         }>
         <GoalSheet patient={activePatient} />
       </PhoneSheet>
