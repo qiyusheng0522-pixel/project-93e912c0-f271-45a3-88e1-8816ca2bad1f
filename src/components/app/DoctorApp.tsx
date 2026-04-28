@@ -490,16 +490,16 @@ const DoctorHome = ({
   ];
   return (
     <div className="pb-4">
-      {/* 顶部留出空间避免 Dynamic Island，与底部统计一起紧凑布局 */}
-      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-        <div className="relative flex items-center justify-between">
+      {/* 顶部白色头部 */}
+      <div className="bg-background px-5 pt-6 pb-2">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">早上好</div>
-            <div className="text-xl font-bold mt-0.5">李医师 👋</div>
+            <div className="text-xs text-muted-foreground">早上好</div>
+            <div className="text-xl font-bold mt-0.5 text-foreground">李医师 👋</div>
+            <div className="text-[11px] text-muted-foreground mt-1">康复医师 · 共 {PATIENTS.length} 位患者</div>
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={() => onOpen("patientChatList")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+            <button onClick={() => onOpen("patientChatList")} className="w-9 h-9 rounded-full bg-primary-soft text-primary flex items-center justify-center relative">
               <MessageCircle className="w-4 h-4" />
               {PATIENT_UNREAD > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[16px] h-4 px-1 rounded-full bg-warning text-white text-[10px] font-bold flex items-center justify-center">
@@ -507,29 +507,36 @@ const DoctorHome = ({
                 </span>
               )}
             </button>
-            <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+            <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-primary-soft text-primary flex items-center justify-center relative">
               <Bell className="w-4 h-4" />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
             </button>
           </div>
         </div>
+      </div>
 
-        <div className="relative mt-3">
-          <PendingStatRow
+      <div className="px-4 mt-3 space-y-4">
+        <div>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <span className="text-[13px] font-bold text-foreground">今日待处理</span>
+            <button onClick={() => onGoPlan("plan")} className="text-[11px] text-primary font-medium flex items-center">
+              点击进入处理 <ChevronRight className="w-3 h-3" />
+            </button>
+          </div>
+          <PendingTodoGrid
+            onViewAll={() => onGoPlan("plan")}
             items={[
-              { label: "待首次评估", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
-              { label: "待设定目标", count: 3, onClick: () => onGoPlan("goal") },
-              { label: "待确认方案", count: 3, onClick: () => onGoPlan("plan") },
-              { label: "待确认AI处方", count: 4, onClick: () => onGoPlan("airx") },
-              { label: "待确认出院方案", count: 2, onClick: onGoDischarge },
+              { label: "待首次评估", count: FIRST_ASSESS_COUNT, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onGoPatients("待首次评估") },
+              { label: "待设定目标", count: 3, icon: Target, iconClass: "bg-primary text-white", onClick: () => onGoPlan("goal") },
+              { label: "待确认方案", count: 3, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onGoPlan("plan") },
+              { label: "待确认处方", count: 4, icon: Sparkles, iconClass: "bg-success text-white", onClick: () => onGoPlan("airx") },
+              { label: "待出院方案", count: 2, icon: LogOut, iconClass: "bg-destructive text-white", onClick: onGoDischarge },
             ]}
           />
         </div>
-      </div>
 
-      <div className="px-4 -mt-6 space-y-4 relative">
         <div>
-          <SectionTitle title="医师工作台 · 点击进入对应模块" />
+          <SectionTitle title="其他事项 · 医师工作台" />
           <div className="grid grid-cols-4 gap-2">
             {tiles.map((it) => (
               <WorkbenchTile
