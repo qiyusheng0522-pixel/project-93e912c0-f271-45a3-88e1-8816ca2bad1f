@@ -3,6 +3,14 @@ import { ScreenShell, TabBar } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import {
+  PatientsPage,
+  PatientDetailSheet,
+  AddNoteSheet,
+  TeamManageSheet,
+  Patient,
+  NEW_PATIENT_COUNT,
+} from "@/components/app/PatientsModule";
 import { toast } from "sonner";
 import {
   Bell,
@@ -19,6 +27,9 @@ import {
   ArrowRight,
   PlayCircle,
   Edit3,
+  UsersRound,
+  Users,
+  AlertTriangle,
 } from "lucide-react";
 
 type SheetKey =
