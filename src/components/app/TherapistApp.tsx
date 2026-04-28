@@ -103,7 +103,7 @@ const QUEUES: Record<QueueKey, TodoItem[]> = {
 };
 
 export const TherapistApp = () => {
-  const [tab, setTab] = useState("patients");
+  const [tab, setTab] = useState("home");
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
