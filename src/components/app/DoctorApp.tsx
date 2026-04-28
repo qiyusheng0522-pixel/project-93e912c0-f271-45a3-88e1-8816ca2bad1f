@@ -125,6 +125,9 @@ export const DoctorApp = () => {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
+  const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
+
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
   const openQueue = (k: QueueKey) => setQueue(k);
@@ -134,13 +137,19 @@ export const DoctorApp = () => {
     setQueue(null);
     setSheet(sheetKey);
   };
+  const pickPatient = (p: Patient) => {
+    const merged = { ...p, notes: patientNotes[p.id] ?? p.notes };
+    setPickedPatient(merged);
+    setSheet("patientDetail");
+  };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="doctor" />}>
-      {tab === "home" && <DoctorHome onOpen={open} onOpenQueue={openQueue} />}
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="doctor" newPatientCount={NEW_PATIENT_COUNT} />}>
+      {tab === "home" && <DoctorHome onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
       {tab === "tasks" && <DoctorTasks onOpen={open} onOpenQueue={openQueue} />}
+      {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} />}
       {tab === "ai" && <DoctorAI onOpen={open} />}
-      {tab === "me" && <DoctorMe />}
+      {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
       {/* ===== Queue Sheets (列表) ===== */}
       {(["assess", "goal", "plan", "meeting", "rx", "monitor", "discharge"] as QueueKey[]).map((k) => (
@@ -155,7 +164,7 @@ export const DoctorApp = () => {
 
       {/* ===== Single-patient confirmation sheets ===== */}
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认，进入目标设定"); close(); }}>确认评估结果 · 进入目标设定</PrimaryBtn>}>
+        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认"); close(); }}>确认评估结果</PrimaryBtn>}>
         <AssessSheet patient={activePatient} />
       </PhoneSheet>
 
@@ -174,9 +183,18 @@ export const DoctorApp = () => {
         <PlanSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "meeting"} onClose={close} title="团队会议确认" accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("方案已通过 · AI 处方已生成"); close(); }}>通过方案 · 生成 AI 处方</PrimaryBtn>}>
-        <MeetingSheet />
+      {/* === 团队会议 IM 聊天 === */}
+      <PhoneSheet open={sheet === "meeting"} onClose={close} title="团队会议" accent="doctor" flush hideHeader>
+        <IMChatSheet
+          accent="doctor"
+          title={`团队会议 · ${activePatient ? activePatient.split(" ")[0] : "张建国"}`}
+          subtitle="V2 方案确认"
+          participants={["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"]}
+          initialMessages={DEFAULT_MEETING_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={close}
+        />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认 AI 处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
@@ -198,9 +216,18 @@ export const DoctorApp = () => {
         <DischargeSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "video"} onClose={close} title="线上团队会诊" accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("已发起会诊"); close(); }}>立即发起</PrimaryBtn>}>
-        <VideoSheet />
+      {/* === 线上会诊 IM 聊天 === */}
+      <PhoneSheet open={sheet === "video"} onClose={close} title="线上会诊" accent="doctor" flush hideHeader>
+        <IMChatSheet
+          accent="doctor"
+          title="线上团队会诊"
+          subtitle="王秀英 · 髋关节术后会诊"
+          participants={["李医师", "王治疗师", "赵护士"]}
+          initialMessages={DEFAULT_VIDEO_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={close}
+        />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "patient"} onClose={close} title="患者详情 · 张建国" accent="doctor">
@@ -215,6 +242,36 @@ export const DoctorApp = () => {
       <PhoneSheet open={sheet === "aiDischarge"} onClose={close} title="AI 二级方案预览" accent="ai"
         footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("已生成二级方案，去调整"); close(); }}>去调整确认</PrimaryBtn>}>
         <DischargeSheet />
+      </PhoneSheet>
+
+      {/* === 患者详情 / 备注 / 团队管理 === */}
+      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="doctor">
+        <PatientDetailSheet
+          patient={pickedPatient}
+          accent="doctor"
+          onAddNote={() => setSheet("addNote")}
+          onShare={() => toast.success("已打开共享设置")}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "addNote"} onClose={() => setSheet("patientDetail")} title="添加患者备注" accent="doctor">
+        <AddNoteSheet
+          patient={pickedPatient}
+          accent="doctor"
+          onSave={(text) => {
+            if (!pickedPatient) return;
+            const newNote = { author: "李医师", time: "刚刚", text };
+            const updated = [newNote, ...(patientNotes[pickedPatient.id] ?? pickedPatient.notes)];
+            setPatientNotes({ ...patientNotes, [pickedPatient.id]: updated });
+            setPickedPatient({ ...pickedPatient, notes: updated });
+            toast.success("备注已保存并共享给团队");
+            setSheet("patientDetail");
+          }}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "team"} onClose={close} title="团队管理" accent="doctor">
+        <TeamManageSheet accent="doctor" />
       </PhoneSheet>
     </ScreenShell>
   );
