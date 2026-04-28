@@ -255,30 +255,16 @@ const NurseHome = ({
         <div className="relative mt-5">
           <PendingStatRow
             items={[
-              { label: "待给药", count: QUEUES.med.length, onClick: () => onOpenQueue("med") },
               { label: "待护理", count: QUEUES.execTask.length, onClick: () => onOpenQueue("execTask") },
-              { label: "待观察", count: QUEUES.obs.length, onClick: () => onOpenQueue("obs") },
+              { label: "待记录", count: QUEUES.vitals.length, onClick: () => onOpenQueue("vitals") },
+              { label: "待宣教", count: 3, onClick: onOpenEdu },
+              { label: "待回复消息", count: PATIENT_UNREAD, onClick: () => toast("进入患者沟通") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4">
-        <div>
-          <SectionTitle title="护理快捷入口" extra={
-            <div className="flex gap-2">
-              <button onClick={onOpenDailyNote} className="text-[11px] text-role-nurse font-semibold">每日护理备注</button>
-              <button onClick={onOpenEdu} className="text-[11px] text-ai font-semibold">宣教推送</button>
-            </div>
-          } />
-          <div className="grid grid-cols-4 gap-2">
-            <WorkbenchTile icon={Pill} label="给药操作" color="text-warning bg-warning-soft" count={QUEUES.med.length} onClick={() => onOpenQueue("med")} />
-            <WorkbenchTile icon={ClipboardCheck} label="护理任务" color="text-role-nurse bg-rose-50" count={QUEUES.execTask.length} onClick={() => onOpenQueue("execTask")} />
-            <WorkbenchTile icon={HeartPulse} label="生命体征" color="text-destructive/80 bg-red-50" count={QUEUES.vitals.length} onClick={() => onOpenQueue("vitals")} />
-            <WorkbenchTile icon={Activity} label="病情观察" color="text-secondary bg-secondary-soft" count={QUEUES.obs.length} onClick={() => onOpenQueue("obs")} />
-          </div>
-        </div>
-
+      <div className="px-4 -mt-5 space-y-4 relative">
         <div>
           <SectionTitle title={`患者待办列 · ${allTodos.length}`} extra={<span className="text-[10px] text-muted-foreground">基于康复处方按患者排序</span>} />
           <div className="space-y-2">
