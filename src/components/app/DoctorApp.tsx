@@ -201,7 +201,7 @@ export const DoctorApp = () => {
         />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认 AI 处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
+      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认康复处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={
           <div className="flex gap-2">
             <button onClick={() => toast("已驳回，待 AI 重新生成")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">驳回</button>
