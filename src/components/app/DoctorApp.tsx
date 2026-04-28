@@ -49,6 +49,7 @@ import {
   UsersRound,
   FileHeart,
   AlertTriangle,
+  User as UserIcon,
 } from "lucide-react";
 
 type SheetKey =
