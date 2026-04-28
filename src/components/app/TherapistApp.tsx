@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
-import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem } from "@/components/app/TodoQueue";
 import {
   PatientsPage,
   PatientDetailSheet,
