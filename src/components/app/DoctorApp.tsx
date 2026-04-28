@@ -280,9 +280,11 @@ export const DoctorApp = () => {
 const DoctorHome = ({
   onOpen,
   onOpenQueue,
+  onGoPatients,
 }: {
   onOpen: (k: SheetKey) => void;
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: () => void;
 }) => {
   const tiles: { icon: any; label: string; color: string; k: QueueKey }[] = [
     { icon: ClipboardCheck, label: "首次评估", color: "text-primary bg-primary-soft", k: "assess" },
@@ -299,8 +301,8 @@ const DoctorHome = ({
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">早上好，李医师</div>
-            <div className="text-lg font-semibold mt-0.5">仁济康复医院 · 神经康复科</div>
+            <div className="text-xs opacity-80">早上好</div>
+            <div className="text-xl font-bold mt-0.5">李医师 👋</div>
           </div>
           <button onClick={() => toast("您有 3 条新提醒")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
@@ -320,16 +322,22 @@ const DoctorHome = ({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
-        <AICard
-          title="AI 智能提醒"
-          action={
-            <button onClick={() => onOpen("aiUpdate")} className="w-full bg-ai text-ai-foreground rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-1">
-              立即处理 <ArrowRight className="w-4 h-4" />
-            </button>
-          }
-        >
-          患者 <b>张建国</b> 的 FMA 评分较上周提升 8 分，建议在线召开团队评估，更新康复方案。
-        </AICard>
+        {/* 新患者提醒 */}
+        {NEW_PATIENT_COUNT > 0 && (
+          <button
+            onClick={onGoPatients}
+            className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]"
+          >
+            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者待接入</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">点击进入患者管理 · 安排首次评估</div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
 
         <div>
           <SectionTitle title="医师工作台 · 点击查看待办列表" />
