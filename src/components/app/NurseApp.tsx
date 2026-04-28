@@ -188,7 +188,11 @@ export const NurseApp = () => {
           patient={pickedPatient}
           accent="nurse"
           onAddNote={() => setSheet("addNote")}
-          onShare={() => toast.success("已打开共享设置")}
+          actions={[
+            { key: "med", label: "给药", icon: Pill, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.bed} ${pickedPatient.name}` : ""); setSheet("med"); } },
+            { key: "care", label: "护理记录", icon: ClipboardCheck, onClick: () => setSheet("dailyNote") },
+            { key: "note", label: "备注", icon: Activity, onClick: () => setSheet("addNote") },
+          ]}
         />
       </PhoneSheet>
 
