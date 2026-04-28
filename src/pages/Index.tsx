@@ -4,6 +4,7 @@ import { DoctorApp } from "@/components/app/DoctorApp";
 import { TherapistApp } from "@/components/app/TherapistApp";
 import { NurseApp } from "@/components/app/NurseApp";
 import { Sparkles, Stethoscope, Activity, HeartPulse, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { WorkflowSection } from "@/components/WorkflowSection";
 
 type Role = "landing" | "doctor" | "therapist" | "nurse";
 
