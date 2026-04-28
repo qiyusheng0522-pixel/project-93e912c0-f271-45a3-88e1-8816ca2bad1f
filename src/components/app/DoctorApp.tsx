@@ -358,6 +358,13 @@ const DoctorHome = ({
               color="text-ai bg-ai-soft"
               onClick={() => onOpen("video")}
             />
+            <WorkbenchTile
+              icon={UsersRound}
+              label="患者管理"
+              color="text-role-doctor bg-primary-soft"
+              count={NEW_PATIENT_COUNT}
+              onClick={onGoPatients}
+            />
           </div>
         </div>
 
