@@ -338,7 +338,6 @@ const TherapistHome = ({
           </button>
         </div>
         <PendingTodoGrid
-          onViewAll={() => onOpenQueue("exec")}
           items={[
             { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
