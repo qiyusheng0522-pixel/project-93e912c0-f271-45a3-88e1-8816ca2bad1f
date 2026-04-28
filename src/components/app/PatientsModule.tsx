@@ -12,7 +12,6 @@ import {
   Users,
   MessageSquare,
   StickyNote,
-  StickyNote,
   CheckCircle2,
   Trash2,
   Edit3 as Edit3Icon,
