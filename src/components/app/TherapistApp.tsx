@@ -300,7 +300,7 @@ const TherapistPatients = ({
   ];
   return (
     <div className="pb-4">
-      <div className="gradient-therapist px-5 pt-6 pb-10 text-white relative overflow-hidden">
+      <div className="gradient-therapist px-5 pt-6 pb-16 text-white relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <div>
