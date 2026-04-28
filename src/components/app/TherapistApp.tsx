@@ -195,10 +195,9 @@ export const TherapistApp = () => {
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "goal"} onClose={close} title={`治疗目标${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
-        footer={<div className="flex gap-2">
-          <button onClick={() => { toast("已切换为手动调整"); }} className="flex-1 border border-secondary/30 text-secondary rounded-2xl py-3 text-sm font-semibold">手动修改</button>
-          <button onClick={() => { toast.success("治疗目标已生成并回传医师"); close(); }} className="flex-1 gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold">生成治疗目标</button>
-        </div>}>
+        footer={
+          <button onClick={() => { toast.success("治疗目标已生成并回传医师"); close(); }} className="w-full gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold">生成治疗目标</button>
+        }>
         <GoalAdjustSheet patient={activePatient} />
       </PhoneSheet>
 
