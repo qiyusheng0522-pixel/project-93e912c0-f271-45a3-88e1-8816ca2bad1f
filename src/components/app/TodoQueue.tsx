@@ -118,20 +118,23 @@ export const PendingStatRow = ({
   items,
 }: {
   items: { label: string; count: number; onClick?: () => void }[];
-}) => (
-  <div className="relative grid grid-cols-3 gap-2">
-    {items.map((it) => (
-      <button
-        key={it.label}
-        onClick={it.onClick}
-        className="bg-white/15 backdrop-blur rounded-xl p-3 text-left active:scale-95 transition-transform relative"
-      >
-        <div className="text-[11px] opacity-80">{it.label}</div>
-        <div className="text-2xl font-bold mt-0.5 flex items-baseline gap-1">
-          {it.count}
-          <ChevronRight className="w-3 h-3 opacity-70" />
-        </div>
-      </button>
-    ))}
-  </div>
-);
+}) => {
+  const cols = items.length >= 4 ? "grid-cols-4" : items.length === 2 ? "grid-cols-2" : "grid-cols-3";
+  return (
+    <div className={`relative grid ${cols} gap-2`}>
+      {items.map((it) => (
+        <button
+          key={it.label}
+          onClick={it.onClick}
+          className="bg-white/15 backdrop-blur rounded-xl p-2.5 text-left active:scale-95 transition-transform relative min-w-0"
+        >
+          <div className="text-[10px] opacity-80 leading-tight whitespace-nowrap overflow-hidden text-ellipsis">{it.label}</div>
+          <div className="text-xl font-bold mt-0.5 flex items-baseline gap-0.5">
+            {it.count}
+            <ChevronRight className="w-3 h-3 opacity-70" />
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+};
