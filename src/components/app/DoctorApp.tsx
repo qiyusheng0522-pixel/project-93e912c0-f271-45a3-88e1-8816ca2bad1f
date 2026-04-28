@@ -132,7 +132,7 @@ export const DoctorApp = () => {
           initialStage={planStage}
           stages={["goal", "plan", "airx"]}
           title="康复方案"
-          subtitle="目标 / 方案 / AI 处方"
+          subtitle="目标 / 方案 / 康复处方"
         />
       )}
       {tab === "discharge" && (
