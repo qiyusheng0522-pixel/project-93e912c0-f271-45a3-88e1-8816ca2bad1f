@@ -13,6 +13,10 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ['"PingFang SC"', '"Inter"', 'system-ui', 'sans-serif'],
+        display: ['"SF Pro Display"', '"PingFang SC"', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -22,6 +26,28 @@ export default {
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          soft: "hsl(var(--primary-soft))",
+          glow: "hsl(var(--primary-glow))",
+        },
+        ai: {
+          DEFAULT: "hsl(var(--ai))",
+          foreground: "hsl(var(--ai-foreground))",
+          soft: "hsl(var(--ai-soft))",
+        },
+        success: {
+          DEFAULT: "hsl(var(--success))",
+          foreground: "hsl(var(--success-foreground))",
+          soft: "hsl(var(--success-soft))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning))",
+          foreground: "hsl(var(--warning-foreground))",
+          soft: "hsl(var(--warning-soft))",
+        },
+        role: {
+          doctor: "hsl(var(--role-doctor))",
+          therapist: "hsl(var(--role-therapist))",
+          nurse: "hsl(var(--role-nurse))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
