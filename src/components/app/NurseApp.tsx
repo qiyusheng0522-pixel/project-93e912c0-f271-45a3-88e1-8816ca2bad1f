@@ -197,9 +197,11 @@ export const NurseApp = () => {
 const Home = ({
   onOpen,
   onOpenQueue,
+  onGoPatients,
 }: {
   onOpen: (k: SheetKey) => void;
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: () => void;
 }) => {
   const tiles: { icon: any; label: string; color: string; k: QueueKey }[] = [
     { icon: Pill, label: "给药操作", color: "text-warning bg-warning-soft", k: "med" },
@@ -216,10 +218,10 @@ const Home = ({
         <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">您好，赵护士</div>
-            <div className="text-lg font-semibold mt-0.5">康复护理 · 西区病房</div>
+            <div className="text-xs opacity-80">您好</div>
+            <div className="text-xl font-bold mt-0.5">赵护士 👋</div>
           </div>
-          <button onClick={() => toast("您有 4 条 AI 推送任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+          <button onClick={() => toast("您有 4 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
@@ -236,13 +238,18 @@ const Home = ({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
-        <AICard title="AI 推送的护理任务" action={
-          <button onClick={() => onOpenQueue("execTask")} className="w-full bg-ai text-ai-foreground rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-1">
-            进入待办列表 <ArrowRight className="w-4 h-4" />
+        {NEW_PATIENT_COUNT > 0 && (
+          <button onClick={onGoPatients} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]">
+            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">前往患者管理查看共享患者档案</div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
-        }>
-          当前 {QUEUES.execTask.length + QUEUES.med.length} 项任务已按优先级智能排序，最紧急：303 床张建国 14:00 静脉给药。
-        </AICard>
+        )}
 
         <div>
           <SectionTitle title="护士工作台 · 点击查看待办列表" />
@@ -258,6 +265,7 @@ const Home = ({
               />
             ))}
             <WorkbenchTile icon={Users} label="床位管理" color="text-success bg-success-soft" onClick={() => onOpen("bed")} />
+            <WorkbenchTile icon={UsersRound} label="患者管理" color="text-role-nurse bg-rose-50" count={NEW_PATIENT_COUNT} onClick={onGoPatients} />
           </div>
         </div>
 
