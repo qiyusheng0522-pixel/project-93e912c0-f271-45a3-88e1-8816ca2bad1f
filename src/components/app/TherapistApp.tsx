@@ -429,10 +429,31 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         <div className="text-xs text-muted-foreground mt-0.5">PT/OT 双证 · 8 年</div>
       </div>
     </div>
-    <div className="grid grid-cols-2 gap-2">
-      <StatChip label="本月治疗" value="248" accent="primary" />
-      <StatChip label="患者好评" value="98%" accent="success" />
-    </div>
+
+    <MeStats
+      accent="therapist"
+      tiles={[
+        { label: "本月治疗", value: 248, sub: "次" },
+        { label: "患者好评", value: "98%", sub: "满意度" },
+        { label: "平均时长", value: "42m", sub: "/次" },
+      ]}
+      trend={[
+        { day: "一", value: 9 }, { day: "二", value: 12 }, { day: "三", value: 11 },
+        { day: "四", value: 14 }, { day: "五", value: 13 }, { day: "六", value: 5 }, { day: "日", value: 3 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "18,640",
+        today: "780",
+        pending: "2,420",
+        breakdown: [
+          { label: "PT 治疗", value: "9,200" },
+          { label: "OT 治疗", value: "6,800" },
+          { label: "评估补充", value: "2,640" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">
