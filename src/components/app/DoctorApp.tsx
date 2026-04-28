@@ -340,6 +340,7 @@ const DoctorHome = ({
               { label: "待设定目标", count: 3, onClick: () => onGoPlan("goal") },
               { label: "待确认方案", count: 3, onClick: () => onGoPlan("plan") },
               { label: "待确认AI处方", count: 4, onClick: () => onGoPlan("airx") },
+              { label: "待确认出院方案", count: 2, onClick: onGoDischarge },
             ]}
           />
         </div>
