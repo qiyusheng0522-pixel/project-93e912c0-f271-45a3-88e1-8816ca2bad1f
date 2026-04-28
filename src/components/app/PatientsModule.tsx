@@ -69,6 +69,13 @@ export const PATIENTS: Patient[] = [
       { time: "今日 09:15", task: "PT 步态训练", author: "系统自动 · 任务执行" },
       { time: "今日 11:00", task: "OT ADL 训练", author: "系统自动 · 任务执行" },
     ],
+    currentPlan: [
+      { label: "医师 · 总体方案", value: "渐进强化 V2", hint: "李志远 · 第 2 周方案" },
+      { label: "PT · 物理治疗", value: "60 min × 5/周", hint: "步态 + 平衡 · 王雅琴" },
+      { label: "OT · 作业治疗", value: "45 min × 5/周", hint: "ADL + 厨房 · 陈治疗师" },
+      { label: "ST · 言语治疗", value: "30 min × 3/周", hint: "构音 · 陈思雨" },
+      { label: "护理 · 康复护理", value: "q4h 体位 + 跌倒预防", hint: "赵静怡" },
+    ],
   },
   { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", condition: "髋关节置换", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间疼痛缓解，VAS 由 6 降至 3。" },
