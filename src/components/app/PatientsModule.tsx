@@ -325,6 +325,26 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
         </div>
       </div>
 
+      {actions && actions.length > 0 && (
+        <div className={`grid gap-2 ${actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+          {actions.map((a) => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.key}
+                onClick={a.onClick}
+                className={`bg-card rounded-2xl shadow-card py-3 flex flex-col items-center gap-1 active:scale-[0.98] border border-border/40`}
+              >
+                <div className={`w-9 h-9 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center`}>
+                  {Icon && <Icon className="w-4 h-4" />}
+                </div>
+                <span className="text-[11px] font-semibold">{a.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <SectionTitle title="档案 / 就诊信息" />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
         <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
