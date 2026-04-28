@@ -65,6 +65,32 @@ type QueueKey =
   | "monitor"
   | "discharge";
 
+type SheetKey =
+  | null
+  | "assess"
+  | "goal"
+  | "plan"
+  | "meeting"
+  | "rx"
+  | "monitor"
+  | "discharge"
+  | "video"
+  | "patient"
+  | "aiUpdate"
+  | "aiDischarge"
+  | "patientDetail"
+  | "addNote"
+  | "team";
+
+type QueueKey =
+  | "assess"
+  | "goal"
+  | "plan"
+  | "meeting"
+  | "rx"
+  | "monitor"
+  | "discharge";
+
 const QUEUE_TITLE: Record<QueueKey, string> = {
   assess: "待评估患者",
   goal: "待设定康复目标",
