@@ -15,6 +15,9 @@ import {
   Share2,
   CheckCircle2,
   Trash2,
+  Edit3 as Edit3Icon,
+  Mic,
+  Eraser,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -335,7 +338,19 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
         <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
         <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
         <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="主管医师" value="李志远 主任医师" hint="神经康复科" />
+        <FormRow label="既往史" value="高血压 8 年 · 糖尿病 5 年" />
+        <FormRow label="手术史" value="2026-04-23 关节置换 / 减压内固定" />
         <FormRow label="过敏 / 医保" value="无 · 城镇职工" />
+        <FormRow label="并发症风险" value="DVT 中 · 跌倒高" />
+      </div>
+
+      <SectionTitle title="评估关键指标" />
+      <div className="bg-card rounded-2xl shadow-card p-3 grid grid-cols-4 gap-2">
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">FMA</div><div className="text-[12px] font-bold mt-0.5">42</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">Barthel</div><div className="text-[12px] font-bold mt-0.5">70</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">Berg</div><div className="text-[12px] font-bold mt-0.5">36</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">VAS</div><div className="text-[12px] font-bold mt-0.5">3</div></div>
       </div>
 
       {patient.currentPlan && patient.currentPlan.length > 0 && (
@@ -349,12 +364,14 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
         </>
       )}
 
-      <SectionTitle title="共享团队成员" extra={<button onClick={onShare} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Share2 className="w-3 h-3" />共享设置</button>} />
-      <div className="bg-card rounded-2xl shadow-card p-3 flex flex-wrap gap-1.5">
-        {patient.shared.map(m => (
-          <span key={m} className="text-[11px] px-2 py-1 rounded-full bg-muted">{m}</span>
-        ))}
-      </div>
+      {patient.currentPlan && patient.currentPlan.length > 0 && accent === "doctor" && (
+        <button
+          onClick={() => toast.success("已进入康复方案修改 · 修改完成后请重新推送")}
+          className="w-full border border-primary/30 text-primary bg-primary/5 rounded-2xl py-2.5 text-[12px] font-semibold flex items-center justify-center gap-1.5"
+        >
+          <Edit3Icon className="w-3.5 h-3.5" /> 修改当前康复方案
+        </button>
+      )}
 
       <SectionTitle title={`协作备注 · ${patient.notes.length}`} extra={<button onClick={onAddNote} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Plus className="w-3 h-3" />添加备注</button>} />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
@@ -457,19 +474,46 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
 /* ============== 添加备注 Sheet ============== */
 export const AddNoteSheet = ({ patient, accent, onSave }: { patient: Patient | null; accent: Accent; onSave: (text: string) => void }) => {
   const [text, setText] = useState("");
+  const [recording, setRecording] = useState(false);
   if (!patient) return null;
+  const startVoice = () => {
+    setRecording(true);
+    toast("🎤 正在听写…");
+    setTimeout(() => {
+      setText(t => (t ? t + " " : "") + "患者今日精神状态良好，建议明日加强平衡训练。");
+      setRecording(false);
+      toast.success("语音已转写");
+    }, 1200);
+  };
   return (
     <div className="p-4 space-y-3">
       <div className="bg-card rounded-2xl shadow-card p-3">
         <div className="text-[12px] font-semibold">{patient.name} · 床 {patient.bed}</div>
         <div className="text-[10px] text-muted-foreground mt-0.5">备注将共享给所有协作成员</div>
       </div>
-      <textarea
-        value={text}
-        onChange={e => setText(e.target.value)}
-        placeholder="输入对该患者的观察、提醒或交接内容..."
-        className="w-full bg-card border border-border rounded-2xl p-3 text-sm h-40 outline-none"
-      />
+      <div className="relative">
+        <textarea
+          value={text}
+          onChange={e => setText(e.target.value)}
+          placeholder="输入对该患者的观察、提醒或交接内容..."
+          className="w-full bg-card border border-border rounded-2xl p-3 pb-12 text-sm h-40 outline-none"
+        />
+        <div className="absolute bottom-2 right-2 flex gap-1.5">
+          <button
+            onClick={() => { setText(""); toast("已清除"); }}
+            disabled={!text}
+            className="text-[11px] px-2.5 py-1.5 rounded-full bg-muted text-foreground/70 disabled:opacity-40 flex items-center gap-1"
+          >
+            <Eraser className="w-3 h-3" />一键清除
+          </button>
+          <button
+            onClick={startVoice}
+            className={`text-[11px] px-2.5 py-1.5 rounded-full flex items-center gap-1 font-semibold ${recording ? "bg-destructive text-white animate-pulse" : `${accentBg[accent]} text-white`}`}
+          >
+            <Mic className="w-3 h-3" />{recording ? "听写中" : "语音输入"}
+          </button>
+        </div>
+      </div>
       <button
         onClick={() => { if (text.trim()) { onSave(text); setText(""); } }}
         className={`w-full ${accentBg[accent]} text-white rounded-2xl py-3 text-sm font-semibold`}

@@ -48,6 +48,7 @@ import {
 import { toast } from "sonner";
 
 const THERAPIST_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: ClipboardList },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
   { key: "chat", label: "沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
@@ -102,7 +103,7 @@ const QUEUES: Record<QueueKey, TodoItem[]> = {
 };
 
 export const TherapistApp = () => {
-  const [tab, setTab] = useState("patients");
+  const [tab, setTab] = useState("home");
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
@@ -136,6 +137,15 @@ export const TherapistApp = () => {
 
   return (
     <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
+      {tab === "home" && (
+        <TherapistHome
+          onOpenQueue={openQueue}
+          onGoPatients={() => setTab("patients")}
+          onUploadDaily={() => open("uploadDaily")}
+          onOpenSummary={() => open("summary")}
+          onOpenMed={() => open("med")}
+        />
+      )}
       {tab === "patients" && (
         <TherapistPatients
           onPickPatient={pickPatient}
@@ -282,7 +292,98 @@ export const TherapistApp = () => {
   );
 };
 
-/* ============== 患者管理（治疗师视角）：在患者列表 + 工作台入口 ============== */
+/* ============== 治疗师首页 ============== */
+const TherapistHome = ({
+  onOpenQueue,
+  onGoPatients,
+  onUploadDaily,
+  onOpenSummary,
+  onOpenMed,
+}: {
+  onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: () => void;
+  onUploadDaily: () => void;
+  onOpenSummary: () => void;
+  onOpenMed: () => void;
+}) => {
+  const execByType = [
+    { type: "OT", count: QUEUES.exec.filter(e => e.meta?.startsWith("OT")).length || 1, color: "text-primary bg-primary-soft" },
+    { type: "PT", count: QUEUES.exec.filter(e => e.meta?.startsWith("PT")).length || 1, color: "text-secondary bg-secondary-soft" },
+    { type: "ST", count: QUEUES.exec.filter(e => e.meta?.startsWith("ST")).length || 1, color: "text-ai bg-ai-soft" },
+  ];
+  return (
+    <div className="pb-4">
+      <div className="gradient-therapist px-5 pt-6 pb-10 text-white relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <div className="text-xs opacity-80">下午好</div>
+            <div className="text-xl font-bold mt-0.5">王治疗师 👋</div>
+            <div className="text-[11px] opacity-90 mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
+          </div>
+          <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+            <Bell className="w-4 h-4" />
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
+          </button>
+        </div>
+        <div className="relative mt-3">
+          <PendingStatRow
+            items={[
+              { label: "待评估确认", count: QUEUES.confirmAssess.length, onClick: () => onOpenQueue("confirmAssess") },
+              { label: "待确认目标", count: QUEUES.goal.length, onClick: () => onOpenQueue("goal") },
+              { label: "待确认处方", count: QUEUES.rx.length, onClick: () => onOpenQueue("rx") },
+              { label: "待执行任务", count: QUEUES.exec.length, onClick: () => onOpenQueue("exec") },
+            ]}
+          />
+        </div>
+      </div>
+
+      <div className="px-4 -mt-4 space-y-4">
+        <div>
+          <SectionTitle title="待执行任务 · OT / PT / ST" extra={<button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-semibold flex items-center">全部 <ChevronRight className="w-3 h-3" /></button>} />
+          <div className="grid grid-cols-3 gap-2">
+            {execByType.map(t => (
+              <button key={t.type} onClick={() => onOpenQueue("exec")} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
+                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold ${t.color}`}>{t.type}</div>
+                <div className="text-[18px] font-bold mt-2">{t.count}</div>
+                <div className="text-[10px] text-muted-foreground">待执行</div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <SectionTitle title="快速记录 · 写入患者档案" />
+          <div className="grid grid-cols-3 gap-2">
+            <button onClick={onOpenSummary} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
+              <div className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center"><ClipboardList className="w-4 h-4" /></div>
+              <div className="text-[12px] font-semibold mt-2">每日小结</div>
+            </button>
+            <button onClick={onUploadDaily} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
+              <div className="w-9 h-9 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><Activity className="w-4 h-4" /></div>
+              <div className="text-[12px] font-semibold mt-2">治疗记录</div>
+            </button>
+            <button onClick={onOpenMed} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
+              <div className="w-9 h-9 rounded-xl bg-warning-soft text-warning flex items-center justify-center"><Pill className="w-4 h-4" /></div>
+              <div className="text-[12px] font-semibold mt-2">药物变动</div>
+            </button>
+          </div>
+        </div>
+
+        <button onClick={onGoPatients} className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]">
+          <div className="w-10 h-10 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><UsersRound className="w-5 h-5" /></div>
+          <div className="flex-1 text-left">
+            <div className="text-[13px] font-semibold">进入患者管理</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">按状态 / 病症 / 入院时间筛选</div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/* ============== 患者管理（治疗师视角） ============== */
 const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
@@ -300,55 +401,13 @@ const TherapistPatients = ({
   ];
   return (
     <div className="pb-4">
-      <div className="gradient-therapist px-5 pt-6 pb-16 text-white relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex items-center justify-between">
-          <div>
-            <div className="text-xs opacity-80">下午好</div>
-            <div className="text-xl font-bold mt-0.5">王治疗师 👋</div>
-            <div className="text-[11px] opacity-90 mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
-          </div>
-          <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
-            <Bell className="w-4 h-4" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
-          </button>
-        </div>
-        <div className="relative mt-5">
-          <PendingStatRow
-            items={[
-              { label: "待执行处方", count: QUEUES.exec.length, onClick: () => onOpenQueue("exec") },
-              { label: "待确认处方", count: QUEUES.rx.length, onClick: () => onOpenQueue("rx") },
-              { label: "待评估确认", count: QUEUES.confirmAssess.length, onClick: () => onOpenQueue("confirmAssess") },
-            ]}
-          />
-        </div>
-      </div>
-
-      <div className="px-4 -mt-8 space-y-4">
-        {NEW_PATIENT_COUNT > 0 && (
-          <div className="bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning">
-            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">下方为团队共享患者列表</div>
-            </div>
-          </div>
-        )}
-
-        <div>
-          <SectionTitle title="快速入口" extra={<button onClick={onUploadDaily} className="text-[11px] text-secondary font-semibold flex items-center gap-1"><Plus className="w-3 h-3" />上传每日治疗</button>} />
-          <div className="grid grid-cols-4 gap-2">
-            {tiles.map((it) => (
-              <WorkbenchTile key={it.label} icon={it.icon} label={it.label} color={it.color} count={it.count} onClick={() => onOpenQueue(it.k)} />
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <SectionTitle title="按状态快速筛选 + 我的患者" />
-          <PatientsPage accent="therapist" onPick={onPickPatient} />
+      <PatientsPage accent="therapist" onPick={onPickPatient} />
+      <div className="px-4 space-y-3 mt-3">
+        <SectionTitle title="治疗关注 · 快速入口" extra={<button onClick={onUploadDaily} className="text-[11px] text-secondary font-semibold flex items-center gap-1"><Plus className="w-3 h-3" />上传每日治疗</button>} />
+        <div className="grid grid-cols-4 gap-2">
+          {tiles.map((it) => (
+            <WorkbenchTile key={it.label} icon={it.icon} label={it.label} color={it.color} count={it.count} onClick={() => onOpenQueue(it.k)} />
+          ))}
         </div>
       </div>
     </div>

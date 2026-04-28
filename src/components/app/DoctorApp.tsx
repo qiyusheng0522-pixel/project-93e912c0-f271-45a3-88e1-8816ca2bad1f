@@ -47,6 +47,7 @@ import {
   User as UserIcon,
   LogOut,
   MessageCircle,
+  UserPlus,
 } from "lucide-react";
 
 type SheetKey =
@@ -148,7 +149,15 @@ export const DoctorApp = () => {
       {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认"); close(); }}>确认评估结果</PrimaryBtn>}>
+        footer={
+          <div className="flex gap-2">
+            <button onClick={() => toast("已打开治疗师选择 · 王雅琴 / 陈治疗师 / 陈思雨")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-1">
+              <UserPlus className="w-4 h-4" />指定治疗师
+              <span className="text-[10px] text-muted-foreground">（可选）</span>
+            </button>
+            <button onClick={() => { toast.success("评估结果已确认"); close(); }} className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold">确认</button>
+          </div>
+        }>
         <AssessSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
 
@@ -337,22 +346,6 @@ const DoctorHome = ({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
-        {NEW_PATIENT_COUNT > 0 && (
-          <button
-            onClick={() => onGoPatients("新患者")}
-            className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]"
-          >
-            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-warning" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者待接入</div>
-              <div className="text-[11px] text-muted-foreground mt-0.5">点击进入患者管理 · 安排首次评估</div>
-            </div>
-            <ChevronRight className="w-4 h-4 text-muted-foreground" />
-          </button>
-        )}
-
         <div>
           <SectionTitle title="医师工作台 · 点击进入对应模块" />
           <div className="grid grid-cols-4 gap-2">
