@@ -359,30 +359,14 @@ const TherapistHome = ({
 /* ============== 患者管理（治疗师视角） ============== */
 const TherapistPatients = ({
   onPickPatient,
-  onOpenQueue,
-  onUploadDaily,
 }: {
   onPickPatient: (p: Patient) => void;
-  onOpenQueue: (k: QueueKey) => void;
-  onUploadDaily: () => void;
+  onOpenQueue?: (k: QueueKey) => void;
+  onUploadDaily?: () => void;
 }) => {
-  const tiles: { icon: any; label: string; color: string; k: QueueKey; count: number }[] = [
-    { icon: ClipboardList, label: "评估确认", color: "text-secondary bg-secondary-soft", k: "confirmAssess", count: QUEUES.confirmAssess.length },
-    { icon: Activity, label: "治疗目标", color: "text-primary bg-primary-soft", k: "goal", count: QUEUES.goal.length },
-    { icon: Dumbbell, label: "处方确认", color: "text-success bg-success-soft", k: "rx", count: QUEUES.rx.length },
-    { icon: Brain, label: "处方执行", color: "text-warning bg-warning-soft", k: "exec", count: QUEUES.exec.length },
-  ];
   return (
     <div className="pb-4">
       <PatientsPage accent="therapist" onPick={onPickPatient} />
-      <div className="px-4 space-y-3 mt-3">
-        <SectionTitle title="治疗关注 · 快速入口" extra={<button onClick={onUploadDaily} className="text-[11px] text-secondary font-semibold flex items-center gap-1"><Plus className="w-3 h-3" />上传每日治疗</button>} />
-        <div className="grid grid-cols-4 gap-2">
-          {tiles.map((it) => (
-            <WorkbenchTile key={it.label} icon={it.icon} label={it.label} color={it.color} count={it.count} onClick={() => onOpenQueue(it.k)} />
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
