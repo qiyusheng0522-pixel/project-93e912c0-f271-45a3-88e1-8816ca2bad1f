@@ -397,7 +397,7 @@ const AIPanel = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => (
   </div>
 );
 
-const Me = () => (
+const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
   <div className="px-4 pt-4 pb-4 space-y-4">
     <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
       <div className="w-16 h-16 rounded-2xl gradient-therapist flex items-center justify-center text-white text-xl font-bold">王</div>
@@ -411,6 +411,14 @@ const Me = () => (
       <StatChip label="患者好评" value="98%" accent="success" />
     </div>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-role-therapist" />
+          <span className="text-sm">团队管理</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-secondary-soft text-secondary">配置成员 · 共享患者</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
       {["我的患者", "治疗记录", "排班管理", "知识库", "设置"].map((it) => (
         <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
           <span className="text-sm">{it}</span>
