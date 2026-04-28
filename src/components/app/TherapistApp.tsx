@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScreenShell, TabBar } from "@/components/app/TabBar";
+import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
@@ -9,8 +9,18 @@ import {
   AddNoteSheet,
   TeamManageSheet,
   Patient,
+  PatientFilter,
   NEW_PATIENT_COUNT,
 } from "@/components/app/PatientsModule";
+import { RehabPlanModule, AIRxModule, PlanStage, AIRxBucket } from "@/components/app/RehabPlanModule";
+import { Home as HomeIcon, UsersRound, FileHeart, Sparkles, User as UserIcon } from "lucide-react";
+const THERAPIST_TABS: TabBarItem[] = [
+  { key: "home", label: "工作台", icon: HomeIcon },
+  { key: "patients", label: "患者管理", icon: UsersRound },
+  { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "ai", label: "AI康复处方", icon: Sparkles },
+  { key: "me", label: "我的", icon: UserIcon },
+];
 import { toast } from "sonner";
 import {
   Bell,
