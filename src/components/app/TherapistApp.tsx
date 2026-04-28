@@ -332,57 +332,22 @@ const TherapistHome = ({
       <div className="px-4 mt-3">
         <div className="flex items-center justify-between mb-2 px-1">
           <span className="text-[13px] font-bold text-foreground">今日待处理</span>
-          <button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-medium flex items-center">
-            点击进入处理 <ChevronRight className="w-3 h-3" />
-          </button>
         </div>
         <PendingTodoGrid
           items={[
             { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
             { label: "待确认处方", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
-            { label: "待执行任务", count: QUEUES.exec.length, icon: Activity, iconClass: "bg-success text-white", onClick: () => onOpenQueue("exec") },
           ]}
         />
       </div>
 
       <div className="px-4 mt-3 space-y-4">
-        <div>
-          <SectionTitle title="待执行任务 · OT / PT / ST" extra={<button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-semibold flex items-center">全部 <ChevronRight className="w-3 h-3" /></button>} />
-          <div className="grid grid-cols-3 gap-2">
-            {execByType.map(t => (
-              <button key={t.type} onClick={() => onOpenQueue("exec")} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold ${t.color}`}>{t.type}</div>
-                <div className="text-[18px] font-bold mt-2">{t.count}</div>
-                <div className="text-[10px] text-muted-foreground">待执行</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <SectionTitle title="快速记录 · 写入患者档案" />
-          <div className="grid grid-cols-3 gap-2">
-            <button onClick={onOpenSummary} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center"><ClipboardList className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">每日小结</div>
-            </button>
-            <button onClick={onUploadDaily} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><Activity className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">治疗记录</div>
-            </button>
-            <button onClick={onOpenMed} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-warning-soft text-warning flex items-center justify-center"><Pill className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">药物变动</div>
-            </button>
-          </div>
-        </div>
-
         <button onClick={onGoPatients} className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]">
           <div className="w-10 h-10 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><UsersRound className="w-5 h-5" /></div>
           <div className="flex-1 text-left">
             <div className="text-[13px] font-semibold">进入患者管理</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">按状态 / 病症 / 入院时间筛选</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">每日小结 / 治疗记录 / 药物变动 / 备注</div>
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
