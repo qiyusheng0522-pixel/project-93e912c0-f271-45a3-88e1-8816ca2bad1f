@@ -289,6 +289,7 @@ export const IMChatSheet = ({
   initialMessages,
   onAISummary,
   enablePatientReminder,
+  onClose,
 }: {
   accent: Accent;
   title: string;
@@ -297,6 +298,7 @@ export const IMChatSheet = ({
   initialMessages: ChatMessage[];
   onAISummary: (summary: string) => void;
   enablePatientReminder?: boolean;
+  onClose?: () => void;
 }) => {
   const [msgs, setMsgs] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
