@@ -136,7 +136,7 @@ export const PatientsPage = ({
 
   return (
     <div className="pb-4">
-      <div className={`${accentBg[accent]} px-5 pt-2 pb-6 text-white relative overflow-hidden`}>
+      <div className={`${accentBg[accent]} px-5 pt-4 pb-10 text-white relative overflow-hidden`}>
         <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative">
           <div className="flex items-center justify-between">
