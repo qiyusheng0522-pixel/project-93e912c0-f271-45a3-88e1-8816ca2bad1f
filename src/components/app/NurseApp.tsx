@@ -104,6 +104,8 @@ export const NurseApp = () => {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
+  const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
   const openQueue = (k: QueueKey) => setQueue(k);
@@ -113,8 +115,12 @@ export const NurseApp = () => {
     setQueue(null);
     setSheet(sheetKey);
   };
+  const pickPatient = (p: Patient) => {
+    const merged = { ...p, notes: patientNotes[p.id] ?? p.notes };
+    setPickedPatient(merged);
+    setSheet("patientDetail");
+  };
 
-  // edu queue picks open eduDetail; order queue picks open order detail
   const queueToSheet: Record<QueueKey, SheetKey> = {
     med: "med",
     vitals: "vitals",
@@ -126,11 +132,12 @@ export const NurseApp = () => {
   };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" />}>
-      {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} />}
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} />}>
+      {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
       {tab === "tasks" && <Tasks onOpenQueue={openQueue} />}
+      {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
       {tab === "ai" && <Edu onOpen={open} onOpenQueue={openQueue} />}
-      {tab === "me" && <Me />}
+      {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["med", "vitals", "inject", "obs", "edu", "execTask", "order"] as QueueKey[]).map((k) => (
         <PhoneSheet key={k} open={queue === k} onClose={closeQueue} title={QUEUE_TITLE[k]} accent="nurse">
