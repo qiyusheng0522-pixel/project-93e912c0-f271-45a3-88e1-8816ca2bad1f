@@ -44,6 +44,7 @@ export type Patient = {
   summaries?: { author: string; time: string; text: string }[];
   medChanges?: { author: string; time: string; text: string }[];
   checkins?: { time: string; task: string; author: string }[];
+  currentPlan?: { label: string; value: string; hint?: string }[];
 };
 
 export const PATIENTS: Patient[] = [
