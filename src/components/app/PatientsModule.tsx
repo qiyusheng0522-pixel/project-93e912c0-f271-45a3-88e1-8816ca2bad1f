@@ -593,3 +593,121 @@ export const DEFAULT_VIDEO_MSGS: ChatMessage[] = [
   { id: "2", author: "王雅琴", role: "PT 治疗师", text: "Berg 32 分，需重点关注负重训练耐受。", time: "14:03" },
   { id: "3", author: "赵静怡", role: "护理", text: "VAS 由 6 → 3，疼痛控制理想。", time: "14:04" },
 ];
+
+/* ============== 团队会议列表 + 新增 ============== */
+export interface TeamMeeting {
+  id: string;
+  patientId?: string;
+  patientName?: string;
+  topic: string;
+  time: string;
+  status: "进行中" | "待开始" | "已结束";
+  participants: string[];
+}
+
+export const DEFAULT_MEETINGS: TeamMeeting[] = [
+  { id: "tm1", patientId: "p1", patientName: "张建国", topic: "V2 方案确认", time: "今日 10:30", status: "进行中", participants: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"] },
+  { id: "tm2", patientId: "p2", patientName: "王秀英", topic: "首次评估复议", time: "今日 16:00", status: "待开始", participants: ["李医师", "王治疗师", "赵护士"] },
+  { id: "tm3", patientId: "p3", patientName: "李 强", topic: "出院条件评估", time: "明日 09:00", status: "待开始", participants: ["李医师", "王治疗师", "赵护士"] },
+];
+
+export const TeamMeetingListSheet = ({
+  accent,
+  meetings,
+  onPick,
+  onCreate,
+}: {
+  accent: Accent;
+  meetings: TeamMeeting[];
+  onPick: (m: TeamMeeting) => void;
+  onCreate: () => void;
+}) => (
+  <div className="p-4 space-y-3">
+    <button
+      onClick={onCreate}
+      className={`w-full ${accentBg[accent]} text-white rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-card`}
+    >
+      <Plus className="w-4 h-4" /> 新增团队会议（针对单个患者）
+    </button>
+    <SectionTitle title={`会议列表 · ${meetings.length}`} />
+    <div className="space-y-2">
+      {meetings.map(m => {
+        const sc = {
+          "进行中": "bg-success-soft text-success",
+          "待开始": "bg-warning/15 text-warning",
+          "已结束": "bg-muted text-muted-foreground",
+        }[m.status];
+        return (
+          <button
+            key={m.id}
+            onClick={() => onPick(m)}
+            className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99]"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <MessageSquare className={`w-4 h-4 ${accentText[accent]}`} />
+                <span className="text-[13px] font-semibold">{m.patientName ? `${m.patientName} · ${m.topic}` : m.topic}</span>
+              </div>
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${sc}`}>{m.status}</span>
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-1">{m.time} · {m.participants.length} 人</div>
+            <div className="text-[10px] text-muted-foreground mt-1 truncate">{m.participants.join(" · ")}</div>
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+export const NewMeetingSheet = ({
+  accent,
+  onCreate,
+}: {
+  accent: Accent;
+  onCreate: (m: TeamMeeting) => void;
+}) => {
+  const [patientId, setPatientId] = useState<string>(PATIENTS[0].id);
+  const [topic, setTopic] = useState("");
+  const [time, setTime] = useState("今日 16:30");
+  return (
+    <div className="p-4 space-y-3">
+      <AICard title="新增团队会议">
+        会议将基于选中患者发起，AI 会自动生成纪要并同步到患者评估 / 方案中。
+      </AICard>
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <div className="flex items-center justify-between py-3 px-3">
+          <span className="text-[13px]">选择患者</span>
+          <select value={patientId} onChange={e => setPatientId(e.target.value)} className="text-[12px] bg-muted rounded-lg px-2 py-1 outline-none">
+            {PATIENTS.map(p => <option key={p.id} value={p.id}>{p.name} · 床{p.bed}</option>)}
+          </select>
+        </div>
+        <div className="flex items-center justify-between py-3 px-3">
+          <span className="text-[13px]">议题</span>
+          <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="如 V2 方案确认" className="w-40 text-right text-[12px] bg-muted rounded-lg px-2 py-1 outline-none" />
+        </div>
+        <div className="flex items-center justify-between py-3 px-3">
+          <span className="text-[13px]">时间</span>
+          <input value={time} onChange={e => setTime(e.target.value)} className="w-40 text-right text-[12px] bg-muted rounded-lg px-2 py-1 outline-none" />
+        </div>
+      </div>
+      <button
+        onClick={() => {
+          if (!topic.trim()) { toast("请填写议题"); return; }
+          const p = PATIENTS.find(x => x.id === patientId)!;
+          onCreate({
+            id: "tm" + Date.now(),
+            patientId: p.id,
+            patientName: p.name,
+            topic,
+            time,
+            status: "待开始",
+            participants: ["李医师", "王治疗师", "赵护士"],
+          });
+        }}
+        className={`w-full ${accentBg[accent]} text-white rounded-2xl py-3 text-sm font-semibold`}
+      >
+        创建会议
+      </button>
+    </div>
+  );
+};
