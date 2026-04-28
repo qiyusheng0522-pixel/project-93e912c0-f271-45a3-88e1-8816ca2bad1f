@@ -131,11 +131,11 @@ export const TherapistApp = () => {
   };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} />}>
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
       {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
-      {tab === "tasks" && <TaskList onOpen={open} onOpenQueue={openQueue} />}
       {tab === "patients" && <PatientsPage accent="therapist" onPick={pickPatient} />}
-      {tab === "ai" && <AIPanel onOpen={open} />}
+      {tab === "plan" && <RehabPlanModule accent="therapist" initialStage="goal" onPickPlan={(_s, p) => { setActivePatient(`${p.name} · 床${p.bed}`); setSheet("goal"); }} />}
+      {tab === "ai" && <AIRxModule accent="therapist" onPick={(_b, p) => { setActivePatient(`${p.name} · 床${p.bed}`); setSheet("rx"); }} />}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["confirmAssess", "goal", "rx", "exec", "summary", "med"] as QueueKey[]).map((k) => (
