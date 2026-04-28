@@ -317,12 +317,37 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
       <div className={`rounded-2xl ${accentBg[accent]} p-5 text-white`}>
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center text-lg font-bold">{patient.name[0]}</div>
-          <div>
+          <div className="flex-1">
             <div className="text-base font-bold">{patient.name} · 床 {patient.bed}</div>
             <div className="text-[11px] opacity-90 mt-0.5">{patient.meta}</div>
           </div>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{patient.status}</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">入院天数</div><div className="text-[12px] font-semibold mt-0.5">{patient.admitDays} 天</div></div>
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">病症</div><div className="text-[12px] font-semibold mt-0.5">{patient.condition}</div></div>
+          <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">协作成员</div><div className="text-[12px] font-semibold mt-0.5">{patient.shared.length} 人</div></div>
         </div>
       </div>
+
+      <SectionTitle title="档案 / 就诊信息" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
+        <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
+        <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="过敏 / 医保" value="无 · 城镇职工" />
+      </div>
+
+      {patient.currentPlan && patient.currentPlan.length > 0 && (
+        <>
+          <SectionTitle title="当前康复方案 · 多角色" extra={<span className="text-[10px] text-muted-foreground">医师 / PT / OT / ST / 护理</span>} />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            {patient.currentPlan.map((row, i) => (
+              <FormRow key={i} label={row.label} value={row.value} hint={row.hint} />
+            ))}
+          </div>
+        </>
+      )}
 
       <SectionTitle title="共享团队成员" extra={<button onClick={onShare} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Share2 className="w-3 h-3" />共享设置</button>} />
       <div className="bg-card rounded-2xl shadow-card p-3 flex flex-wrap gap-1.5">
