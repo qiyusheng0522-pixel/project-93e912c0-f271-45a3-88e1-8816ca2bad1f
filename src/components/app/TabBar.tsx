@@ -61,7 +61,7 @@ export const ScreenShell = ({
   tabBar?: ReactNode;
 }) => (
   <div className="relative min-h-full flex flex-col">
-    <div className="flex-1">{children}</div>
+    <div className="flex-1 relative">{children}</div>
     {tabBar}
   </div>
 );
