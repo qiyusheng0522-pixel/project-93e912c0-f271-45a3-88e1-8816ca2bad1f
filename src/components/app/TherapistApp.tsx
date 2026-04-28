@@ -23,6 +23,7 @@ import {
   TeamMeeting,
 } from "@/components/app/PatientsModule";
 import { RehabPlanModule, PlanStage } from "@/components/app/RehabPlanModule";
+import { MeStats } from "@/components/app/MeStats";
 import {
   UsersRound,
   FileHeart,
@@ -195,10 +196,9 @@ export const TherapistApp = () => {
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "goal"} onClose={close} title={`治疗目标${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
-        footer={<div className="flex gap-2">
-          <button onClick={() => { toast("已切换为手动调整"); }} className="flex-1 border border-secondary/30 text-secondary rounded-2xl py-3 text-sm font-semibold">手动修改</button>
-          <button onClick={() => { toast.success("治疗目标已生成并回传医师"); close(); }} className="flex-1 gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold">生成治疗目标</button>
-        </div>}>
+        footer={
+          <button onClick={() => { toast.success("治疗目标已生成并回传医师"); close(); }} className="w-full gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold">生成治疗目标</button>
+        }>
         <GoalAdjustSheet patient={activePatient} />
       </PhoneSheet>
 
@@ -240,7 +240,12 @@ export const TherapistApp = () => {
           patient={pickedPatient}
           accent="therapist"
           onAddNote={() => setSheet("addNote")}
-          onShare={() => toast.success("已打开共享设置")}
+          actions={[
+            { key: "summary", label: "每日小结", icon: ClipboardList, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.name} · 床${pickedPatient.bed}` : ""); setSheet("summary"); } },
+            { key: "therapy", label: "治疗记录", icon: Activity, onClick: () => setSheet("uploadDaily") },
+            { key: "med", label: "药物变动", icon: Pill, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.name} · 床${pickedPatient.bed}` : ""); setSheet("med"); } },
+            { key: "note", label: "备注", icon: Edit3, onClick: () => setSheet("addNote") },
+          ]}
         />
       </PhoneSheet>
 
@@ -333,57 +338,22 @@ const TherapistHome = ({
       <div className="px-4 mt-3">
         <div className="flex items-center justify-between mb-2 px-1">
           <span className="text-[13px] font-bold text-foreground">今日待处理</span>
-          <button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-medium flex items-center">
-            点击进入处理 <ChevronRight className="w-3 h-3" />
-          </button>
         </div>
         <PendingTodoGrid
           items={[
             { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
             { label: "待确认处方", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
-            { label: "待执行任务", count: QUEUES.exec.length, icon: Activity, iconClass: "bg-success text-white", onClick: () => onOpenQueue("exec") },
           ]}
         />
       </div>
 
       <div className="px-4 mt-3 space-y-4">
-        <div>
-          <SectionTitle title="待执行任务 · OT / PT / ST" extra={<button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-semibold flex items-center">全部 <ChevronRight className="w-3 h-3" /></button>} />
-          <div className="grid grid-cols-3 gap-2">
-            {execByType.map(t => (
-              <button key={t.type} onClick={() => onOpenQueue("exec")} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-[12px] font-bold ${t.color}`}>{t.type}</div>
-                <div className="text-[18px] font-bold mt-2">{t.count}</div>
-                <div className="text-[10px] text-muted-foreground">待执行</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <SectionTitle title="快速记录 · 写入患者档案" />
-          <div className="grid grid-cols-3 gap-2">
-            <button onClick={onOpenSummary} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-primary-soft text-primary flex items-center justify-center"><ClipboardList className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">每日小结</div>
-            </button>
-            <button onClick={onUploadDaily} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><Activity className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">治疗记录</div>
-            </button>
-            <button onClick={onOpenMed} className="bg-card rounded-2xl shadow-card p-3 text-left active:scale-[0.99]">
-              <div className="w-9 h-9 rounded-xl bg-warning-soft text-warning flex items-center justify-center"><Pill className="w-4 h-4" /></div>
-              <div className="text-[12px] font-semibold mt-2">药物变动</div>
-            </button>
-          </div>
-        </div>
-
         <button onClick={onGoPatients} className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]">
           <div className="w-10 h-10 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><UsersRound className="w-5 h-5" /></div>
           <div className="flex-1 text-left">
             <div className="text-[13px] font-semibold">进入患者管理</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">按状态 / 病症 / 入院时间筛选</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">每日小结 / 治疗记录 / 药物变动 / 备注</div>
           </div>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
@@ -395,30 +365,14 @@ const TherapistHome = ({
 /* ============== 患者管理（治疗师视角） ============== */
 const TherapistPatients = ({
   onPickPatient,
-  onOpenQueue,
-  onUploadDaily,
 }: {
   onPickPatient: (p: Patient) => void;
-  onOpenQueue: (k: QueueKey) => void;
-  onUploadDaily: () => void;
+  onOpenQueue?: (k: QueueKey) => void;
+  onUploadDaily?: () => void;
 }) => {
-  const tiles: { icon: any; label: string; color: string; k: QueueKey; count: number }[] = [
-    { icon: ClipboardList, label: "评估确认", color: "text-secondary bg-secondary-soft", k: "confirmAssess", count: QUEUES.confirmAssess.length },
-    { icon: Activity, label: "治疗目标", color: "text-primary bg-primary-soft", k: "goal", count: QUEUES.goal.length },
-    { icon: Dumbbell, label: "处方确认", color: "text-success bg-success-soft", k: "rx", count: QUEUES.rx.length },
-    { icon: Brain, label: "处方执行", color: "text-warning bg-warning-soft", k: "exec", count: QUEUES.exec.length },
-  ];
   return (
     <div className="pb-4">
       <PatientsPage accent="therapist" onPick={onPickPatient} />
-      <div className="px-4 space-y-3 mt-3">
-        <SectionTitle title="治疗关注 · 快速入口" extra={<button onClick={onUploadDaily} className="text-[11px] text-secondary font-semibold flex items-center gap-1"><Plus className="w-3 h-3" />上传每日治疗</button>} />
-        <div className="grid grid-cols-4 gap-2">
-          {tiles.map((it) => (
-            <WorkbenchTile key={it.label} icon={it.icon} label={it.label} color={it.color} count={it.count} onClick={() => onOpenQueue(it.k)} />
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
@@ -476,10 +430,31 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         <div className="text-xs text-muted-foreground mt-0.5">PT/OT 双证 · 8 年</div>
       </div>
     </div>
-    <div className="grid grid-cols-2 gap-2">
-      <StatChip label="本月治疗" value="248" accent="primary" />
-      <StatChip label="患者好评" value="98%" accent="success" />
-    </div>
+
+    <MeStats
+      accent="therapist"
+      tiles={[
+        { label: "本月治疗", value: 248, sub: "次" },
+        { label: "患者好评", value: "98%", sub: "满意度" },
+        { label: "平均时长", value: "42m", sub: "/次" },
+      ]}
+      trend={[
+        { day: "一", value: 9 }, { day: "二", value: 12 }, { day: "三", value: 11 },
+        { day: "四", value: 14 }, { day: "五", value: 13 }, { day: "六", value: 5 }, { day: "日", value: 3 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "18,640",
+        today: "780",
+        pending: "2,420",
+        breakdown: [
+          { label: "PT 治疗", value: "9,200" },
+          { label: "OT 治疗", value: "6,800" },
+          { label: "评估补充", value: "2,640" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">

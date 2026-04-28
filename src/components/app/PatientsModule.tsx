@@ -12,7 +12,6 @@ import {
   Users,
   MessageSquare,
   StickyNote,
-  Share2,
   CheckCircle2,
   Trash2,
   Edit3 as Edit3Icon,
@@ -297,11 +296,14 @@ const PatientCard = ({ p, accent, onClick }: { p: Patient; accent: Accent; onCli
 };
 
 /* ============== 患者详情 Sheet ============== */
-export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
+export type PatientDetailAction = { key: string; label: string; icon?: any; onClick: () => void };
+
+export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, actions }: {
   patient: Patient | null;
   accent: Accent;
   onAddNote: () => void;
-  onShare: () => void;
+  onShare?: () => void;
+  actions?: PatientDetailAction[];
 }) => {
   if (!patient) return null;
   return (
@@ -321,6 +323,26 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
           <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">协作成员</div><div className="text-[12px] font-semibold mt-0.5">{patient.shared.length} 人</div></div>
         </div>
       </div>
+
+      {actions && actions.length > 0 && (
+        <div className={`grid gap-2 ${actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
+          {actions.map((a) => {
+            const Icon = a.icon;
+            return (
+              <button
+                key={a.key}
+                onClick={a.onClick}
+                className={`bg-card rounded-2xl shadow-card py-3 flex flex-col items-center gap-1 active:scale-[0.98] border border-border/40`}
+              >
+                <div className={`w-9 h-9 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center`}>
+                  {Icon && <Icon className="w-4 h-4" />}
+                </div>
+                <span className="text-[11px] font-semibold">{a.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <SectionTitle title="档案 / 就诊信息" />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">

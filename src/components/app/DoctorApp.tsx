@@ -25,6 +25,7 @@ import {
   TeamMeeting,
 } from "@/components/app/PatientsModule";
 import { RehabPlanModule, PlanStage } from "@/components/app/RehabPlanModule";
+import { MeStats } from "@/components/app/MeStats";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -185,10 +186,7 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "goal"} onClose={close} title={`AI 康复目标${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
         footer={
-          <div className="flex gap-2">
-            <button onClick={() => toast("已切换到手动调整")} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">手动调整</button>
-            <button onClick={() => { toast.success("康复目标已同步治疗师"); close(); }} className="flex-1 gradient-ai text-white rounded-2xl py-3 text-sm font-semibold">同步治疗师</button>
-          </div>
+          <button onClick={() => { toast.success("康复目标已同步治疗师"); close(); }} className="w-full gradient-ai text-white rounded-2xl py-3 text-sm font-semibold">同步治疗师</button>
         }>
         <GoalSheet patient={activePatient} />
       </PhoneSheet>
@@ -323,7 +321,6 @@ export const DoctorApp = () => {
           patient={pickedPatient}
           accent="doctor"
           onAddNote={() => setSheet("addNote")}
-          onShare={() => toast.success("已打开共享设置")}
         />
       </PhoneSheet>
 
@@ -605,6 +602,31 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
       </div>
     </div>
+
+    <MeStats
+      accent="doctor"
+      tiles={[
+        { label: "本月接诊", value: 86, sub: "患者人次" },
+        { label: "方案确认", value: 124, sub: "AI 方案" },
+        { label: "团队会议", value: 18, sub: "次" },
+      ]}
+      trend={[
+        { day: "一", value: 12 }, { day: "二", value: 15 }, { day: "三", value: 9 },
+        { day: "四", value: 18 }, { day: "五", value: 14 }, { day: "六", value: 6 }, { day: "日", value: 4 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "32,580",
+        today: "1,240",
+        pending: "4,860",
+        breakdown: [
+          { label: "门诊 / 评估", value: "12,400" },
+          { label: "方案确认", value: "9,800" },
+          { label: "线上会诊", value: "10,380" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">
@@ -738,10 +760,10 @@ const GoalSheet = ({ patient }: { patient?: string }) => (
       基于评估数据与同类病例匹配，AI 已生成 4 周分阶段目标。
     </AICard>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      <FormRow label="短期目标 (1 周)" value={<button className="text-primary text-xs flex items-center gap-1"><Edit3 className="w-3 h-3" />编辑</button>} hint="床椅转移独立完成" />
-      <FormRow label="中期目标 (2 周)" value={<button className="text-primary text-xs flex items-center gap-1"><Edit3 className="w-3 h-3" />编辑</button>} hint="助行器辅助步行 30m" />
-      <FormRow label="长期目标 (4 周)" value={<button className="text-primary text-xs flex items-center gap-1"><Edit3 className="w-3 h-3" />编辑</button>} hint="独立步行 ≥ 50m，FMA 提升 ≥ 8 分" />
-      <FormRow label="ADL 目标" value="Barthel ≥ 75" hint="独立完成穿衣、如厕" />
+      <FormRow label="短期目标 (1 周)" value={<input defaultValue="床椅转移独立完成" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+      <FormRow label="中期目标 (2 周)" value={<input defaultValue="助行器辅助步行 30m" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+      <FormRow label="长期目标 (4 周)" value={<input defaultValue="独立步行 ≥ 50m，FMA +8" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+      <FormRow label="ADL 目标" value={<input defaultValue="Barthel ≥ 75" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
     </div>
     <button className="w-full flex items-center justify-center gap-1 text-xs text-ai font-semibold py-2" onClick={() => toast("已新增自定义目标项")}>
       <Plus className="w-3.5 h-3.5" /> 新增自定义目标

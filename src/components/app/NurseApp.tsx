@@ -37,6 +37,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
+import { MeStats } from "@/components/app/MeStats";
 
 const NURSE_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: HomeIcon },
@@ -188,7 +189,11 @@ export const NurseApp = () => {
           patient={pickedPatient}
           accent="nurse"
           onAddNote={() => setSheet("addNote")}
-          onShare={() => toast.success("已打开共享设置")}
+          actions={[
+            { key: "med", label: "给药", icon: Pill, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.bed} ${pickedPatient.name}` : ""); setSheet("med"); } },
+            { key: "care", label: "护理记录", icon: ClipboardCheck, onClick: () => setSheet("dailyNote") },
+            { key: "note", label: "备注", icon: Activity, onClick: () => setSheet("addNote") },
+          ]}
         />
       </PhoneSheet>
 
@@ -255,30 +260,16 @@ const NurseHome = ({
         <div className="relative mt-5">
           <PendingStatRow
             items={[
-              { label: "待给药", count: QUEUES.med.length, onClick: () => onOpenQueue("med") },
               { label: "待护理", count: QUEUES.execTask.length, onClick: () => onOpenQueue("execTask") },
-              { label: "待观察", count: QUEUES.obs.length, onClick: () => onOpenQueue("obs") },
+              { label: "待记录", count: QUEUES.vitals.length, onClick: () => onOpenQueue("vitals") },
+              { label: "待宣教", count: 3, onClick: onOpenEdu },
+              { label: "待回复消息", count: PATIENT_UNREAD, onClick: () => toast("进入患者沟通") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4">
-        <div>
-          <SectionTitle title="护理快捷入口" extra={
-            <div className="flex gap-2">
-              <button onClick={onOpenDailyNote} className="text-[11px] text-role-nurse font-semibold">每日护理备注</button>
-              <button onClick={onOpenEdu} className="text-[11px] text-ai font-semibold">宣教推送</button>
-            </div>
-          } />
-          <div className="grid grid-cols-4 gap-2">
-            <WorkbenchTile icon={Pill} label="给药操作" color="text-warning bg-warning-soft" count={QUEUES.med.length} onClick={() => onOpenQueue("med")} />
-            <WorkbenchTile icon={ClipboardCheck} label="护理任务" color="text-role-nurse bg-rose-50" count={QUEUES.execTask.length} onClick={() => onOpenQueue("execTask")} />
-            <WorkbenchTile icon={HeartPulse} label="生命体征" color="text-destructive/80 bg-red-50" count={QUEUES.vitals.length} onClick={() => onOpenQueue("vitals")} />
-            <WorkbenchTile icon={Activity} label="病情观察" color="text-secondary bg-secondary-soft" count={QUEUES.obs.length} onClick={() => onOpenQueue("obs")} />
-          </div>
-        </div>
-
+      <div className="px-4 -mt-5 space-y-4 relative">
         <div>
           <SectionTitle title={`患者待办列 · ${allTodos.length}`} extra={<span className="text-[10px] text-muted-foreground">基于康复处方按患者排序</span>} />
           <div className="space-y-2">
@@ -486,6 +477,31 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         <div className="text-xs text-muted-foreground mt-0.5">康复护理组 · 12 年</div>
       </div>
     </div>
+
+    <MeStats
+      accent="nurse"
+      tiles={[
+        { label: "本月护理", value: 412, sub: "次" },
+        { label: "给药执行", value: 286, sub: "项" },
+        { label: "宣教推送", value: 64, sub: "次" },
+      ]}
+      trend={[
+        { day: "一", value: 18 }, { day: "二", value: 22 }, { day: "三", value: 17 },
+        { day: "四", value: 25 }, { day: "五", value: 21 }, { day: "六", value: 12 }, { day: "日", value: 9 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "12,860",
+        today: "520",
+        pending: "1,640",
+        breakdown: [
+          { label: "护理操作", value: "7,200" },
+          { label: "给药执行", value: "3,800" },
+          { label: "宣教 / 随访", value: "1,860" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">
