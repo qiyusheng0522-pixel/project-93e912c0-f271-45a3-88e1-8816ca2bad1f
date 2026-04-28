@@ -480,7 +480,7 @@ const DoctorHome = ({
   return (
     <div className="pb-4">
       {/* 顶部留出空间避免 Dynamic Island，与底部统计一起紧凑布局 */}
-      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
+      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
@@ -516,7 +516,7 @@ const DoctorHome = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
+      <div className="px-4 -mt-6 space-y-4 relative">
         <div>
           <SectionTitle title="医师工作台 · 点击进入对应模块" />
           <div className="grid grid-cols-4 gap-2">
