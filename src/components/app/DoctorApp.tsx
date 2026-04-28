@@ -60,6 +60,7 @@ type SheetKey =
   | "meeting"
   | "rx"
   | "discharge"
+  | "videoPicker"
   | "video"
   | "patientDetail"
   | "addNote"
