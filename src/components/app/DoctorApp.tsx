@@ -308,7 +308,7 @@ const DoctorHome = ({
     { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
     { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
     { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
-    { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("video") },
+    { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("videoPicker") },
   ];
   return (
     <div className="pb-4">
