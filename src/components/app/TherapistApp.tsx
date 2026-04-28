@@ -37,7 +37,7 @@ import {
   ArrowRight,
   PlayCircle,
   Edit3,
-  UsersRound,
+  Stethoscope,
   Users,
   AlertTriangle,
 } from "lucide-react";
