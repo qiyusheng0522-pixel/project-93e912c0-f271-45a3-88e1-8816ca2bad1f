@@ -478,6 +478,7 @@ export const IMChatSheet = ({
   initialMessages,
   onAISummary,
   enablePatientReminder,
+  enablePlanConfirm,
   onClose,
 }: {
   accent: Accent;
@@ -487,12 +488,14 @@ export const IMChatSheet = ({
   initialMessages: ChatMessage[];
   onAISummary: (summary: string) => void;
   enablePatientReminder?: boolean;
+  enablePlanConfirm?: boolean;
   onClose?: () => void;
 }) => {
   const [msgs, setMsgs] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [summary, setSummary] = useState<string | null>(null);
   const [reminderSent, setReminderSent] = useState(false);
+  const [planConfirmed, setPlanConfirmed] = useState(false);
 
   const send = () => {
     if (!input.trim()) return;
@@ -557,17 +560,25 @@ export const IMChatSheet = ({
         )}
       </div>
 
-      {/* AI / patient reminder bar */}
-      <div className="px-3 py-2 bg-card border-t border-border/60 flex gap-2">
-        <button onClick={generateSummary} className="flex-1 gradient-ai text-white text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1">
+      {/* AI / patient reminder / plan confirm bar */}
+      <div className="px-3 py-2 bg-card border-t border-border/60 flex gap-2 flex-wrap">
+        <button onClick={generateSummary} className="flex-1 min-w-[110px] gradient-ai text-white text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1">
           <Sparkles className="w-3.5 h-3.5" /> AI 总结并更新档案
         </button>
         {enablePatientReminder && (
           <button
             onClick={() => { setReminderSent(true); toast.success("已发送沟通提醒到患者及家属"); }}
-            className={`flex-1 text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${reminderSent ? "bg-success-soft text-success" : "border border-border"}`}
+            className={`flex-1 min-w-[100px] text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${reminderSent ? "bg-success-soft text-success" : "border border-border"}`}
           >
             <Bell className="w-3.5 h-3.5" /> {reminderSent ? "已提醒患者" : "患者沟通提醒"}
+          </button>
+        )}
+        {enablePlanConfirm && (
+          <button
+            onClick={() => { setPlanConfirmed(true); toast.success("会议中已确认康复方案 · 已推送治疗师"); }}
+            className={`flex-1 min-w-[110px] text-[11px] font-semibold py-2 rounded-xl flex items-center justify-center gap-1 ${planConfirmed ? "bg-success-soft text-success" : `${accentBg[accent]} text-white`}`}
+          >
+            <CheckCircle2 className="w-3.5 h-3.5" /> {planConfirmed ? "方案已确认" : "确认康复方案"}
           </button>
         )}
       </div>
