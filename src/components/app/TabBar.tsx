@@ -21,7 +21,7 @@ export const TabBar = ({ active, accent, onChange }: TabBarProps) => {
   }[accent];
 
   return (
-    <div className="sticky bottom-0 left-0 right-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-2 pt-2 pb-6 z-20">
+    <div className="shrink-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-2 pt-2 pb-5 z-20">
       <div className="flex items-center justify-around">
         {items.map((it) => {
           const Icon = it.icon;
@@ -53,6 +53,10 @@ export const TabBar = ({ active, accent, onChange }: TabBarProps) => {
   );
 };
 
+/**
+ * ScreenShell: phone screen layout — scrollable body + tab bar pinned to phone bottom.
+ * Relies on parent (PhoneFrame content area) providing a fixed height.
+ */
 export const ScreenShell = ({
   children,
   tabBar,
@@ -60,8 +64,8 @@ export const ScreenShell = ({
   children: ReactNode;
   tabBar?: ReactNode;
 }) => (
-  <div className="relative min-h-full flex flex-col">
-    <div className="flex-1 relative">{children}</div>
+  <div className="relative h-full flex flex-col">
+    <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">{children}</div>
     {tabBar}
   </div>
 );
