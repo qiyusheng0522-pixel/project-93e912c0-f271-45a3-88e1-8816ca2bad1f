@@ -323,8 +323,17 @@ export const IMChatSheet = ({
     <div className="flex flex-col h-full">
       {/* header */}
       <div className={`${accentBg[accent]} text-white px-4 py-3`}>
-        <div className="text-sm font-bold">{title}</div>
-        <div className="text-[11px] opacity-90 mt-0.5">{subtitle} · {participants.length} 人在线</div>
+        <div className="flex items-center gap-2">
+          {onClose && (
+            <button onClick={onClose} className="w-7 h-7 rounded-full bg-white/20 backdrop-blur flex items-center justify-center -ml-1">
+              <ChevronRight className="w-4 h-4 rotate-180" />
+            </button>
+          )}
+          <div className="flex-1">
+            <div className="text-sm font-bold">{title}</div>
+            <div className="text-[11px] opacity-90 mt-0.5">{subtitle} · {participants.length} 人在线</div>
+          </div>
+        </div>
         <div className="flex gap-1 mt-2 overflow-x-auto scrollbar-hide">
           {participants.map(p => (
             <span key={p} className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur whitespace-nowrap">{p}</span>
