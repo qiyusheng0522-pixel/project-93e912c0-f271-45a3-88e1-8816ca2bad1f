@@ -141,11 +141,11 @@ export const NurseApp = () => {
   };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} />}>
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="nurse" newPatientCount={NEW_PATIENT_COUNT} items={NURSE_TABS} />}>
       {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
-      {tab === "tasks" && <Tasks onOpenQueue={openQueue} />}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
-      {tab === "ai" && <Edu onOpen={open} onOpenQueue={openQueue} />}
+      {tab === "plan" && <RehabPlanModule accent="nurse" initialStage="plan" onPickPlan={() => toast("请由康复医师调整方案")} />}
+      {tab === "ai" && <AIRxModule accent="nurse" onPick={() => toast("请由康复医师确认 AI 处方")} />}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["med", "vitals", "inject", "obs", "edu", "execTask", "order"] as QueueKey[]).map((k) => (
