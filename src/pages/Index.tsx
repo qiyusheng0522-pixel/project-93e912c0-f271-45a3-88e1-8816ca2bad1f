@@ -4,6 +4,7 @@ import { DoctorApp } from "@/components/app/DoctorApp";
 import { TherapistApp } from "@/components/app/TherapistApp";
 import { NurseApp } from "@/components/app/NurseApp";
 import { Sparkles, Stethoscope, Activity, HeartPulse, ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { WorkflowSection } from "@/components/WorkflowSection";
 
 type Role = "landing" | "doctor" | "therapist" | "nurse";
 
@@ -190,33 +191,11 @@ const Index = () => {
           })}
         </div>
 
-        {/* Workflow strip */}
-        <div className="mt-16 bg-card rounded-3xl shadow-card p-8 border border-border/50">
-          <div className="flex items-center gap-2 mb-6">
-            <Sparkles className="w-4 h-4 text-ai" />
-            <h3 className="text-lg font-bold">AI 全流程协同闭环</h3>
-          </div>
-          <div className="grid md:grid-cols-5 gap-4">
-            {[
-              { step: "01", t: "首次评估", who: "医师 + 团队", c: "gradient-doctor" },
-              { step: "02", t: "AI 设定目标", who: "医师确认", c: "gradient-ai" },
-              { step: "03", t: "AI 排班 & 处方", who: "治疗师", c: "gradient-therapist" },
-              { step: "04", t: "执行 & 打卡", who: "治疗师 + 护士", c: "gradient-primary" },
-              { step: "05", t: "出院二级方案", who: "AI + 医师", c: "gradient-nurse" },
-            ].map((s, i) => (
-              <div key={s.step} className="relative">
-                <div className={`${s.c} rounded-2xl p-4 text-white h-full`}>
-                  <div className="text-[10px] opacity-80">STEP {s.step}</div>
-                  <div className="text-base font-bold mt-1">{s.t}</div>
-                  <div className="text-[11px] opacity-90 mt-1">{s.who}</div>
-                </div>
-                {i < 4 && (
-                  <ArrowRight className="hidden md:block absolute top-1/2 -right-3 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 z-10" />
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Full workflow */}
+        <div className="mt-20">
+          <WorkflowSection />
         </div>
+
       </main>
     </div>
   );
