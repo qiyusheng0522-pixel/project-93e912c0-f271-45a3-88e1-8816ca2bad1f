@@ -524,7 +524,6 @@ const DoctorHome = ({
             </button>
           </div>
           <PendingTodoGrid
-            onViewAll={() => onGoPlan("plan")}
             items={[
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onGoPatients("待首次评估") },
               { label: "待设定目标", count: 3, icon: Target, iconClass: "bg-primary text-white", onClick: () => onGoPlan("goal") },
