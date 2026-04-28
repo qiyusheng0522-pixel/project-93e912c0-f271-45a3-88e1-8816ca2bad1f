@@ -174,7 +174,6 @@ export const PatientsPage = ({
   const filterChips: { key: PatientFilter; label: string; count: number }[] = [
     { key: "all", label: "全部", count: PATIENTS.length },
     { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
-    { key: "新患者", label: "新患者", count: NEW_PATIENT_COUNT },
     { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
     { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
   ];
@@ -250,17 +249,7 @@ export const PatientsPage = ({
           </div>
         </div>
 
-        {statusFilter === "待首次评估" && list.length > 0 && (
-          <div className="bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
-              <Bell className="w-4 h-4" />
-            </div>
-            <div className="flex-1">
-              <div className="text-[12px] font-semibold text-warning">{list.length} 位患者待首次评估</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">点击患者进入档案 · 安排团队线上评估</div>
-            </div>
-          </div>
-        )}
+        {/* 待首次评估提示已合并至筛选筹码与列表标签，无需额外横幅 */}
 
         <div>
           <SectionTitle title={`患者列表 · ${list.length}`} />
