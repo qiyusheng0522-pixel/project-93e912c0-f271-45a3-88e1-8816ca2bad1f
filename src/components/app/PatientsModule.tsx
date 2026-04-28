@@ -72,7 +72,33 @@ export const PATIENTS: Patient[] = [
   { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", condition: "髋关节置换", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间疼痛缓解，VAS 由 6 降至 3。" },
   ] },
-  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "赵护士"], notes: [] },
+  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
+    notes: [
+      { author: "李医师", time: "今日 08:30", text: "Barthel 已达 85，符合出院条件，准备启动院外二级方案。" },
+      { author: "王治疗师", time: "昨日 17:00", text: "下肢肌力 IV 级，独立步行 60m，平衡 Berg 48。" },
+      { author: "孙博士", time: "前日 16:20", text: "患者出院焦虑下降，家属支持充足。" },
+    ],
+    therapyRecords: [
+      { type: "PT", author: "王治疗师", time: "今日 09:00", text: "步行训练 40min · 独立步行 60m，无跌倒。" },
+      { type: "OT", author: "陈治疗师", time: "今日 10:30", text: "厨房 ADL 训练 30min · 可独立完成切配 + 烹饪。" },
+      { type: "ST", author: "陈思雨", time: "昨日 15:00", text: "构音清晰度 92%，吞咽 EAT-10：2 分。" },
+      { type: "PT", author: "王治疗师", time: "昨日 09:00", text: "上下楼梯训练 20min · 双足交替，扶手辅助。" },
+    ],
+    summaries: [
+      { author: "王治疗师", time: "今日 17:30", text: "本周 PT/OT 完成率 100%，目标基本达成，建议进入出院准备。" },
+      { author: "陈治疗师", time: "本周一 17:30", text: "OT 厨房训练顺利，建议加入家属指导课。" },
+    ],
+    medChanges: [
+      { author: "李医师", time: "本周三 10:00", text: "停用巴氯芬，加用维生素 B 族口服。" },
+      { author: "李医师", time: "上周一 09:30", text: "降压药调整：氨氯地平 5mg qd → 2.5mg qd。" },
+    ],
+    checkins: [
+      { time: "今日 09:15", task: "PT 步行训练", author: "系统自动 · 任务执行" },
+      { time: "今日 10:30", task: "OT 厨房 ADL", author: "系统自动 · 任务执行" },
+      { time: "昨日 09:15", task: "PT 上下楼梯", author: "系统自动 · 任务执行" },
+      { time: "昨日 14:00", task: "ST 构音训练", author: "系统自动 · 任务执行" },
+    ],
+  },
   { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
   { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
 ];
