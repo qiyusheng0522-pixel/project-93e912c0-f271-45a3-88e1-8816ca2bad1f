@@ -31,6 +31,7 @@ import {
   Bell,
   ChevronRight,
   ClipboardList,
+  ClipboardCheck,
   Activity,
   Calendar,
   CheckCircle2,
@@ -44,6 +45,8 @@ import {
   Sparkles,
   Plus,
   Stethoscope,
+  Target,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
