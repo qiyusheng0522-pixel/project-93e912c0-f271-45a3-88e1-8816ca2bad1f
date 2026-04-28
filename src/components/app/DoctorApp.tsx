@@ -3,6 +3,18 @@ import { ScreenShell, TabBar } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import {
+  PatientsPage,
+  PatientDetailSheet,
+  AddNoteSheet,
+  TeamManageSheet,
+  IMChatSheet,
+  Patient,
+  PATIENTS,
+  NEW_PATIENT_COUNT,
+  DEFAULT_MEETING_MSGS,
+  DEFAULT_VIDEO_MSGS,
+} from "@/components/app/PatientsModule";
 import { toast } from "sonner";
 import {
   Bell,
@@ -23,6 +35,11 @@ import {
   Edit3,
   Send,
   Home as HomeIcon,
+  UsersRound,
+  HeartHandshake,
+  FileHeart,
+  Pill,
+  AlertTriangle,
 } from "lucide-react";
 
 type SheetKey =
