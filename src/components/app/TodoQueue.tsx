@@ -1,5 +1,65 @@
 import { ReactNode } from "react";
-import { ChevronRight, Clock, AlertCircle } from "lucide-react";
+import { ChevronRight, Clock, AlertCircle, type LucideIcon } from "lucide-react";
+
+export interface PendingTodoTile {
+  label: string;
+  count: number;
+  icon: LucideIcon;
+  /** tailwind classes for the icon tile bg + text color, e.g. "bg-warning text-white" */
+  iconClass: string;
+  onClick?: () => void;
+}
+
+/**
+ * Card-grid style pending todo list (2 columns) used on the workbench home.
+ * Matches the reference design: rounded icon top-left, label bottom-left,
+ * large count on the right, plus a "查看全部" tile at the end.
+ */
+export const PendingTodoGrid = ({
+  items,
+  onViewAll,
+  viewAllLabel = "查看全部",
+}: {
+  items: PendingTodoTile[];
+  onViewAll?: () => void;
+  viewAllLabel?: string;
+}) => {
+  return (
+    <div className="grid grid-cols-2 gap-2.5">
+      {items.map((it) => {
+        const Icon = it.icon;
+        return (
+          <button
+            key={it.label}
+            onClick={it.onClick}
+            className="bg-card rounded-2xl shadow-card border border-border/40 p-3.5 text-left active:scale-[0.98] transition-transform flex items-center justify-between gap-2 min-h-[88px]"
+          >
+            <div className="flex flex-col justify-between h-full min-w-0">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${it.iconClass}`}>
+                <Icon className="w-5 h-5" strokeWidth={2.2} />
+              </div>
+              <div className="text-[12px] text-muted-foreground mt-2 whitespace-nowrap">{it.label}</div>
+            </div>
+            <div className="text-2xl font-extrabold text-foreground leading-none shrink-0">
+              {it.count}
+            </div>
+          </button>
+        );
+      })}
+      {onViewAll && (
+        <button
+          onClick={onViewAll}
+          className="rounded-2xl border border-dashed border-primary/30 bg-primary/5 p-3.5 flex flex-col items-start justify-between min-h-[88px] active:scale-[0.98] transition-transform"
+        >
+          <div className="w-10 h-10 rounded-xl bg-card shadow-card flex items-center justify-center text-primary">
+            <ChevronRight className="w-5 h-5" />
+          </div>
+          <div className="text-[12px] text-primary font-medium mt-2">{viewAllLabel}</div>
+        </button>
+      )}
+    </div>
+  );
+};
 
 export interface TodoItem {
   id: string;
