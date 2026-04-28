@@ -164,7 +164,7 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "plan"} onClose={close} title={`AI 康复方案${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
         footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("方案已提交团队会议确认"); close(); }}>提交团队会议</PrimaryBtn>}>
-        <PlanSheet patient={activePatient} />
+        <PlanSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "meetingList"} onClose={close} title="团队会议" accent="doctor">
