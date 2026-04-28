@@ -155,7 +155,7 @@ export const PatientsPage = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-2 space-y-3">
+      <div className="px-4 -mt-5 space-y-3 relative">
         {/* 状态筛选 */}
         <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 py-1">
           {filterChips.map(c => {
