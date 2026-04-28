@@ -54,29 +54,6 @@ type SheetKey =
   | "video"
   | "patient"
   | "aiUpdate"
-  | "aiDischarge";
-
-type QueueKey =
-  | "assess"
-  | "goal"
-  | "plan"
-  | "meeting"
-  | "rx"
-  | "monitor"
-  | "discharge";
-
-type SheetKey =
-  | null
-  | "assess"
-  | "goal"
-  | "plan"
-  | "meeting"
-  | "rx"
-  | "monitor"
-  | "discharge"
-  | "video"
-  | "patient"
-  | "aiUpdate"
   | "aiDischarge"
   | "patientDetail"
   | "addNote"
