@@ -562,9 +562,24 @@ const GoalSheet = ({ patient }: { patient?: string }) => (
   </div>
 );
 
-const PlanSheet = ({ patient }: { patient?: string }) => (
+const PlanSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchMeeting?: () => void }) => (
   <div className="p-4 space-y-3">
     <PatientHeader patient={patient} label="康复方案" />
+    {onLaunchMeeting && (
+      <button
+        onClick={onLaunchMeeting}
+        className="w-full bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]"
+      >
+        <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
+          <Video className="w-4 h-4" />
+        </div>
+        <div className="flex-1 text-left">
+          <div className="text-[12px] font-semibold text-warning">就该方案发起在线团队会议</div>
+          <div className="text-[10px] text-muted-foreground">医师 / 治疗师 / 护士线上协同确认 · AI 自动纪要</div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-warning" />
+      </button>
+    )}
     <AICard title="AI 生成的康复方案 V2">
       基于本周评估更新方案：PT 强度 +20%、新增 OT 厨房训练、ST 维持原计划。
     </AICard>
@@ -584,7 +599,7 @@ const PlanSheet = ({ patient }: { patient?: string }) => (
 
 const RxSheet = ({ patient }: { patient?: string }) => (
   <div className="p-4 space-y-3">
-    <PatientHeader patient={patient} label="AI 处方" />
+    <PatientHeader patient={patient} label="康复处方" />
     <AICard title="AI 自动生成的康复处方建议">
       基于已确认方案，自动生成至治疗师端，请确认或调整。
     </AICard>
