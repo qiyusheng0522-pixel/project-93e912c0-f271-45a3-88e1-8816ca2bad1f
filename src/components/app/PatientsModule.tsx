@@ -338,7 +338,19 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
         <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
         <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
         <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="主管医师" value="李志远 主任医师" hint="神经康复科" />
+        <FormRow label="既往史" value="高血压 8 年 · 糖尿病 5 年" />
+        <FormRow label="手术史" value="2026-04-23 关节置换 / 减压内固定" />
         <FormRow label="过敏 / 医保" value="无 · 城镇职工" />
+        <FormRow label="并发症风险" value="DVT 中 · 跌倒高" />
+      </div>
+
+      <SectionTitle title="评估关键指标" />
+      <div className="bg-card rounded-2xl shadow-card p-3 grid grid-cols-4 gap-2">
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">FMA</div><div className="text-[12px] font-bold mt-0.5">42</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">Barthel</div><div className="text-[12px] font-bold mt-0.5">70</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">Berg</div><div className="text-[12px] font-bold mt-0.5">36</div></div>
+        <div className="bg-muted rounded-xl py-2 text-center"><div className="text-[9px] text-muted-foreground">VAS</div><div className="text-[12px] font-bold mt-0.5">3</div></div>
       </div>
 
       {patient.currentPlan && patient.currentPlan.length > 0 && (
