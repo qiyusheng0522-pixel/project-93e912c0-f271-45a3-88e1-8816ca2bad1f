@@ -137,6 +137,15 @@ export const TherapistApp = () => {
 
   return (
     <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
+      {tab === "home" && (
+        <TherapistHome
+          onOpenQueue={openQueue}
+          onGoPatients={() => setTab("patients")}
+          onUploadDaily={() => open("uploadDaily")}
+          onOpenSummary={() => open("summary")}
+          onOpenMed={() => open("med")}
+        />
+      )}
       {tab === "patients" && (
         <TherapistPatients
           onPickPatient={pickPatient}
