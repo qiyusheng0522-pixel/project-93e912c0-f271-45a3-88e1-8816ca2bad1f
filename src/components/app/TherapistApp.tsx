@@ -103,6 +103,8 @@ export const TherapistApp = () => {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [queue, setQueue] = useState<QueueKey | null>(null);
   const [activePatient, setActivePatient] = useState<string>("");
+  const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
+  const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
   const openQueue = (k: QueueKey) => setQueue(k);
@@ -112,13 +114,19 @@ export const TherapistApp = () => {
     setQueue(null);
     setSheet(sheetKey);
   };
+  const pickPatient = (p: Patient) => {
+    const merged = { ...p, notes: patientNotes[p.id] ?? p.notes };
+    setPickedPatient(merged);
+    setSheet("patientDetail");
+  };
 
   return (
-    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" />}>
-      {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} />}
+    <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} />}>
+      {tab === "home" && <Home onOpen={open} onOpenQueue={openQueue} onGoPatients={() => setTab("patients")} />}
       {tab === "tasks" && <TaskList onOpen={open} onOpenQueue={openQueue} />}
+      {tab === "patients" && <PatientsPage accent="therapist" onPick={pickPatient} />}
       {tab === "ai" && <AIPanel onOpen={open} />}
-      {tab === "me" && <Me />}
+      {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
       {(["confirmAssess", "goal", "rx", "exec", "summary", "med"] as QueueKey[]).map((k) => (
         <PhoneSheet key={k} open={queue === k} onClose={closeQueue} title={QUEUE_TITLE[k]} accent="therapist">
@@ -173,6 +181,35 @@ export const TherapistApp = () => {
 
       <PhoneSheet open={sheet === "patient"} onClose={close} title="患者治疗档案" accent="therapist">
         <PatientSheet onOpen={open} />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="therapist">
+        <PatientDetailSheet
+          patient={pickedPatient}
+          accent="therapist"
+          onAddNote={() => setSheet("addNote")}
+          onShare={() => toast.success("已打开共享设置")}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "addNote"} onClose={() => setSheet("patientDetail")} title="添加患者备注" accent="therapist">
+        <AddNoteSheet
+          patient={pickedPatient}
+          accent="therapist"
+          onSave={(text) => {
+            if (!pickedPatient) return;
+            const newNote = { author: "王治疗师", time: "刚刚", text };
+            const updated = [newNote, ...(patientNotes[pickedPatient.id] ?? pickedPatient.notes)];
+            setPatientNotes({ ...patientNotes, [pickedPatient.id]: updated });
+            setPickedPatient({ ...pickedPatient, notes: updated });
+            toast.success("备注已保存并共享给团队");
+            setSheet("patientDetail");
+          }}
+        />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "team"} onClose={close} title="团队管理" accent="therapist">
+        <TeamManageSheet accent="therapist" />
       </PhoneSheet>
     </ScreenShell>
   );
