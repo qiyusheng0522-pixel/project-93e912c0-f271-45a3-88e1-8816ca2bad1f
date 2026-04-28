@@ -297,11 +297,14 @@ const PatientCard = ({ p, accent, onClick }: { p: Patient; accent: Accent; onCli
 };
 
 /* ============== 患者详情 Sheet ============== */
-export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
+export type PatientDetailAction = { key: string; label: string; icon?: any; onClick: () => void };
+
+export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, actions }: {
   patient: Patient | null;
   accent: Accent;
   onAddNote: () => void;
-  onShare: () => void;
+  onShare?: () => void;
+  actions?: PatientDetailAction[];
 }) => {
   if (!patient) return null;
   return (
