@@ -165,7 +165,7 @@ export const DoctorApp = () => {
           <div className="flex gap-2">
             <button
               onClick={() => { setActiveMeeting(null); setSheet("meeting"); toast("已发起团队会议评估"); }}
-              className="flex-1 border border-doctor/30 text-doctor rounded-2xl py-3 text-sm font-semibold"
+              className="flex-1 border border-primary/30 text-primary rounded-2xl py-3 text-sm font-semibold"
             >
               团队会议评估
             </button>
