@@ -285,22 +285,17 @@ const DoctorHome = ({
   onGoPlan: (stage: PlanStage) => void;
   onGoDischarge: () => void;
 }) => {
-  // 工作台顺序：患者管理 → 首次评估 → 康复目标 → 康复方案 → AI处方(并入康复方案) → 出院方案 → 团队会议 → 患者沟通 → 线上会诊
+  // 工作台仅保留：患者管理、团队会议、患者沟通、线上会诊（首评/目标/方案/AI处方已上移到顶部待办统计）
   const tiles = [
     { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
-    { icon: ClipboardCheck, label: "首次评估", color: "text-secondary bg-secondary-soft", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
-    { icon: Target, label: "康复目标", color: "text-primary bg-primary-soft", count: 3, onClick: () => onGoPlan("goal") },
-    { icon: FileText, label: "康复方案", color: "text-ai bg-ai-soft", count: 3, onClick: () => onGoPlan("plan") },
-    { icon: Sparkles, label: "AI 处方", color: "text-success bg-success-soft", count: 4, onClick: () => onGoPlan("airx") },
-    { icon: LogOut, label: "出院方案", color: "text-secondary bg-secondary-soft", count: 2, onClick: onGoDischarge },
     { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
     { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
     { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("video") },
   ];
   return (
     <div className="pb-4">
-      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠 */}
-      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
+      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠；底部增大避免新患者卡片遮挡 */}
+      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
@@ -327,14 +322,15 @@ const DoctorHome = ({
           <PendingStatRow
             items={[
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
+              { label: "待设定目标", count: 3, onClick: () => onGoPlan("goal") },
               { label: "待确认方案", count: 3, onClick: () => onGoPlan("plan") },
-              { label: "待确认 AI 处方", count: 4, onClick: () => onGoPlan("airx") },
+              { label: "待确认AI处方", count: 4, onClick: () => onGoPlan("airx") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4">
+      <div className="px-4 -mt-8 space-y-4">
         {NEW_PATIENT_COUNT > 0 && (
           <button
             onClick={() => onGoPatients("新患者")}
