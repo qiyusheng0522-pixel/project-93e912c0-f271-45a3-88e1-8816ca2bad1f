@@ -25,6 +25,7 @@ import {
   TeamMeeting,
 } from "@/components/app/PatientsModule";
 import { RehabPlanModule, PlanStage } from "@/components/app/RehabPlanModule";
+import { MeStats } from "@/components/app/MeStats";
 import { toast } from "sonner";
 import {
   AlertDialog,
