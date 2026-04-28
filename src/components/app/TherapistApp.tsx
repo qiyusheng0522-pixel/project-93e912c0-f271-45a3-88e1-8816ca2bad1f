@@ -313,21 +313,22 @@ const TherapistHome = ({
   ];
   return (
     <div className="pb-4">
-      <div className="gradient-therapist px-5 pt-6 pb-10 text-white relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex items-center justify-between">
+      <div className="bg-background px-5 pt-6 pb-2">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">下午好</div>
-            <div className="text-xl font-bold mt-0.5">王治疗师 👋</div>
-            <div className="text-[11px] opacity-90 mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
+            <div className="text-xs text-muted-foreground">下午好</div>
+            <div className="text-xl font-bold mt-0.5 text-foreground">王治疗师 👋</div>
+            <div className="text-[11px] text-muted-foreground mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
           </div>
-          <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+          <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-secondary-soft text-secondary flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
         </div>
-        <div className="relative mt-3">
+        <div className="mt-3">
           <PendingStatRow
+            variant="card"
+            accent="therapist"
             items={[
               { label: "待评估确认", count: QUEUES.confirmAssess.length, onClick: () => onOpenQueue("confirmAssess") },
               { label: "待确认目标", count: QUEUES.goal.length, onClick: () => onOpenQueue("goal") },
@@ -338,7 +339,7 @@ const TherapistHome = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
+      <div className="px-4 mt-3 space-y-4">
         <div>
           <SectionTitle title="待执行任务 · OT / PT / ST" extra={<button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-semibold flex items-center">全部 <ChevronRight className="w-3 h-3" /></button>} />
           <div className="grid grid-cols-3 gap-2">

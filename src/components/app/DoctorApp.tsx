@@ -162,15 +162,23 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={
-          <button
-            onClick={() => {
-              toast.success("评估结果已确认 · 请指派治疗师");
-              setTherapistPickerOpen(true);
-            }}
-            className="w-full gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
-          >
-            确认评估
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => { setActiveMeeting(null); setSheet("meeting"); toast("已发起团队会议评估"); }}
+              className="flex-1 border border-primary/30 text-primary rounded-2xl py-3 text-sm font-semibold"
+            >
+              团队会议评估
+            </button>
+            <button
+              onClick={() => {
+                toast.success("评估结果已确认 · 请指派治疗师");
+                setTherapistPickerOpen(true);
+              }}
+              className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+            >
+              确认首次评估
+            </button>
+          </div>
         }>
         <AssessSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
@@ -291,15 +299,23 @@ export const DoctorApp = () => {
         accent="doctor"
         footer={
           pickedPatient?.needFirstAssess ? (
-            <button
-              onClick={() => {
-                toast.success("首次评估已确认 · 请指派治疗师");
-                setTherapistPickerOpen(true);
-              }}
-              className="w-full gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
-            >
-              确认首次评估
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setActiveMeeting(null); setSheet("meeting"); toast("已发起团队会议评估"); }}
+                className="flex-1 border border-primary/30 text-primary rounded-2xl py-3 text-sm font-semibold"
+              >
+                团队会议评估
+              </button>
+              <button
+                onClick={() => {
+                  toast.success("首次评估已确认 · 请指派治疗师");
+                  setTherapistPickerOpen(true);
+                }}
+                className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+              >
+                确认首次评估
+              </button>
+            </div>
           ) : undefined
         }
       >
