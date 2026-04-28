@@ -476,6 +476,31 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         <div className="text-xs text-muted-foreground mt-0.5">康复护理组 · 12 年</div>
       </div>
     </div>
+
+    <MeStats
+      accent="nurse"
+      tiles={[
+        { label: "本月护理", value: 412, sub: "次" },
+        { label: "给药执行", value: 286, sub: "项" },
+        { label: "宣教推送", value: 64, sub: "次" },
+      ]}
+      trend={[
+        { day: "一", value: 18 }, { day: "二", value: 22 }, { day: "三", value: 17 },
+        { day: "四", value: 25 }, { day: "五", value: 21 }, { day: "六", value: 12 }, { day: "日", value: 9 },
+      ]}
+      revenue={{
+        monthLabel: "本月收益",
+        monthValue: "12,860",
+        today: "520",
+        pending: "1,640",
+        breakdown: [
+          { label: "护理操作", value: "7,200" },
+          { label: "给药执行", value: "3,800" },
+          { label: "宣教 / 随访", value: "1,860" },
+        ],
+      }}
+    />
+
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
         <div className="flex items-center gap-3">
