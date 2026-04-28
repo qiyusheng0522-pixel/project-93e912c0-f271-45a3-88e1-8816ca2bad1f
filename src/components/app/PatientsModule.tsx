@@ -349,12 +349,14 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare }: {
         </>
       )}
 
-      <SectionTitle title="共享团队成员" extra={<button onClick={onShare} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Share2 className="w-3 h-3" />共享设置</button>} />
-      <div className="bg-card rounded-2xl shadow-card p-3 flex flex-wrap gap-1.5">
-        {patient.shared.map(m => (
-          <span key={m} className="text-[11px] px-2 py-1 rounded-full bg-muted">{m}</span>
-        ))}
-      </div>
+      {patient.currentPlan && patient.currentPlan.length > 0 && accent === "doctor" && (
+        <button
+          onClick={() => toast.success("已进入康复方案修改 · 修改完成后请重新推送")}
+          className="w-full border border-primary/30 text-primary bg-primary/5 rounded-2xl py-2.5 text-[12px] font-semibold flex items-center justify-center gap-1.5"
+        >
+          <Edit3Icon className="w-3.5 h-3.5" /> 修改当前康复方案
+        </button>
+      )}
 
       <SectionTitle title={`协作备注 · ${patient.notes.length}`} extra={<button onClick={onAddNote} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Plus className="w-3 h-3" />添加备注</button>} />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
