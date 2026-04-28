@@ -294,8 +294,8 @@ const DoctorHome = ({
   ];
   return (
     <div className="pb-4">
-      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠；底部增大避免新患者卡片遮挡 */}
-      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
+      {/* 顶部留出空间避免 Dynamic Island，与底部统计一起紧凑布局 */}
+      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
@@ -318,7 +318,7 @@ const DoctorHome = ({
           </div>
         </div>
 
-        <div className="relative mt-5">
+        <div className="relative mt-3">
           <PendingStatRow
             items={[
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
@@ -330,7 +330,7 @@ const DoctorHome = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-8 space-y-4">
+      <div className="px-4 -mt-4 space-y-4">
         {NEW_PATIENT_COUNT > 0 && (
           <button
             onClick={() => onGoPatients("新患者")}
