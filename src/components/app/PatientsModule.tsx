@@ -12,7 +12,7 @@ import {
   Users,
   MessageSquare,
   StickyNote,
-  Share2,
+  StickyNote,
   CheckCircle2,
   Trash2,
   Edit3 as Edit3Icon,
