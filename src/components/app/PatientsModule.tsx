@@ -93,11 +93,47 @@ const accentText: Record<Accent, string> = {
 };
 
 /* ============== 患者管理主页 ============== */
-export const PatientsPage = ({ accent, onPick }: { accent: Accent; onPick: (p: Patient) => void }) => {
+export const PatientsPage = ({
+  accent,
+  onPick,
+  initialFilter = "all",
+}: {
+  accent: Accent;
+  onPick: (p: Patient) => void;
+  initialFilter?: PatientFilter;
+}) => {
   const [q, setQ] = useState("");
-  const list = PATIENTS.filter(p => p.name.includes(q) || p.bed.includes(q));
-  const newOnes = list.filter(p => p.isNew);
-  const others = list.filter(p => !p.isNew);
+  const [statusFilter, setStatusFilter] = useState<PatientFilter>(initialFilter);
+  const [condition, setCondition] = useState<string>("");
+  const [admitRange, setAdmitRange] = useState<"all" | "0-3" | "4-14" | "15+">("all");
+
+  const matchStatus = (p: Patient) => {
+    if (statusFilter === "all") return true;
+    if (statusFilter === "待首次评估") return p.needFirstAssess;
+    if (statusFilter === "新患者") return p.isNew;
+    return p.status === statusFilter;
+  };
+  const matchAdmit = (p: Patient) => {
+    if (admitRange === "all") return true;
+    if (admitRange === "0-3") return p.admitDays <= 3;
+    if (admitRange === "4-14") return p.admitDays >= 4 && p.admitDays <= 14;
+    return p.admitDays >= 15;
+  };
+  const list = PATIENTS.filter(p =>
+    (p.name.includes(q) || p.bed.includes(q)) &&
+    matchStatus(p) &&
+    (!condition || p.condition === condition) &&
+    matchAdmit(p)
+  );
+
+  const filterChips: { key: PatientFilter; label: string; count: number }[] = [
+    { key: "all", label: "全部", count: PATIENTS.length },
+    { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
+    { key: "新患者", label: "新患者", count: NEW_PATIENT_COUNT },
+    { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
+    { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
+  ];
+
   return (
     <div className="pb-4">
       <div className={`${accentBg[accent]} px-5 pt-2 pb-6 text-white relative overflow-hidden`}>
@@ -106,7 +142,7 @@ export const PatientsPage = ({ accent, onPick }: { accent: Accent; onPick: (p: P
           <div className="flex items-center justify-between">
             <div>
               <div className="text-xs opacity-80">患者管理</div>
-              <div className="text-lg font-semibold mt-0.5">共 {PATIENTS.length} 位 · 新患者 {NEW_PATIENT_COUNT} 位</div>
+              <div className="text-lg font-semibold mt-0.5">共 {PATIENTS.length} 位 · 新 {NEW_PATIENT_COUNT}</div>
             </div>
             <button onClick={() => toast("已邀请新患者")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
               <Plus className="w-4 h-4" />
@@ -119,33 +155,68 @@ export const PatientsPage = ({ accent, onPick }: { accent: Accent; onPick: (p: P
         </div>
       </div>
 
-      <div className="px-4 -mt-2 space-y-4">
-        {newOnes.length > 0 && (
+      <div className="px-4 -mt-2 space-y-3">
+        {/* 状态筛选 */}
+        <div className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 py-1">
+          {filterChips.map(c => {
+            const active = statusFilter === c.key;
+            return (
+              <button
+                key={c.key}
+                onClick={() => setStatusFilter(c.key)}
+                className={`shrink-0 text-[11px] px-3 py-1.5 rounded-full font-semibold transition-all ${
+                  active ? `${accentBg[accent]} text-white shadow-card` : "bg-card text-foreground/70"
+                }`}
+              >
+                {c.label} <span className={active ? "opacity-80" : "text-muted-foreground"}>({c.count})</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* 病症 + 入院时间 筛选 */}
+        <div className="flex gap-2 text-[11px]">
+          <select
+            value={condition}
+            onChange={e => setCondition(e.target.value)}
+            className="flex-1 bg-card border border-border rounded-full px-3 py-1.5 outline-none"
+          >
+            <option value="">全部病症</option>
+            {ALL_CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <select
+            value={admitRange}
+            onChange={e => setAdmitRange(e.target.value as any)}
+            className="flex-1 bg-card border border-border rounded-full px-3 py-1.5 outline-none"
+          >
+            <option value="all">全部入院时间</option>
+            <option value="0-3">0-3 天</option>
+            <option value="4-14">4-14 天</option>
+            <option value="15+">15 天以上</option>
+          </select>
+        </div>
+
+        {statusFilter === "待首次评估" && list.length > 0 && (
           <div className="bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
               <Bell className="w-4 h-4" />
             </div>
             <div className="flex-1">
-              <div className="text-[12px] font-semibold text-warning">有 {newOnes.length} 位新患者待接入</div>
-              <div className="text-[10px] text-muted-foreground mt-0.5">点击下方患者卡片完成首次评估安排</div>
-            </div>
-          </div>
-        )}
-
-        {newOnes.length > 0 && (
-          <div>
-            <SectionTitle title="🆕 新患者" />
-            <div className="space-y-2">
-              {newOnes.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} />)}
+              <div className="text-[12px] font-semibold text-warning">{list.length} 位患者待首次评估</div>
+              <div className="text-[10px] text-muted-foreground mt-0.5">点击患者进入档案 · 安排团队线上评估</div>
             </div>
           </div>
         )}
 
         <div>
-          <SectionTitle title="我的患者" extra={<span className="text-[10px] text-muted-foreground">共享 / 协作中</span>} />
-          <div className="space-y-2">
-            {others.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} />)}
-          </div>
+          <SectionTitle title={`患者列表 · ${list.length}`} />
+          {list.length === 0 ? (
+            <div className="bg-card rounded-2xl p-8 text-center text-xs text-muted-foreground">无匹配患者</div>
+          ) : (
+            <div className="space-y-2">
+              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} />)}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -163,16 +234,18 @@ const PatientCard = ({ p, accent, onClick }: { p: Patient; accent: Accent; onCli
     <button onClick={onClick} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-start gap-3 active:scale-[0.99]">
       <div className={`w-11 h-11 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center font-bold`}>{p.name[0]}</div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <div className="text-[13px] font-semibold">{p.name}</div>
           <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
           {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
+          {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
         </div>
         <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
-        <div className="flex items-center gap-2 mt-1.5">
+        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusMap}`}>{p.status}</span>
-          <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length} 人协作</span>
-          {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length} 条备注</span>}
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{p.condition}</span>
+          <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length}</span>
+          {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length}</span>}
         </div>
       </div>
       <ChevronRight className="w-4 h-4 text-muted-foreground self-center" />
