@@ -57,7 +57,6 @@ import {
   User as UserIcon,
   LogOut,
   MessageCircle,
-  UserPlus,
 } from "lucide-react";
 
 type SheetKey =
@@ -163,13 +162,15 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={
-          <div className="flex gap-2">
-            <button onClick={() => toast("已打开治疗师选择 · 王雅琴 / 陈治疗师 / 陈思雨")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-1">
-              <UserPlus className="w-4 h-4" />指定治疗师
-              <span className="text-[10px] text-muted-foreground">（可选）</span>
-            </button>
-            <button onClick={() => { toast.success("评估结果已确认"); close(); }} className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold">确认</button>
-          </div>
+          <button
+            onClick={() => {
+              toast.success("评估结果已确认 · 请指派治疗师");
+              setTherapistPickerOpen(true);
+            }}
+            className="w-full gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+          >
+            确认评估
+          </button>
         }>
         <AssessSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
@@ -290,21 +291,15 @@ export const DoctorApp = () => {
         accent="doctor"
         footer={
           pickedPatient?.needFirstAssess ? (
-            <div className="flex gap-2">
-              <button
-                onClick={() => setTherapistPickerOpen(true)}
-                className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-1"
-              >
-                <UserPlus className="w-4 h-4" />指定治疗师
-                <span className="text-[10px] text-muted-foreground">（可选）</span>
-              </button>
-              <button
-                onClick={() => { toast.success("首次评估已确认 · 进入目标设定"); close(); }}
-                className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
-              >
-                确认
-              </button>
-            </div>
+            <button
+              onClick={() => {
+                toast.success("首次评估已确认 · 请指派治疗师");
+                setTherapistPickerOpen(true);
+              }}
+              className="w-full gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+            >
+              确认首次评估
+            </button>
           ) : undefined
         }
       >
@@ -404,8 +399,8 @@ const TherapistPickerDialog = ({
     <AlertDialog open={open} onOpenChange={(o) => !o && onClose()}>
       <AlertDialogContent className="max-w-sm">
         <AlertDialogHeader>
-          <AlertDialogTitle>指定治疗师</AlertDialogTitle>
-          <AlertDialogDescription>请选择治疗类型（PT / OT / ST），并为每种类型指定治疗师。</AlertDialogDescription>
+          <AlertDialogTitle>指派治疗师</AlertDialogTitle>
+          <AlertDialogDescription>评估已确认。请选择治疗类型（PT / OT / ST），并为每种类型指派治疗师。</AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-3">
           <div className="flex gap-2">
@@ -480,7 +475,7 @@ const DoctorHome = ({
   return (
     <div className="pb-4">
       {/* 顶部留出空间避免 Dynamic Island，与底部统计一起紧凑布局 */}
-      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
+      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
@@ -516,7 +511,7 @@ const DoctorHome = ({
         </div>
       </div>
 
-      <div className="px-4 -mt-4 space-y-4">
+      <div className="px-4 -mt-6 space-y-4 relative">
         <div>
           <SectionTitle title="医师工作台 · 点击进入对应模块" />
           <div className="grid grid-cols-4 gap-2">

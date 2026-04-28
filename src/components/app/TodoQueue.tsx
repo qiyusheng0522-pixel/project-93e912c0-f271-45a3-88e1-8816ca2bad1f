@@ -130,10 +130,10 @@ export const PendingStatRow = ({
         <button
           key={it.label}
           onClick={it.onClick}
-          className={`bg-white/15 backdrop-blur rounded-xl ${dense ? "p-2" : "p-2.5"} text-left active:scale-95 transition-transform relative min-w-0`}
+          className={`bg-white/15 backdrop-blur rounded-xl ${dense ? "px-1.5 py-2" : "p-2.5"} text-left active:scale-95 transition-transform relative min-w-0 flex flex-col justify-between min-h-[58px]`}
         >
-          <div className={`${dense ? "text-[9px]" : "text-[10px]"} opacity-80 leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}>{it.label}</div>
-          <div className={`${dense ? "text-base" : "text-xl"} font-bold mt-0.5 flex items-baseline gap-0.5`}>
+          <div className={`${dense ? "text-[10px]" : "text-[10px]"} opacity-90 leading-[1.15] break-words`}>{it.label}</div>
+          <div className={`${dense ? "text-lg" : "text-xl"} font-bold mt-1 flex items-baseline gap-0.5 leading-none`}>
             {it.count}
             <ChevronRight className="w-3 h-3 opacity-70" />
           </div>
