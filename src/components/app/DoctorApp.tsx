@@ -320,7 +320,6 @@ export const DoctorApp = () => {
           patient={pickedPatient}
           accent="doctor"
           onAddNote={() => setSheet("addNote")}
-          onShare={() => toast.success("已打开共享设置")}
         />
       </PhoneSheet>
 
