@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
-import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem } from "@/components/app/TodoQueue";
 import {
   PatientsPage,
   PatientDetailSheet,
@@ -31,6 +31,7 @@ import {
   Bell,
   ChevronRight,
   ClipboardList,
+  ClipboardCheck,
   Activity,
   Calendar,
   CheckCircle2,
@@ -44,6 +45,8 @@ import {
   Sparkles,
   Plus,
   Stethoscope,
+  Target,
+  FileText,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -325,18 +328,24 @@ const TherapistHome = ({
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
         </div>
-        <div className="mt-3">
-          <PendingStatRow
-            variant="card"
-            accent="therapist"
-            items={[
-              { label: "待评估确认", count: QUEUES.confirmAssess.length, onClick: () => onOpenQueue("confirmAssess") },
-              { label: "待确认目标", count: QUEUES.goal.length, onClick: () => onOpenQueue("goal") },
-              { label: "待确认处方", count: QUEUES.rx.length, onClick: () => onOpenQueue("rx") },
-              { label: "待执行任务", count: QUEUES.exec.length, onClick: () => onOpenQueue("exec") },
-            ]}
-          />
+      </div>
+
+      <div className="px-4 mt-3">
+        <div className="flex items-center justify-between mb-2 px-1">
+          <span className="text-[13px] font-bold text-foreground">今日待处理</span>
+          <button onClick={() => onOpenQueue("exec")} className="text-[11px] text-secondary font-medium flex items-center">
+            点击进入处理 <ChevronRight className="w-3 h-3" />
+          </button>
         </div>
+        <PendingTodoGrid
+          onViewAll={() => onOpenQueue("exec")}
+          items={[
+            { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
+            { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
+            { label: "待确认处方", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
+            { label: "待执行任务", count: QUEUES.exec.length, icon: Activity, iconClass: "bg-success text-white", onClick: () => onOpenQueue("exec") },
+          ]}
+        />
       </div>
 
       <div className="px-4 mt-3 space-y-4">
