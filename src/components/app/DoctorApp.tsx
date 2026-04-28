@@ -148,7 +148,15 @@ export const DoctorApp = () => {
       {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
-        footer={<PrimaryBtn variant="doctor" onClick={() => { toast.success("评估结果已确认"); close(); }}>确认评估结果</PrimaryBtn>}>
+        footer={
+          <div className="flex gap-2">
+            <button onClick={() => toast("已打开治疗师选择 · 王雅琴 / 陈治疗师 / 陈思雨")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-1">
+              <UserPlus className="w-4 h-4" />指定治疗师
+              <span className="text-[10px] text-muted-foreground">（可选）</span>
+            </button>
+            <button onClick={() => { toast.success("评估结果已确认"); close(); }} className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold">确认</button>
+          </div>
+        }>
         <AssessSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
 
