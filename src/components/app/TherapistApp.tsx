@@ -218,9 +218,11 @@ export const TherapistApp = () => {
 const Home = ({
   onOpen,
   onOpenQueue,
+  onGoPatients,
 }: {
   onOpen: (k: SheetKey) => void;
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: () => void;
 }) => {
   const tiles: { icon: any; label: string; color: string; k: QueueKey }[] = [
     { icon: ClipboardList, label: "评估确认", color: "text-secondary bg-secondary-soft", k: "confirmAssess" },
@@ -236,8 +238,8 @@ const Home = ({
         <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">下午好，王治疗师</div>
-            <div className="text-lg font-semibold mt-0.5">PT 物理治疗 · 三楼训练室</div>
+            <div className="text-xs opacity-80">下午好</div>
+            <div className="text-xl font-bold mt-0.5">王治疗师 👋</div>
           </div>
           <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
@@ -257,13 +259,18 @@ const Home = ({
       </div>
 
       <div className="px-4 -mt-4 space-y-4">
-        <AICard title="AI 推送的治疗任务" action={
-          <button onClick={() => onOpenQueue("exec")} className="w-full bg-ai text-ai-foreground rounded-xl py-2.5 text-sm font-semibold flex items-center justify-center gap-1">
-            进入待执行列表 <ArrowRight className="w-4 h-4" />
+        {NEW_PATIENT_COUNT > 0 && (
+          <button onClick={onGoPatients} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 border-l-4 border-l-warning active:scale-[0.99]">
+            <div className="w-10 h-10 rounded-xl bg-warning-soft flex items-center justify-center">
+              <AlertTriangle className="w-5 h-5 text-warning" />
+            </div>
+            <div className="flex-1">
+              <div className="text-[13px] font-semibold">有 {NEW_PATIENT_COUNT} 位新患者</div>
+              <div className="text-[11px] text-muted-foreground mt-0.5">前往患者管理查看共享患者档案</div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
           </button>
-        }>
-          基于今日排班，AI 已为你智能推送 {QUEUES.exec.length} 个治疗时段，平均利用率 92%。
-        </AICard>
+        )}
 
         <div>
           <SectionTitle title="治疗师工作台 · 点击查看待办列表" />
@@ -280,6 +287,7 @@ const Home = ({
             ))}
             <WorkbenchTile icon={Calendar} label="智能排班" color="text-ai bg-ai-soft" onClick={() => onOpen("schedule")} />
             <WorkbenchTile icon={CheckCircle2} label="打卡记录" color="text-secondary bg-secondary-soft" onClick={() => onOpen("checkin")} />
+            <WorkbenchTile icon={UsersRound} label="患者管理" color="text-role-therapist bg-secondary-soft" count={NEW_PATIENT_COUNT} onClick={onGoPatients} />
           </div>
         </div>
 
