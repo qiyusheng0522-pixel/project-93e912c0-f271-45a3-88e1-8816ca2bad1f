@@ -163,7 +163,12 @@ export const DoctorApp = () => {
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "plan"} onClose={close} title={`AI 康复方案${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
-        footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("方案已提交团队会议确认"); close(); }}>提交团队会议</PrimaryBtn>}>
+        footer={
+          <div className="flex gap-2">
+            <button onClick={() => { setActiveMeeting(null); setSheet("meeting"); }} className="flex-1 border border-ai/30 text-ai rounded-2xl py-3 text-sm font-semibold">提交团队会议</button>
+            <button onClick={() => { toast.success("康复方案已直接确认 · 推送治疗师"); close(); }} className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold">直接确认</button>
+          </div>
+        }>
         <PlanSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
 
