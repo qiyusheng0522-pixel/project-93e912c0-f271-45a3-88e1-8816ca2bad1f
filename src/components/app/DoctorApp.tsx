@@ -202,6 +202,7 @@ export const DoctorApp = () => {
           initialMessages={DEFAULT_MEETING_MSGS}
           onAISummary={() => {}}
           enablePatientReminder
+          enablePlanConfirm
           onClose={() => setSheet(activeMeeting ? "meetingList" : null)}
         />
       </PhoneSheet>
