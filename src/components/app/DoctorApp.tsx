@@ -132,7 +132,7 @@ export const DoctorApp = () => {
           initialStage={planStage}
           stages={["goal", "plan", "airx"]}
           title="康复方案"
-          subtitle="目标 / 方案 / AI 处方"
+          subtitle="目标 / 方案 / 康复处方"
         />
       )}
       {tab === "discharge" && (
@@ -164,7 +164,7 @@ export const DoctorApp = () => {
 
       <PhoneSheet open={sheet === "plan"} onClose={close} title={`AI 康复方案${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="ai"
         footer={<PrimaryBtn variant="ai" onClick={() => { toast.success("方案已提交团队会议确认"); close(); }}>提交团队会议</PrimaryBtn>}>
-        <PlanSheet patient={activePatient} />
+        <PlanSheet patient={activePatient} onLaunchMeeting={() => { setActiveMeeting(null); setSheet("meeting"); }} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "meetingList"} onClose={close} title="团队会议" accent="doctor">
@@ -201,7 +201,7 @@ export const DoctorApp = () => {
         />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认 AI 处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
+      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认康复处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={
           <div className="flex gap-2">
             <button onClick={() => toast("已驳回，待 AI 重新生成")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">驳回</button>
@@ -285,22 +285,17 @@ const DoctorHome = ({
   onGoPlan: (stage: PlanStage) => void;
   onGoDischarge: () => void;
 }) => {
-  // 工作台顺序：患者管理 → 首次评估 → 康复目标 → 康复方案 → AI处方(并入康复方案) → 出院方案 → 团队会议 → 患者沟通 → 线上会诊
+  // 工作台仅保留：患者管理、团队会议、患者沟通、线上会诊（首评/目标/方案/AI处方已上移到顶部待办统计）
   const tiles = [
     { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
-    { icon: ClipboardCheck, label: "首次评估", color: "text-secondary bg-secondary-soft", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
-    { icon: Target, label: "康复目标", color: "text-primary bg-primary-soft", count: 3, onClick: () => onGoPlan("goal") },
-    { icon: FileText, label: "康复方案", color: "text-ai bg-ai-soft", count: 3, onClick: () => onGoPlan("plan") },
-    { icon: Sparkles, label: "AI 处方", color: "text-success bg-success-soft", count: 4, onClick: () => onGoPlan("airx") },
-    { icon: LogOut, label: "出院方案", color: "text-secondary bg-secondary-soft", count: 2, onClick: onGoDischarge },
     { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
     { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
     { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("video") },
   ];
   return (
     <div className="pb-4">
-      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠 */}
-      <div className="gradient-doctor px-5 pt-6 pb-10 text-white relative overflow-hidden">
+      {/* 顶部留出更多空间，避免 Dynamic Island 与问候语重叠；底部增大避免新患者卡片遮挡 */}
+      <div className="gradient-doctor px-5 pt-6 pb-16 text-white relative overflow-hidden">
         <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
         <div className="relative flex items-center justify-between">
           <div>
@@ -327,14 +322,15 @@ const DoctorHome = ({
           <PendingStatRow
             items={[
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, onClick: () => onGoPatients("待首次评估") },
+              { label: "待设定目标", count: 3, onClick: () => onGoPlan("goal") },
               { label: "待确认方案", count: 3, onClick: () => onGoPlan("plan") },
-              { label: "待确认 AI 处方", count: 4, onClick: () => onGoPlan("airx") },
+              { label: "待确认AI处方", count: 4, onClick: () => onGoPlan("airx") },
             ]}
           />
         </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4">
+      <div className="px-4 -mt-8 space-y-4">
         {NEW_PATIENT_COUNT > 0 && (
           <button
             onClick={() => onGoPatients("新患者")}
@@ -566,9 +562,24 @@ const GoalSheet = ({ patient }: { patient?: string }) => (
   </div>
 );
 
-const PlanSheet = ({ patient }: { patient?: string }) => (
+const PlanSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchMeeting?: () => void }) => (
   <div className="p-4 space-y-3">
     <PatientHeader patient={patient} label="康复方案" />
+    {onLaunchMeeting && (
+      <button
+        onClick={onLaunchMeeting}
+        className="w-full bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]"
+      >
+        <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
+          <Video className="w-4 h-4" />
+        </div>
+        <div className="flex-1 text-left">
+          <div className="text-[12px] font-semibold text-warning">就该方案发起在线团队会议</div>
+          <div className="text-[10px] text-muted-foreground">医师 / 治疗师 / 护士线上协同确认 · AI 自动纪要</div>
+        </div>
+        <ChevronRight className="w-4 h-4 text-warning" />
+      </button>
+    )}
     <AICard title="AI 生成的康复方案 V2">
       基于本周评估更新方案：PT 强度 +20%、新增 OT 厨房训练、ST 维持原计划。
     </AICard>
@@ -588,7 +599,7 @@ const PlanSheet = ({ patient }: { patient?: string }) => (
 
 const RxSheet = ({ patient }: { patient?: string }) => (
   <div className="p-4 space-y-3">
-    <PatientHeader patient={patient} label="AI 处方" />
+    <PatientHeader patient={patient} label="康复处方" />
     <AICard title="AI 自动生成的康复处方建议">
       基于已确认方案，自动生成至治疗师端，请确认或调整。
     </AICard>

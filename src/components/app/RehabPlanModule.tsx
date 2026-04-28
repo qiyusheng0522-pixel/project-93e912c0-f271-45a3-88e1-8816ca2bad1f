@@ -8,14 +8,14 @@ export type PlanStage = "goal" | "plan" | "discharge" | "airx";
 const STAGE_LABEL: Record<PlanStage, string> = {
   goal: "康复目标",
   plan: "康复方案",
-  airx: "AI 处方",
+  airx: "康复处方",
   discharge: "出院方案",
 };
 
 const STAGE_DESC: Record<PlanStage, string> = {
   goal: "AI 智能设定 / 手动调整目标",
-  plan: "AI 生成 / 团队会议确认方案",
-  airx: "AI 自动生成处方 · 医师确认",
+  plan: "AI 生成 / 团队会议确认方案 · 支持发起在线会议",
+  airx: "AI 自动生成康复处方 · 医师确认",
   discharge: "AI 生成院外二级方案 · 需二次确认",
 };
 
