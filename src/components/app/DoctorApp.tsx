@@ -522,7 +522,7 @@ const DoctorAI = ({ onOpen }: { onOpen: (k: SheetKey) => void }) => {
   );
 };
 
-const DoctorMe = () => (
+const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
   <div className="px-4 pt-4 pb-4 space-y-4">
     <div className="bg-card rounded-2xl shadow-card p-5 flex items-center gap-4">
       <div className="w-16 h-16 rounded-2xl gradient-doctor flex items-center justify-center text-white text-xl font-bold">李</div>
@@ -536,7 +536,15 @@ const DoctorMe = () => (
       </div>
     </div>
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-      {["我的患者", "评估记录", "团队管理", "AI 偏好设置", "帮助与反馈"].map((it) => (
+      <button onClick={onOpenTeam} className="w-full flex items-center justify-between px-4 py-3.5">
+        <div className="flex items-center gap-3">
+          <Users className="w-4 h-4 text-role-doctor" />
+          <span className="text-sm">团队管理</span>
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-primary-soft text-primary">配置成员 · 共享患者</span>
+        </div>
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+      </button>
+      {["我的患者", "评估记录", "AI 偏好设置", "帮助与反馈"].map((it) => (
         <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
           <span className="text-sm">{it}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
