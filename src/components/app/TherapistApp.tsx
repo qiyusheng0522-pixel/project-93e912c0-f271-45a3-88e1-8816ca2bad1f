@@ -314,11 +314,13 @@ const TherapistHome = ({
   onOpenSummary: () => void;
   onOpenMed: () => void;
 }) => {
-  const execByType = [
-    { type: "OT", count: QUEUES.exec.filter(e => e.meta?.startsWith("OT")).length || 1, color: "text-primary bg-primary-soft" },
-    { type: "PT", count: QUEUES.exec.filter(e => e.meta?.startsWith("PT")).length || 1, color: "text-secondary bg-secondary-soft" },
-    { type: "ST", count: QUEUES.exec.filter(e => e.meta?.startsWith("ST")).length || 1, color: "text-ai bg-ai-soft" },
-  ];
+  const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
+    ...QUEUES.confirmAssess.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "confirmAssess" as QueueKey })),
+    ...QUEUES.goal.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "goal" as QueueKey })),
+    ...QUEUES.rx.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "rx" as QueueKey })),
+    ...QUEUES.exec.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "exec" as QueueKey })),
+  ].sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.urgency] - { high: 0, medium: 1, low: 2 }[b.urgency]));
+  const tagShort: Record<QueueKey, string> = { confirmAssess: "评估", goal: "目标", rx: "处方", exec: "执行" };
   return (
     <div className="pb-4">
       <div className="bg-background px-5 pt-6 pb-2">
@@ -346,6 +348,49 @@ const TherapistHome = ({
             { label: "待确认处方", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
           ]}
         />
+      </div>
+
+      <div className="px-4 mt-4">
+        <div className="flex items-center justify-between mb-2 px-1">
+          <span className="text-[13px] font-bold text-foreground">今日待办清单</span>
+          <span className="text-[11px] text-muted-foreground">共 {allTodos.length} 项 · 按优先级</span>
+        </div>
+        <div className="bg-card rounded-2xl shadow-card border border-border/40 divide-y divide-border/60 overflow-hidden">
+          {allTodos.map((t, idx) => {
+            const tagColor =
+              t.k === "confirmAssess" ? "bg-warning/15 text-warning" :
+              t.k === "goal" ? "bg-primary/10 text-primary" :
+              t.k === "rx" ? "bg-secondary/10 text-secondary" :
+              "bg-success/10 text-success";
+            const uColor =
+              t.urgency === "high" ? "bg-destructive/10 text-destructive" :
+              t.urgency === "medium" ? "bg-warning/15 text-warning" :
+              "bg-muted text-muted-foreground";
+            const uLabel = t.urgency === "high" ? "紧急" : t.urgency === "medium" ? "重要" : "常规";
+            return (
+              <button
+                key={`${t.k}-${idx}`}
+                onClick={() => onOpenQueue(t.k)}
+                className="w-full text-left px-3 py-2.5 flex items-center gap-2 active:bg-muted/40"
+              >
+                <div className="w-7 h-7 rounded-lg bg-muted text-foreground/70 flex items-center justify-center text-[11px] font-bold shrink-0">
+                  {idx + 1}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold shrink-0 ${tagColor}`}>{tagShort[t.k]}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold shrink-0 ${uColor}`}>{uLabel}</span>
+                    <span className="text-[12px] font-semibold truncate">{t.patient}</span>
+                  </div>
+                  <div className="text-[11px] text-muted-foreground mt-0.5 truncate">
+                    {t.meta}{t.time ? ` · ${t.time}` : ""}
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <div className="px-4 mt-3 space-y-4">
