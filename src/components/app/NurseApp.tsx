@@ -2,7 +2,7 @@ import { useState } from "react";
 import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
-import { TodoQueueList, WorkbenchTile, PendingStatRow, TodoItem } from "@/components/app/TodoQueue";
+import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem } from "@/components/app/TodoQueue";
 import {
   PatientsPage,
   PatientDetailSheet,
@@ -244,56 +244,32 @@ const NurseHome = ({
 
   return (
     <div className="pb-4">
-      <div className="gradient-nurse px-5 pt-6 pb-10 text-white relative overflow-hidden">
-        <div className="absolute -top-10 -left-10 w-48 h-48 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex items-center justify-between">
+      <div className="bg-background px-5 pt-6 pb-2">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs opacity-80">您好</div>
-            <div className="text-xl font-bold mt-0.5">赵护士 👋</div>
-            <div className="text-[11px] opacity-90 mt-1">今日共 {totalTodo} 项护理待办（来自康复处方）</div>
+            <div className="text-xs text-muted-foreground">您好</div>
+            <div className="text-xl font-bold mt-0.5 text-foreground">赵护士 👋</div>
+            <div className="text-[11px] text-muted-foreground mt-1">今日共 {totalTodo} 项护理待办（来自康复处方）</div>
           </div>
-          <button onClick={() => toast("您有 4 条新任务")} className="w-9 h-9 rounded-full bg-white/20 backdrop-blur flex items-center justify-center relative">
+          <button onClick={() => toast("您有 4 条新任务")} className="w-9 h-9 rounded-full bg-rose-50 text-role-nurse flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
         </div>
-        <div className="relative mt-5">
-          <PendingStatRow
-            items={[
-              { label: "待护理", count: QUEUES.execTask.length, onClick: () => onOpenQueue("execTask") },
-              { label: "待记录", count: QUEUES.vitals.length, onClick: () => onOpenQueue("vitals") },
-              { label: "待宣教", count: 3, onClick: onOpenEdu },
-              { label: "待回复消息", count: PATIENT_UNREAD, onClick: () => toast("进入患者沟通") },
-            ]}
-          />
-        </div>
       </div>
 
-      <div className="px-4 -mt-5 space-y-4 relative">
-        <div>
-          <SectionTitle title={`患者待办列 · ${allTodos.length}`} extra={<span className="text-[10px] text-muted-foreground">基于康复处方按患者排序</span>} />
-          <div className="space-y-2">
-            {allTodos.slice(0, 8).map((t, i) => {
-              const u = { high: "border-l-destructive", medium: "border-l-warning", low: "border-l-border" }[t.urgency];
-              const tag = { med: "给药", execTask: "护理", vitals: "体征", obs: "观察", inject: "注射" }[t.k];
-              return (
-                <button
-                  key={i}
-                  onClick={() => onOpenQueue(t.k)}
-                  className={`w-full text-left bg-card rounded-2xl shadow-card p-3 border-l-4 ${u} flex items-center gap-3 active:scale-[0.99]`}
-                >
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 text-role-nurse flex items-center justify-center text-[10px] font-bold">{tag}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[12px] font-semibold truncate">{t.patient}</div>
-                    <div className="text-[10px] text-muted-foreground truncate">{t.meta}</div>
-                  </div>
-                  {t.time && <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{t.time}</span>}
-                  <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                </button>
-              );
-            })}
-          </div>
+      <div className="px-4 mt-3">
+        <div className="flex items-center justify-between mb-2 px-1">
+          <span className="text-[13px] font-bold text-foreground">今日待处理</span>
         </div>
+        <PendingTodoGrid
+          items={[
+            { label: "待护理", count: QUEUES.execTask.length, icon: HeartPulse, iconClass: "bg-success text-white", onClick: () => onOpenQueue("execTask") },
+            { label: "待记录", count: QUEUES.vitals.length, icon: Activity, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("vitals") },
+            { label: "待宣教", count: 3, icon: BookOpen, iconClass: "bg-warning text-white", onClick: onOpenEdu },
+            { label: "待回复消息", count: PATIENT_UNREAD, icon: MessageCircle, iconClass: "bg-secondary text-white", onClick: () => toast("进入患者沟通") },
+          ]}
+        />
       </div>
     </div>
   );
