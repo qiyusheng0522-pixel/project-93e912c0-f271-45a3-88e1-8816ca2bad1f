@@ -133,10 +133,9 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-ai-soft text-ai text-xs font-semibold mb-5">
             <Sparkles className="w-3.5 h-3.5" /> AI 驱动 · 多角色协同
           </div>
-          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.05] mb-5">
-            康复医院<br />
-            <span className="bg-clip-text text-transparent gradient-primary">智慧协同</span>
-            移动工作台
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight text-foreground leading-[1.1] mb-5">
+            省人康复科{" "}
+            <span className="bg-clip-text text-transparent gradient-primary">移动工作台</span>
           </h1>
           <p className="text-lg text-muted-foreground leading-relaxed max-w-2xl">
             康复医师 · 治疗师 · 护士，三端打通。AI 智能贯穿评估、目标、方案、处方、执行、宣教全流程。
