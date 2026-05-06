@@ -99,6 +99,7 @@ export const DoctorApp = () => {
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
   const [therapistPickerOpen, setTherapistPickerOpen] = useState(false);
   const [videoPatient, setVideoPatient] = useState<Patient | null>(null);
+  const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
