@@ -322,7 +322,7 @@ const TherapistHome = ({
     ...QUEUES.rx.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "rx" as QueueKey })),
     ...QUEUES.exec.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "exec" as QueueKey })),
   ].sort((a, b) => ({ high: 0, medium: 1, low: 2 }[a.urgency] - { high: 0, medium: 1, low: 2 }[b.urgency]));
-  const tagShort: Record<QueueKey, string> = { confirmAssess: "评估", goal: "目标", rx: "处方", exec: "执行" };
+  const tagShort: Record<QueueKey, string> = { confirmAssess: "评估", goal: "目标", rx: "医嘱", exec: "执行" };
   return (
     <div className="pb-4">
       <div className="bg-background px-5 pt-6 pb-2">
