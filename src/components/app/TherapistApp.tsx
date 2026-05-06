@@ -395,16 +395,6 @@ const TherapistHome = ({
         </div>
       </div>
 
-      <div className="px-4 mt-3 space-y-4">
-        <button onClick={onGoPatients} className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99]">
-          <div className="w-10 h-10 rounded-xl bg-secondary-soft text-secondary flex items-center justify-center"><UsersRound className="w-5 h-5" /></div>
-          <div className="flex-1 text-left">
-            <div className="text-[13px] font-semibold">进入患者管理</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">每日小结 / 治疗记录 / 药物变动 / 备注</div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
-      </div>
     </div>
   );
 };
