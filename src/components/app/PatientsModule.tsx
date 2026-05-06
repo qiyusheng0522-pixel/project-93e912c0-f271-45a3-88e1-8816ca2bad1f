@@ -140,10 +140,12 @@ const accentText: Record<Accent, string> = {
 export const PatientsPage = ({
   accent,
   onPick,
+  onSummary,
   initialFilter = "all",
 }: {
   accent: Accent;
   onPick: (p: Patient) => void;
+  onSummary?: (p: Patient) => void;
   initialFilter?: PatientFilter;
 }) => {
   const [q, setQ] = useState("");
