@@ -258,7 +258,7 @@ export const PatientsPage = ({
             <div className="bg-card rounded-2xl p-8 text-center text-xs text-muted-foreground">无匹配患者</div>
           ) : (
             <div className="space-y-2">
-              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} />)}
+              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} onSummary={onSummary ? () => onSummary(p) : undefined} />)}
             </div>
           )}
         </div>
