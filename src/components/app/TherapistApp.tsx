@@ -172,7 +172,9 @@ export const TherapistApp = () => {
           subTab={chatSubTab}
           onChange={setChatSubTab}
           onOpenPatient={(p) => { setChatPatient(p); setSheet("patientChat"); }}
-          onOpenMeeting={() => setSheet("meetingList")}
+          meetings={meetings}
+          onPickMeeting={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreateMeeting={() => setSheet("newMeeting")}
         />
       )}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
