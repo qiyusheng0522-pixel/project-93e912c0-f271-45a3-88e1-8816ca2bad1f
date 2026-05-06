@@ -56,6 +56,7 @@ const THERAPIST_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: ClipboardList },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "rx", label: "医嘱", icon: FileText },
   { key: "chat", label: "沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
   { key: "me", label: "我的", icon: UserIcon },
 ];
@@ -146,8 +147,8 @@ export const TherapistApp = () => {
         <TherapistHome
           onOpenQueue={openQueue}
           onGoPatients={() => setTab("patients")}
+          onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
-          onOpenSummary={() => open("summary")}
           onOpenMed={() => open("med")}
         />
       )}
@@ -156,7 +157,6 @@ export const TherapistApp = () => {
           onPickPatient={pickPatient}
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
-          onOpenSummary={() => open("summary")}
         />
       )}
       {tab === "plan" && (
@@ -168,6 +168,9 @@ export const TherapistApp = () => {
           title="康复方案"
           subtitle="治疗目标 + 康复处方确认"
         />
+      )}
+      {tab === "rx" && (
+        <RxTab onPick={(item) => { setActivePatient(item.patient); setSheet("rx"); }} />
       )}
       {tab === "chat" && (
         <ChatHub
@@ -224,9 +227,9 @@ export const TherapistApp = () => {
         <ExecSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "summary"} onClose={close} title={`今日工作小结${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
-        footer={<PrimaryBtn variant="therapist" onClick={() => { toast.success("小结已提交，已同步医师端"); close(); }}>提交小结</PrimaryBtn>}>
-        <SummarySheet />
+      <PhoneSheet open={sheet === "summary"} onClose={close} title={`每日小结${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
+        footer={<PrimaryBtn variant="therapist" onClick={() => { toast.success("小结已写入该患者档案"); close(); }}>提交小结</PrimaryBtn>}>
+        <SummarySheet patient={activePatient} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "uploadDaily"} onClose={close} title="上传每日治疗情况" accent="therapist"
@@ -308,14 +311,14 @@ export const TherapistApp = () => {
 const TherapistHome = ({
   onOpenQueue,
   onGoPatients,
+  onGoRx,
   onUploadDaily,
-  onOpenSummary,
   onOpenMed,
 }: {
   onOpenQueue: (k: QueueKey) => void;
   onGoPatients: () => void;
+  onGoRx: () => void;
   onUploadDaily: () => void;
-  onOpenSummary: () => void;
   onOpenMed: () => void;
 }) => {
   const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
@@ -349,7 +352,7 @@ const TherapistHome = ({
           items={[
             { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
-            { label: "待确认医嘱", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
+            { label: "待确认医嘱", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: onGoRx },
           ]}
         />
       </div>
@@ -405,12 +408,10 @@ const TherapistHome = ({
 const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
-  onOpenSummary,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
-  onOpenSummary?: () => void;
 }) => {
   // 基于康复方案生成的治疗师待办任务
   const planTodos = [
@@ -421,19 +422,9 @@ const TherapistPatients = ({
   return (
     <div className="pb-4">
       <div className="px-4 pt-3 space-y-2">
-        <button
-          onClick={onOpenSummary}
-          className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99] border border-secondary/20"
-        >
-          <div className="w-10 h-10 rounded-xl gradient-therapist text-white flex items-center justify-center">
-            <ClipboardList className="w-5 h-5" />
-          </div>
-          <div className="flex-1 text-left">
-            <div className="text-[13px] font-semibold">每日小结输入</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">填写治疗记录 / 药物变动等信息</div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <AICard title="每日小结 · 按患者填写">
+          请进入对应患者档案，点击「每日小结」按钮填写当日治疗记录、药物变动等信息。
+        </AICard>
 
         <div className="bg-card rounded-2xl shadow-card border border-border/40 p-3">
           <div className="flex items-center justify-between mb-2">
@@ -534,17 +525,6 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         { day: "一", value: 9 }, { day: "二", value: 12 }, { day: "三", value: 11 },
         { day: "四", value: 14 }, { day: "五", value: 13 }, { day: "六", value: 5 }, { day: "日", value: 3 },
       ]}
-      revenue={{
-        monthLabel: "本月收益",
-        monthValue: "18,640",
-        today: "780",
-        pending: "2,420",
-        breakdown: [
-          { label: "PT 治疗", value: "9,200" },
-          { label: "OT 治疗", value: "6,800" },
-          { label: "评估补充", value: "2,640" },
-        ],
-      }}
     />
 
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
@@ -700,26 +680,62 @@ const ExecSheet = () => (
   </div>
 );
 
-const SummarySheet = () => (
-  <div className="p-4 space-y-3">
-    <SectionTitle title="今日工作小结" extra={<span className="text-[10px] text-muted-foreground">将自动写入患者档案</span>} />
-    <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">完成训练</div>
-        <div className="text-sm font-semibold">5 / 5 项 · 累计 95 分钟</div>
+const SummarySheet = ({ patient }: { patient?: string }) => {
+  const name = patient ? patient.split(" ")[0] : "张建国";
+  return (
+    <div className="p-4 space-y-3">
+      {/* 患者信息卡 */}
+      <div className="bg-card rounded-2xl shadow-card p-4 flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">
+          {name[0]}
+        </div>
+        <div className="flex-1">
+          <div className="text-sm font-bold">{patient || "张建国 · 床A-301"}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">本日小结 · 2026-05-06</div>
+        </div>
+        <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">每日小结</span>
       </div>
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">主观感受 (Borg)</div>
-        <div className="flex gap-1">
-          {[6, 7, 8, 9, 10, 11, 12].map((n) => (
-            <button key={n} className={`flex-1 py-2 rounded-lg text-xs ${n === 9 ? "gradient-therapist text-white" : "bg-muted"}`}>{n}</button>
-          ))}
+
+      <SectionTitle title="本患者今日治疗" extra={<span className="text-[10px] text-muted-foreground">将归入该患者档案</span>} />
+      <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">完成训练项</div>
+          <div className="text-sm font-semibold">PT 下肢力量 · OT 厨房活动 · 共 2 项 / 55 分钟</div>
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">患者主观感受 (Borg)</div>
+          <div className="flex gap-1">
+            {[6, 7, 8, 9, 10, 11, 12].map((n) => (
+              <button key={n} className={`flex-1 py-2 rounded-lg text-xs ${n === 9 ? "gradient-therapist text-white" : "bg-muted"}`}>{n}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">治疗记录</div>
+          <textarea defaultValue={`${name} 今日完成 PT/OT 训练，厨房活动表现明显改善，建议明日加入精细动作训练。`} className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">药物变动 / 反馈</div>
+          <textarea placeholder="如：巴氯芬调整为 10mg bid，肌张力下降..." className="w-full bg-muted rounded-xl p-3 text-xs h-16 outline-none" />
         </div>
       </div>
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">治疗记录</div>
-        <textarea defaultValue="患者今日完成全部 OT 任务，厨房活动表现明显改善，建议明日加入精细动作训练。" className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+    </div>
+  );
+};
+
+/* ============== 医嘱 Tab ============== */
+const RxTab = ({ onPick }: { onPick: (item: TodoItem) => void }) => (
+  <div className="pb-4">
+    <div className="gradient-therapist px-5 pt-6 pb-6 text-white relative overflow-hidden">
+      <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+      <div className="relative">
+        <div className="text-xs opacity-80">康复医嘱</div>
+        <div className="text-[15px] font-semibold mt-0.5">待确认 · {QUEUES.rx.length} 项</div>
+        <div className="text-[11px] opacity-80 mt-1">康复整体计划 · 全套训练 + 流程安排，含居家训练</div>
       </div>
+    </div>
+    <div className="px-4 pt-4">
+      <TodoQueueList accent="therapist" items={QUEUES.rx} onPick={onPick} />
     </div>
   </div>
 );
