@@ -408,12 +408,10 @@ const TherapistHome = ({
 const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
-  onOpenSummary,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
-  onOpenSummary?: () => void;
 }) => {
   // 基于康复方案生成的治疗师待办任务
   const planTodos = [
@@ -424,19 +422,9 @@ const TherapistPatients = ({
   return (
     <div className="pb-4">
       <div className="px-4 pt-3 space-y-2">
-        <button
-          onClick={onOpenSummary}
-          className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99] border border-secondary/20"
-        >
-          <div className="w-10 h-10 rounded-xl gradient-therapist text-white flex items-center justify-center">
-            <ClipboardList className="w-5 h-5" />
-          </div>
-          <div className="flex-1 text-left">
-            <div className="text-[13px] font-semibold">每日小结输入</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">填写治疗记录 / 药物变动等信息</div>
-          </div>
-          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-        </button>
+        <AICard title="每日小结 · 按患者填写">
+          请进入对应患者档案，点击「每日小结」按钮填写当日治疗记录、药物变动等信息。
+        </AICard>
 
         <div className="bg-card rounded-2xl shadow-card border border-border/40 p-3">
           <div className="flex items-center justify-between mb-2">
