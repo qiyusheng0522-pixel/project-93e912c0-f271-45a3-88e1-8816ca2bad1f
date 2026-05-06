@@ -267,7 +267,7 @@ export const PatientsPage = ({
   );
 };
 
-const PatientCard = ({ p, accent, onClick }: { p: Patient; accent: Accent; onClick: () => void }) => {
+const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Accent; onClick: () => void; onSummary?: () => void }) => {
   const statusMap = {
     "新患者": "bg-warning/15 text-warning",
     "康复中": "bg-primary/10 text-primary",
@@ -275,25 +275,37 @@ const PatientCard = ({ p, accent, onClick }: { p: Patient; accent: Accent; onCli
     "已出院": "bg-muted text-muted-foreground",
   }[p.status];
   return (
-    <button onClick={onClick} className="w-full text-left bg-card rounded-2xl shadow-card p-3.5 flex items-start gap-3 active:scale-[0.99]">
-      <div className={`w-11 h-11 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center font-bold`}>{p.name[0]}</div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap">
-          <div className="text-[13px] font-semibold">{p.name}</div>
-          <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
-          {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
-          {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
+    <div className="w-full bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99]">
+      <button onClick={onClick} className="w-full text-left flex items-start gap-3">
+        <div className={`w-11 h-11 rounded-xl ${accentBg[accent]} text-white flex items-center justify-center font-bold`}>{p.name[0]}</div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="text-[13px] font-semibold">{p.name}</div>
+            <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
+            {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
+            {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusMap}`}>{p.status}</span>
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{p.condition}</span>
+            <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length}</span>
+            {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length}</span>}
+          </div>
         </div>
-        <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
-        <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-          <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusMap}`}>{p.status}</span>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{p.condition}</span>
-          <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length}</span>
-          {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length}</span>}
+        <ChevronRight className="w-4 h-4 text-muted-foreground self-center" />
+      </button>
+      {onSummary && (
+        <div className="mt-2.5 pt-2.5 border-t border-border/60 flex justify-end">
+          <button
+            onClick={(e) => { e.stopPropagation(); onSummary(); }}
+            className={`text-[11px] px-3 py-1.5 rounded-full font-semibold ${accentBg[accent]} text-white shadow-card`}
+          >
+            每日小结
+          </button>
         </div>
-      </div>
-      <ChevronRight className="w-4 h-4 text-muted-foreground self-center" />
-    </button>
+      )}
+    </div>
   );
 };
 
