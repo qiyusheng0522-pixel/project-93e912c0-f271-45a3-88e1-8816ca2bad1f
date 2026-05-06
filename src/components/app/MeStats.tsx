@@ -27,8 +27,8 @@ export interface MeStatsProps {
   trend: { day: string; value: number }[];
   /** Top stat tiles (3-4 items) */
   tiles: { label: string; value: string | number; sub?: string }[];
-  /** Revenue card */
-  revenue: {
+  /** Revenue card (optional - hidden when omitted) */
+  revenue?: {
     monthLabel: string;
     monthValue: string;
     today: string;
