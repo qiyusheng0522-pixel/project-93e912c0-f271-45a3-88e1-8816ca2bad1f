@@ -707,11 +707,21 @@ export const IMChatSheet = ({
 
       {/* input */}
       <div className="px-3 py-2 bg-card border-t border-border/60 flex items-center gap-2">
+        <button
+          onClick={() => {
+            toast("🎤 正在听写…");
+            setTimeout(() => { setInput(v => (v ? v + " " : "") + "我已记录您的反馈，会与团队同步。"); toast.success("语音已转写"); }, 900);
+          }}
+          className="w-9 h-9 rounded-full bg-muted text-foreground/70 flex items-center justify-center"
+          aria-label="语音输入"
+        >
+          <Mic className="w-4 h-4" />
+        </button>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") send(); }}
-          placeholder="输入消息..."
+          placeholder="输入消息 / 按🎤语音输入..."
           className="flex-1 bg-muted rounded-full px-4 py-2 text-xs outline-none"
         />
         <button onClick={send} className={`w-9 h-9 rounded-full ${accentBg[accent]} text-white flex items-center justify-center`}>
