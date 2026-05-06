@@ -155,6 +155,7 @@ export const TherapistApp = () => {
           onPickPatient={pickPatient}
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
+          onOpenSummary={() => open("summary")}
         />
       )}
       {tab === "plan" && (
