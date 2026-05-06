@@ -157,6 +157,10 @@ export const TherapistApp = () => {
           onPickPatient={pickPatient}
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
+          onSummaryPatient={(p) => {
+            setActivePatient(`${p.name} · 床${p.bed}`);
+            setSheet("summary");
+          }}
         />
       )}
       {tab === "plan" && (
