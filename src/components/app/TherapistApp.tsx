@@ -684,6 +684,29 @@ const ExecSheet = () => (
 
 const SummarySheet = ({ patient }: { patient?: string }) => {
   const name = patient ? patient.split(" ")[0] : "张建国";
+  const aiDraft = `${name} 今日完成 PT 下肢力量训练（3×10）与 OT 厨房活动训练 25min，主观 Borg 9，疼痛 VAS 由 5 降至 3。步态对称性改善约 8%，转移动作由中等辅助降为轻度辅助。建议明日加入精细动作训练并维持现有强度。`;
+  const [record, setRecord] = useState(aiDraft);
+  const [med, setMed] = useState("");
+  const [recording, setRecording] = useState<null | "record" | "med">(null);
+
+  const toggleVoice = (field: "record" | "med") => {
+    if (recording === field) {
+      setRecording(null);
+      toast.success("语音已转写并追加");
+      const sample = field === "record" ? " 患者反馈步行时髋部酸胀感减轻。" : " 巴氯芬剂量维持 10mg bid。";
+      if (field === "record") setRecord((v) => v + sample);
+      else setMed((v) => v + sample);
+    } else {
+      setRecording(field);
+      toast("正在录音，再次点击结束");
+    }
+  };
+
+  const regenerate = () => {
+    setRecord(aiDraft);
+    toast.success("已用 AI 重新总结");
+  };
+
   return (
     <div className="p-4 space-y-3">
       {/* 患者信息卡 */}
@@ -697,6 +720,17 @@ const SummarySheet = ({ patient }: { patient?: string }) => {
         </div>
         <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">每日小结</span>
       </div>
+
+      <AICard
+        title="AI 智能总结"
+        action={
+          <button onClick={regenerate} className="text-[11px] px-3 py-1 rounded-full bg-ai text-ai-foreground font-semibold">
+            重新生成
+          </button>
+        }
+      >
+        基于今日训练记录、客观指标与历史数据，为 {name} 自动生成本日治疗小结草稿。可在下方二次编辑或语音补充。
+      </AICard>
 
       <SectionTitle title="本患者今日治疗" extra={<span className="text-[10px] text-muted-foreground">将归入该患者档案</span>} />
       <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
@@ -713,12 +747,44 @@ const SummarySheet = ({ patient }: { patient?: string }) => {
           </div>
         </div>
         <div>
-          <div className="text-[11px] text-muted-foreground mb-1">治疗记录</div>
-          <textarea defaultValue={`${name} 今日完成 PT/OT 训练，厨房活动表现明显改善，建议明日加入精细动作训练。`} className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-[11px] text-muted-foreground">治疗记录（AI 草稿，可编辑）</div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => toggleVoice("record")}
+                className={`text-[10px] px-2 py-1 rounded-full font-semibold ${recording === "record" ? "bg-destructive text-white animate-pulse" : "bg-secondary-soft text-secondary"}`}
+              >
+                {recording === "record" ? "● 录音中" : "🎙 语音输入"}
+              </button>
+              <button
+                onClick={() => { setRecord(""); toast("已清空治疗记录"); }}
+                className="text-[10px] px-2 py-1 rounded-full bg-muted text-foreground/70 font-semibold"
+              >
+                一键清空
+              </button>
+            </div>
+          </div>
+          <textarea value={record} onChange={(e) => setRecord(e.target.value)} className="w-full bg-muted rounded-xl p-3 text-xs h-28 outline-none" />
         </div>
         <div>
-          <div className="text-[11px] text-muted-foreground mb-1">药物变动 / 反馈</div>
-          <textarea placeholder="如：巴氯芬调整为 10mg bid，肌张力下降..." className="w-full bg-muted rounded-xl p-3 text-xs h-16 outline-none" />
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-[11px] text-muted-foreground">药物变动 / 反馈</div>
+            <div className="flex items-center gap-1.5">
+              <button
+                onClick={() => toggleVoice("med")}
+                className={`text-[10px] px-2 py-1 rounded-full font-semibold ${recording === "med" ? "bg-destructive text-white animate-pulse" : "bg-secondary-soft text-secondary"}`}
+              >
+                {recording === "med" ? "● 录音中" : "🎙 语音输入"}
+              </button>
+              <button
+                onClick={() => { setMed(""); toast("已清空药物变动"); }}
+                className="text-[10px] px-2 py-1 rounded-full bg-muted text-foreground/70 font-semibold"
+              >
+                一键清空
+              </button>
+            </div>
+          </div>
+          <textarea value={med} onChange={(e) => setMed(e.target.value)} placeholder="如：巴氯芬调整为 10mg bid，肌张力下降..." className="w-full bg-muted rounded-xl p-3 text-xs h-20 outline-none" />
         </div>
       </div>
     </div>
