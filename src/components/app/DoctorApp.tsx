@@ -697,9 +697,14 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
-      {["我的患者", "评估记录", "AI 偏好设置", "帮助与反馈"].map((it) => (
-        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
-          <span className="text-sm">{it}</span>
+      {[
+        { label: "我的患者", info: `当前共 ${PATIENTS.length} 位患者，新患者 ${NEW_PATIENT_COUNT} 位` },
+        { label: "评估记录", info: "本月已完成 86 份首次评估，详情已同步至档案" },
+        { label: "AI 偏好设置", info: "AI 风险偏好：保守 · 处方默认 4 周复评" },
+        { label: "帮助与反馈", info: "客服电话：400-021-8866，工单已为您准备" },
+      ].map((it) => (
+        <button key={it.label} onClick={() => toast.success(it.info)} className="w-full flex items-center justify-between px-4 py-3.5">
+          <span className="text-sm">{it.label}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
       ))}
