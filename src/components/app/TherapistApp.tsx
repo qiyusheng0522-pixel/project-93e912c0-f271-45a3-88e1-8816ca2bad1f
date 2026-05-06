@@ -412,10 +412,12 @@ const TherapistHome = ({
 const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
+  onSummaryPatient,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
+  onSummaryPatient?: (p: Patient) => void;
 }) => {
   // 基于康复方案生成的治疗师待办任务
   const planTodos = [
@@ -426,10 +428,6 @@ const TherapistPatients = ({
   return (
     <div className="pb-4">
       <div className="px-4 pt-3 space-y-2">
-        <AICard title="每日小结 · 按患者填写">
-          请进入对应患者档案，点击「每日小结」按钮填写当日治疗记录、药物变动等信息。
-        </AICard>
-
         <div className="bg-card rounded-2xl shadow-card border border-border/40 p-3">
           <div className="flex items-center justify-between mb-2">
             <span className="text-[12px] font-bold text-foreground flex items-center gap-1.5">
@@ -455,7 +453,7 @@ const TherapistPatients = ({
           </div>
         </div>
       </div>
-      <PatientsPage accent="therapist" onPick={onPickPatient} />
+      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} />
     </div>
   );
 };
