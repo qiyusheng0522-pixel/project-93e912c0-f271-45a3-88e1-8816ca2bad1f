@@ -3,6 +3,7 @@ import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem } from "@/components/app/TodoQueue";
+import { RxDetail } from "@/components/app/RxDetail";
 import {
   PatientsPage,
   PatientDetailSheet,
@@ -678,54 +679,9 @@ const ScheduleSheet = () => (
   </div>
 );
 
-const RxAdjustSheet = ({ patient }: { patient?: string }) => {
-  const name = patient ? patient.split(" ")[0] : "张建国";
-  return (
-    <div className="p-4 space-y-3">
-      <div className="bg-card rounded-2xl shadow-card p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
-          <div className="flex-1">
-            <div className="text-sm font-bold">{patient || "张建国 · 男 56 岁"}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">脑卒中后偏瘫 · 入院第 12 天</div>
-          </div>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">处方确认</span>
-        </div>
-      </div>
-
-      <AICard title="AI 生成的康复方案 + 处方建议">
-        基于本周评估更新方案，PT 强度 +20%、新增 OT 厨房训练、ST 维持。下方为详细处方，可逐项调整后确认推送医师签发。
-      </AICard>
-
-      <SectionTitle title="排班联动（AI 自动）" extra={<button className="text-[10px] text-secondary font-semibold">手动调整</button>} />
-      <div className="bg-card rounded-2xl shadow-card p-3 space-y-1.5 text-[11px]">
-        <div className="flex justify-between"><span>09:00 PT · A-301</span><span className="text-muted-foreground">王治疗师</span></div>
-        <div className="flex justify-between"><span>14:00 OT · B-201</span><span className="text-muted-foreground">陈治疗师</span></div>
-        <div className="flex justify-between"><span>16:00 ST · B-205</span><span className="text-muted-foreground">陈思雨</span></div>
-      </div>
-
-      <SectionTitle title="处方明细（可调整）" />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        {[
-          { t: "PT", n: "下肢力量", s: "3×10" },
-          { t: "PT", n: "平衡板", s: "15min" },
-          { t: "OT", n: "穿衣 ADL", s: "20min" },
-          { t: "OT", n: "厨房活动", s: "25min" },
-          { t: "ST", n: "构音训练", s: "30min" },
-        ].map((r) => (
-          <div key={r.n} className="flex items-center gap-3 py-3">
-            <span className="text-[10px] px-2 py-0.5 rounded bg-secondary-soft text-secondary font-bold">{r.t}</span>
-            <div className="flex-1">
-              <div className="text-[12px] font-semibold">{r.n}</div>
-              <div className="text-[10px] text-muted-foreground">{r.s}</div>
-            </div>
-            <button className="text-secondary"><Edit3 className="w-3.5 h-3.5" /></button>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
+const RxAdjustSheet = ({ patient }: { patient?: string }) => (
+  <RxDetail patient={patient} accent="therapist" />
+);
 
 const ExecSheet = () => (
   <div className="p-4 space-y-3">
