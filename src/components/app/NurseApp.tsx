@@ -230,10 +230,12 @@ const NurseHome = ({
   onOpenQueue,
   onOpenDailyNote,
   onOpenEdu,
+  onOpenChat,
 }: {
   onOpenQueue: (k: QueueKey) => void;
   onOpenDailyNote: () => void;
   onOpenEdu: () => void;
+  onOpenChat: () => void;
 }) => {
   const totalTodo = QUEUES.med.length + QUEUES.vitals.length + QUEUES.inject.length + QUEUES.obs.length + QUEUES.execTask.length;
   const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
