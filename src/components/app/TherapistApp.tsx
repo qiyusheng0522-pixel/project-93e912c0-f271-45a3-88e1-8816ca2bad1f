@@ -515,9 +515,15 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
-      {["我的患者", "治疗记录", "排班管理", "知识库", "设置"].map((it) => (
-        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
-          <span className="text-sm">{it}</span>
+      {[
+        { label: "我的患者", info: `当前共 ${PATIENTS.length} 位患者，本周新增 2 位` },
+        { label: "治疗记录", info: "本月共 248 次治疗记录已自动归档至患者档案" },
+        { label: "排班管理", info: "本周排班 32 项 · AI 已优化训练室占用率" },
+        { label: "知识库", info: "已收藏 18 篇 PT/OT 实训手册，可在患者档案中调阅" },
+        { label: "设置", info: "默认手势：双指上滑发起团队会议；震动提醒：开" },
+      ].map((it) => (
+        <button key={it.label} onClick={() => toast.success(it.info)} className="w-full flex items-center justify-between px-4 py-3.5">
+          <span className="text-sm">{it.label}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
       ))}
