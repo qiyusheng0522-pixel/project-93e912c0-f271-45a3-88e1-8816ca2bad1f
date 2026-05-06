@@ -429,12 +429,16 @@ const ChatHub = ({
   subTab,
   onChange,
   onOpenPatient,
-  onOpenMeeting,
+  meetings,
+  onPickMeeting,
+  onCreateMeeting,
 }: {
   subTab: "patient" | "team";
   onChange: (k: "patient" | "team") => void;
   onOpenPatient: (p: Patient) => void;
-  onOpenMeeting: () => void;
+  meetings: TeamMeeting[];
+  onPickMeeting: (m: TeamMeeting) => void;
+  onCreateMeeting: () => void;
 }) => (
   <div className="pb-4">
     <div className="gradient-therapist px-5 pt-6 pb-6 text-white">
@@ -449,7 +453,7 @@ const ChatHub = ({
               onClick={() => onChange(k)}
               className={`flex-1 text-[12px] py-1.5 rounded-full font-semibold transition-all ${active ? "bg-white text-foreground" : "text-white/90"}`}
             >
-              {k === "patient" ? `患者沟通 · ${PATIENT_UNREAD}` : `团队会议 · ${DEFAULT_MEETINGS.length}`}
+              {k === "patient" ? `患者沟通 · ${PATIENT_UNREAD}` : `团队会议 · ${meetings.length}`}
             </button>
           );
         })}
@@ -458,12 +462,12 @@ const ChatHub = ({
     {subTab === "patient" ? (
       <PatientChatListSheet accent="therapist" onPick={onOpenPatient} />
     ) : (
-      <div className="p-4 space-y-3">
-        <button onClick={onOpenMeeting} className="w-full gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold flex items-center justify-center gap-2 shadow-card">
-          <MessageSquare className="w-4 h-4" /> 进入团队会议（针对单个患者）
-        </button>
-        <AICard title="团队会议 · AI 自动纪要">所有会议均会由 AI 自动生成纪要并同步到患者档案。</AICard>
-      </div>
+      <TeamMeetingListSheet
+        accent="therapist"
+        meetings={meetings}
+        onPick={onPickMeeting}
+        onCreate={onCreateMeeting}
+      />
     )}
   </div>
 );
