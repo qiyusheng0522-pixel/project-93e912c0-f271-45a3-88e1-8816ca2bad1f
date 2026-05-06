@@ -82,6 +82,7 @@ const DOCTOR_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: HomeIcon },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "rx", label: "医嘱", icon: Sparkles },
   { key: "chat", label: "沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
   { key: "me", label: "我的", icon: UserIcon },
 ];
@@ -260,7 +261,7 @@ export const DoctorApp = () => {
         />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认康复处方${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
+      <PhoneSheet open={sheet === "rx"} onClose={close} title={`确认康复医嘱${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
         footer={
           <div className="flex gap-2">
             <button onClick={() => toast("已驳回，待 AI 重新生成")} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">驳回</button>
@@ -865,19 +866,21 @@ const PlanSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchMee
 
 const RxSheet = ({ patient }: { patient?: string }) => (
   <div className="p-4 space-y-3">
-    <PatientHeader patient={patient} label="康复处方" />
-    <AICard title="AI 自动生成的康复处方建议">
-      基于已确认方案，自动生成至治疗师端，请确认或调整。
+    <PatientHeader patient={patient} label="康复医嘱" />
+    <AICard title="康复医嘱 · 康复整体计划">
+      由康复治疗师做的「全套训练 + 流程安排」，包含处方里的项目，并新增日常居家训练，请医师审核签发。
     </AICard>
-    <div className="bg-card rounded-2xl shadow-card p-4 space-y-2">
+
+    <SectionTitle title="院内训练处方" />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
       {[
         { type: "PT", name: "下肢力量训练", set: "3 组 × 10 次", freq: "每日" },
         { type: "PT", name: "平衡板训练", set: "15 分钟", freq: "每日" },
         { type: "OT", name: "穿衣 ADL", set: "20 分钟", freq: "每日" },
-        { type: "OT", name: "厨房活动", set: "25 分钟", freq: "3次/周" },
-        { type: "ST", name: "构音训练", set: "30 分钟", freq: "3次/周" },
+        { type: "OT", name: "厨房活动", set: "25 分钟", freq: "3 次/周" },
+        { type: "ST", name: "构音训练", set: "30 分钟", freq: "3 次/周" },
       ].map((r) => (
-        <div key={r.name} className="flex items-center gap-3 py-2 border-b border-border/60 last:border-0">
+        <div key={r.name} className="flex items-center gap-3 py-2.5 px-3">
           <span className="text-[10px] px-2 py-0.5 rounded bg-primary-soft text-primary font-bold">{r.type}</span>
           <div className="flex-1">
             <div className="text-[12px] font-semibold">{r.name}</div>
@@ -886,6 +889,33 @@ const RxSheet = ({ patient }: { patient?: string }) => (
           <button className="text-[11px] text-primary"><Edit3 className="w-3.5 h-3.5" /></button>
         </div>
       ))}
+    </div>
+
+    <SectionTitle title="日常居家训练" extra={<span className="text-[10px] text-muted-foreground">由治疗师补充</span>} />
+    <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+      {[
+        { type: "居家", name: "床边坐起 + 静态平衡", set: "10 分钟", freq: "每日早" },
+        { type: "居家", name: "踝泵 + 股四头肌等长收缩", set: "30 次 × 3", freq: "每日 3 次" },
+        { type: "居家", name: "扶椅站立 → 扶墙行走", set: "15 分钟", freq: "每日晚" },
+        { type: "家属", name: "辅助转移 + 跌倒预防", set: "—", freq: "随时" },
+      ].map((r) => (
+        <div key={r.name} className="flex items-center gap-3 py-2.5 px-3">
+          <span className="text-[10px] px-2 py-0.5 rounded bg-success-soft text-success font-bold">{r.type}</span>
+          <div className="flex-1">
+            <div className="text-[12px] font-semibold">{r.name}</div>
+            <div className="text-[10px] text-muted-foreground">{r.set} · {r.freq}</div>
+          </div>
+          <button className="text-[11px] text-primary"><Edit3 className="w-3.5 h-3.5" /></button>
+        </div>
+      ))}
+    </div>
+
+    <SectionTitle title="流程安排（本周）" />
+    <div className="bg-card rounded-2xl shadow-card p-3 space-y-1.5 text-[11px]">
+      <div className="flex justify-between"><span>09:00 PT · A-301</span><span className="text-muted-foreground">王治疗师</span></div>
+      <div className="flex justify-between"><span>14:00 OT · B-201</span><span className="text-muted-foreground">陈治疗师</span></div>
+      <div className="flex justify-between"><span>16:00 ST · B-205</span><span className="text-muted-foreground">陈思雨</span></div>
+      <div className="flex justify-between"><span>20:00 居家 · 家庭</span><span className="text-muted-foreground">家属协助</span></div>
     </div>
   </div>
 );
