@@ -534,17 +534,6 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         { day: "一", value: 9 }, { day: "二", value: 12 }, { day: "三", value: 11 },
         { day: "四", value: 14 }, { day: "五", value: 13 }, { day: "六", value: 5 }, { day: "日", value: 3 },
       ]}
-      revenue={{
-        monthLabel: "本月收益",
-        monthValue: "18,640",
-        today: "780",
-        pending: "2,420",
-        breakdown: [
-          { label: "PT 治疗", value: "9,200" },
-          { label: "OT 治疗", value: "6,800" },
-          { label: "评估补充", value: "2,640" },
-        ],
-      }}
     />
 
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
