@@ -137,6 +137,7 @@ export const DoctorApp = () => {
           onGoPatients={goPatients}
           onGoPlan={goPlan}
           onGoDischarge={() => setTab("discharge")}
+          onGoChat={() => setTab("chat")}
         />
       )}
       {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} initialFilter={patientsFilter} />}
