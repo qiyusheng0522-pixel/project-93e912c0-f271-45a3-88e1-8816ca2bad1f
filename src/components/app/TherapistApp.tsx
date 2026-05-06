@@ -680,26 +680,62 @@ const ExecSheet = () => (
   </div>
 );
 
-const SummarySheet = () => (
-  <div className="p-4 space-y-3">
-    <SectionTitle title="今日工作小结" extra={<span className="text-[10px] text-muted-foreground">将自动写入患者档案</span>} />
-    <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">完成训练</div>
-        <div className="text-sm font-semibold">5 / 5 项 · 累计 95 分钟</div>
+const SummarySheet = ({ patient }: { patient?: string }) => {
+  const name = patient ? patient.split(" ")[0] : "张建国";
+  return (
+    <div className="p-4 space-y-3">
+      {/* 患者信息卡 */}
+      <div className="bg-card rounded-2xl shadow-card p-4 flex items-center gap-3">
+        <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">
+          {name[0]}
+        </div>
+        <div className="flex-1">
+          <div className="text-sm font-bold">{patient || "张建国 · 床A-301"}</div>
+          <div className="text-[11px] text-muted-foreground mt-0.5">本日小结 · 2026-05-06</div>
+        </div>
+        <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">每日小结</span>
       </div>
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">主观感受 (Borg)</div>
-        <div className="flex gap-1">
-          {[6, 7, 8, 9, 10, 11, 12].map((n) => (
-            <button key={n} className={`flex-1 py-2 rounded-lg text-xs ${n === 9 ? "gradient-therapist text-white" : "bg-muted"}`}>{n}</button>
-          ))}
+
+      <SectionTitle title="本患者今日治疗" extra={<span className="text-[10px] text-muted-foreground">将归入该患者档案</span>} />
+      <div className="bg-card rounded-2xl shadow-card p-4 space-y-3">
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">完成训练项</div>
+          <div className="text-sm font-semibold">PT 下肢力量 · OT 厨房活动 · 共 2 项 / 55 分钟</div>
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">患者主观感受 (Borg)</div>
+          <div className="flex gap-1">
+            {[6, 7, 8, 9, 10, 11, 12].map((n) => (
+              <button key={n} className={`flex-1 py-2 rounded-lg text-xs ${n === 9 ? "gradient-therapist text-white" : "bg-muted"}`}>{n}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">治疗记录</div>
+          <textarea defaultValue={`${name} 今日完成 PT/OT 训练，厨房活动表现明显改善，建议明日加入精细动作训练。`} className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+        </div>
+        <div>
+          <div className="text-[11px] text-muted-foreground mb-1">药物变动 / 反馈</div>
+          <textarea placeholder="如：巴氯芬调整为 10mg bid，肌张力下降..." className="w-full bg-muted rounded-xl p-3 text-xs h-16 outline-none" />
         </div>
       </div>
-      <div>
-        <div className="text-[11px] text-muted-foreground mb-1">治疗记录</div>
-        <textarea defaultValue="患者今日完成全部 OT 任务，厨房活动表现明显改善，建议明日加入精细动作训练。" className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+    </div>
+  );
+};
+
+/* ============== 医嘱 Tab ============== */
+const RxTab = ({ onPick }: { onPick: (item: TodoItem) => void }) => (
+  <div className="pb-4">
+    <div className="gradient-therapist px-5 pt-6 pb-6 text-white relative overflow-hidden">
+      <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
+      <div className="relative">
+        <div className="text-xs opacity-80">康复医嘱</div>
+        <div className="text-[15px] font-semibold mt-0.5">待确认 · {QUEUES.rx.length} 项</div>
+        <div className="text-[11px] opacity-80 mt-1">康复整体计划 · 全套训练 + 流程安排，含居家训练</div>
       </div>
+    </div>
+    <div className="px-4 pt-4">
+      <TodoQueueList accent="therapist" items={QUEUES.rx} onPick={onPick} />
     </div>
   </div>
 );
