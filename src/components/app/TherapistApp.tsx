@@ -227,9 +227,9 @@ export const TherapistApp = () => {
         <ExecSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "summary"} onClose={close} title={`今日工作小结${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
-        footer={<PrimaryBtn variant="therapist" onClick={() => { toast.success("小结已提交，已同步医师端"); close(); }}>提交小结</PrimaryBtn>}>
-        <SummarySheet />
+      <PhoneSheet open={sheet === "summary"} onClose={close} title={`每日小结${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
+        footer={<PrimaryBtn variant="therapist" onClick={() => { toast.success("小结已写入该患者档案"); close(); }}>提交小结</PrimaryBtn>}>
+        <SummarySheet patient={activePatient} />
       </PhoneSheet>
 
       <PhoneSheet open={sheet === "uploadDaily"} onClose={close} title="上传每日治疗情况" accent="therapist"
