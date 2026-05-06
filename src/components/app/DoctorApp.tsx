@@ -484,11 +484,13 @@ const DoctorHome = ({
   onGoPatients,
   onGoPlan,
   onGoDischarge,
+  onGoChat,
 }: {
   onOpen: (k: SheetKey) => void;
   onGoPatients: (filter?: PatientFilter) => void;
   onGoPlan: (stage: PlanStage) => void;
   onGoDischarge: () => void;
+  onGoChat: () => void;
 }) => {
   // 工作台仅保留：患者管理、沟通、线上会诊、出院方案
   const tiles = [
