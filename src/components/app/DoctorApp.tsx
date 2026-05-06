@@ -137,6 +137,7 @@ export const DoctorApp = () => {
           onOpen={open}
           onGoPatients={goPatients}
           onGoPlan={goPlan}
+          onGoRx={goRx}
           onGoDischarge={() => setTab("discharge")}
           onGoChat={() => setTab("chat")}
         />
