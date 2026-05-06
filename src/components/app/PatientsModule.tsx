@@ -973,14 +973,25 @@ export const PatientChatSheet = ({
         <button
           onClick={() => setShowAI(!showAI)}
           className={`w-9 h-9 rounded-full flex items-center justify-center ${showAI ? "gradient-ai text-white" : "bg-muted text-foreground/70"}`}
+          aria-label="AI 建议"
         >
           <Sparkles className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() => {
+            toast("🎤 正在听写…");
+            setTimeout(() => { setInput(v => (v ? v + " " : "") + "请按医嘱循序渐进，注意安全。"); toast.success("语音已转写"); }, 900);
+          }}
+          className="w-9 h-9 rounded-full bg-muted text-foreground/70 flex items-center justify-center"
+          aria-label="语音输入"
+        >
+          <Mic className="w-4 h-4" />
         </button>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === "Enter") send(); }}
-          placeholder="输入消息..."
+          placeholder="输入消息 / 按🎤语音输入..."
           className="flex-1 bg-muted rounded-full px-4 py-2 text-xs outline-none"
         />
         <button onClick={() => send()} className={`w-9 h-9 rounded-full ${accentBg[accent]} text-white flex items-center justify-center`}>
