@@ -160,6 +160,16 @@ export const DoctorApp = () => {
           subtitle="AI 二级方案 · 需医师二次确认"
         />
       )}
+      {tab === "chat" && (
+        <DoctorChatHub
+          subTab={chatSubTab}
+          onChange={setChatSubTab}
+          onOpenPatient={(p) => { setChatPatient(p); setSheet("patientChat"); }}
+          meetings={meetings}
+          onPickMeeting={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreateMeeting={() => setSheet("newMeeting")}
+        />
+      )}
       {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
 
       <PhoneSheet open={sheet === "assess"} onClose={close} title={`首次康复评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="doctor"
