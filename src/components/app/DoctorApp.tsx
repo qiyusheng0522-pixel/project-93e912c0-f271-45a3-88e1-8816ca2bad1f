@@ -542,22 +542,17 @@ const DoctorHome = ({
   onOpen,
   onGoPatients,
   onGoPlan,
+  onGoRx,
   onGoDischarge,
   onGoChat,
 }: {
   onOpen: (k: SheetKey) => void;
   onGoPatients: (filter?: PatientFilter) => void;
   onGoPlan: (stage: PlanStage) => void;
+  onGoRx: () => void;
   onGoDischarge: () => void;
   onGoChat: () => void;
 }) => {
-  // 工作台仅保留：患者管理、沟通、线上会诊、出院方案
-  const tiles = [
-    { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
-    { icon: MessageCircle, label: "沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD + DEFAULT_MEETINGS.length, onClick: () => onGoChat() },
-    { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("videoPicker") },
-    { icon: LogOut, label: "出院方案", color: "text-warning bg-warning-soft", count: 2, onClick: onGoDischarge },
-  ];
   return (
     <div className="pb-4">
       {/* 顶部白色头部 */}
@@ -598,26 +593,10 @@ const DoctorHome = ({
               { label: "待首次评估", count: FIRST_ASSESS_COUNT, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onGoPatients("待首次评估") },
               { label: "待设定目标", count: 3, icon: Target, iconClass: "bg-primary text-white", onClick: () => onGoPlan("goal") },
               { label: "待确认方案", count: 3, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onGoPlan("plan") },
-              { label: "待确认处方", count: 4, icon: Sparkles, iconClass: "bg-success text-white", onClick: () => onGoPlan("airx") },
+              { label: "待确认医嘱", count: 4, icon: Sparkles, iconClass: "bg-success text-white", onClick: onGoRx },
               { label: "待出院方案", count: 2, icon: LogOut, iconClass: "bg-destructive text-white", onClick: onGoDischarge },
             ]}
           />
-        </div>
-
-        <div>
-          <SectionTitle title="其他事项 · 医师工作台" />
-          <div className="grid grid-cols-4 gap-2">
-            {tiles.map((it) => (
-              <WorkbenchTile
-                key={it.label}
-                icon={it.icon}
-                label={it.label}
-                color={it.color}
-                count={it.count}
-                onClick={it.onClick}
-              />
-            ))}
-          </div>
         </div>
 
         <div>
