@@ -531,9 +531,15 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
-      {["护理记录", "给药历史", "宣教记录", "排班", "设置"].map((it) => (
-        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
-          <span className="text-sm">{it}</span>
+      {[
+        { label: "护理记录", info: "本月护理记录 412 条已同步患者档案" },
+        { label: "给药历史", info: "本月给药 286 项，AI 三查七对零差错" },
+        { label: "宣教记录", info: "本月推送 64 次宣教，平均阅读率 86%" },
+        { label: "排班", info: "本周白班 5 / 夜班 2，已与组长确认" },
+        { label: "设置", info: "夜间免打扰：22:00-06:00 · 紧急任务直达" },
+      ].map((it) => (
+        <button key={it.label} onClick={() => toast.success(it.info)} className="w-full flex items-center justify-between px-4 py-3.5">
+          <span className="text-sm">{it.label}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
       ))}
