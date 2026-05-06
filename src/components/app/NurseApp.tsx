@@ -136,6 +136,7 @@ export const NurseApp = () => {
           onOpenQueue={openQueue}
           onOpenDailyNote={() => open("dailyNote")}
           onOpenEdu={() => setTab("edu")}
+          onOpenChat={() => setTab("chat")}
         />
       )}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
