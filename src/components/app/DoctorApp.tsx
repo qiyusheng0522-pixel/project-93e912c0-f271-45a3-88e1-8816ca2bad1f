@@ -112,6 +112,7 @@ export const DoctorApp = () => {
     setPlanStage(stage);
     setTab("plan");
   };
+  const goRx = () => setTab("rx");
   const pickPatient = (p: Patient) => {
     const merged = { ...p, notes: patientNotes[p.id] ?? p.notes };
     setPickedPatient(merged);
