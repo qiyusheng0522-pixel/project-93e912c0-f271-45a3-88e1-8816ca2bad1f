@@ -311,14 +311,14 @@ export const TherapistApp = () => {
 const TherapistHome = ({
   onOpenQueue,
   onGoPatients,
+  onGoRx,
   onUploadDaily,
-  onOpenSummary,
   onOpenMed,
 }: {
   onOpenQueue: (k: QueueKey) => void;
   onGoPatients: () => void;
+  onGoRx: () => void;
   onUploadDaily: () => void;
-  onOpenSummary: () => void;
   onOpenMed: () => void;
 }) => {
   const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
