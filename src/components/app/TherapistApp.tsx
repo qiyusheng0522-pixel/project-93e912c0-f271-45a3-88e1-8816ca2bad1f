@@ -56,6 +56,7 @@ const THERAPIST_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: ClipboardList },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
+  { key: "rx", label: "医嘱", icon: FileText },
   { key: "chat", label: "沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
   { key: "me", label: "我的", icon: UserIcon },
 ];
