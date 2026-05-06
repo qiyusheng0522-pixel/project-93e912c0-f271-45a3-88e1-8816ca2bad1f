@@ -147,9 +147,19 @@ export const DoctorApp = () => {
           accent="doctor"
           onPickPlan={pickPlanPatient}
           initialStage={planStage}
-          stages={["goal", "plan", "airx"]}
+          stages={["goal", "plan"]}
           title="康复方案"
-          subtitle="目标 / 方案 / 康复处方"
+          subtitle="院内康复治疗方案 · 目标 / 方案"
+        />
+      )}
+      {tab === "rx" && (
+        <RehabPlanModule
+          accent="doctor"
+          onPickPlan={pickPlanPatient}
+          initialStage="airx"
+          stages={["airx"]}
+          title="康复医嘱"
+          subtitle="康复整体计划 · 全套训练 + 流程安排 · 含居家训练"
         />
       )}
       {tab === "discharge" && (
