@@ -82,7 +82,7 @@ const DOCTOR_TABS: TabBarItem[] = [
   { key: "home", label: "工作台", icon: HomeIcon },
   { key: "patients", label: "患者管理", icon: UsersRound },
   { key: "plan", label: "康复方案", icon: FileHeart },
-  { key: "discharge", label: "出院方案", icon: LogOut },
+  { key: "chat", label: "沟通", icon: MessageCircle, badge: PATIENT_UNREAD },
   { key: "me", label: "我的", icon: UserIcon },
 ];
 
@@ -99,6 +99,7 @@ export const DoctorApp = () => {
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
   const [therapistPickerOpen, setTherapistPickerOpen] = useState(false);
   const [videoPatient, setVideoPatient] = useState<Patient | null>(null);
+  const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -136,6 +137,7 @@ export const DoctorApp = () => {
           onGoPatients={goPatients}
           onGoPlan={goPlan}
           onGoDischarge={() => setTab("discharge")}
+          onGoChat={() => setTab("chat")}
         />
       )}
       {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} initialFilter={patientsFilter} />}
@@ -157,6 +159,16 @@ export const DoctorApp = () => {
           stages={["discharge"]}
           title="出院方案"
           subtitle="AI 二级方案 · 需医师二次确认"
+        />
+      )}
+      {tab === "chat" && (
+        <DoctorChatHub
+          subTab={chatSubTab}
+          onChange={setChatSubTab}
+          onOpenPatient={(p) => { setChatPatient(p); setSheet("patientChat"); }}
+          meetings={meetings}
+          onPickMeeting={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreateMeeting={() => setSheet("newMeeting")}
         />
       )}
       {tab === "me" && <DoctorMe onOpenTeam={() => open("team")} />}
@@ -467,23 +479,72 @@ const TherapistPickerDialog = ({
   );
 };
 
+const DoctorChatHub = ({
+  subTab,
+  onChange,
+  onOpenPatient,
+  meetings,
+  onPickMeeting,
+  onCreateMeeting,
+}: {
+  subTab: "patient" | "team";
+  onChange: (k: "patient" | "team") => void;
+  onOpenPatient: (p: Patient) => void;
+  meetings: TeamMeeting[];
+  onPickMeeting: (m: TeamMeeting) => void;
+  onCreateMeeting: () => void;
+}) => (
+  <div className="pb-4">
+    <div className="gradient-doctor px-5 pt-6 pb-6 text-white">
+      <div className="text-xs opacity-80">沟通中心</div>
+      <div className="text-[15px] font-semibold mt-0.5">患者沟通 + 团队会议</div>
+      <div className="mt-3 flex gap-1.5 bg-white/15 backdrop-blur rounded-full p-1">
+        {(["patient", "team"] as const).map((k) => {
+          const active = subTab === k;
+          return (
+            <button
+              key={k}
+              onClick={() => onChange(k)}
+              className={`flex-1 text-[12px] py-1.5 rounded-full font-semibold transition-all ${active ? "bg-white text-foreground" : "text-white/90"}`}
+            >
+              {k === "patient" ? `患者沟通 · ${PATIENT_UNREAD}` : `团队会议 · ${meetings.length}`}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+    {subTab === "patient" ? (
+      <PatientChatListSheet accent="doctor" onPick={onOpenPatient} />
+    ) : (
+      <TeamMeetingListSheet
+        accent="doctor"
+        meetings={meetings}
+        onPick={onPickMeeting}
+        onCreate={onCreateMeeting}
+      />
+    )}
+  </div>
+);
+
 const DoctorHome = ({
   onOpen,
   onGoPatients,
   onGoPlan,
   onGoDischarge,
+  onGoChat,
 }: {
   onOpen: (k: SheetKey) => void;
   onGoPatients: (filter?: PatientFilter) => void;
   onGoPlan: (stage: PlanStage) => void;
   onGoDischarge: () => void;
+  onGoChat: () => void;
 }) => {
-  // 工作台仅保留：患者管理、团队会议、患者沟通、线上会诊（首评/目标/方案/AI处方已上移到顶部待办统计）
+  // 工作台仅保留：患者管理、沟通、线上会诊、出院方案
   const tiles = [
     { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
-    { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
-    { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
+    { icon: MessageCircle, label: "沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD + DEFAULT_MEETINGS.length, onClick: () => onGoChat() },
     { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("videoPicker") },
+    { icon: LogOut, label: "出院方案", color: "text-warning bg-warning-soft", count: 2, onClick: onGoDischarge },
   ];
   return (
     <div className="pb-4">
@@ -636,9 +697,14 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </button>
-      {["我的患者", "评估记录", "AI 偏好设置", "帮助与反馈"].map((it) => (
-        <button key={it} onClick={() => toast(it + " · 即将开放")} className="w-full flex items-center justify-between px-4 py-3.5">
-          <span className="text-sm">{it}</span>
+      {[
+        { label: "我的患者", info: `当前共 ${PATIENTS.length} 位患者，新患者 ${NEW_PATIENT_COUNT} 位` },
+        { label: "评估记录", info: "本月已完成 86 份首次评估，详情已同步至档案" },
+        { label: "AI 偏好设置", info: "AI 风险偏好：保守 · 处方默认 4 周复评" },
+        { label: "帮助与反馈", info: "客服电话：400-021-8866，工单已为您准备" },
+      ].map((it) => (
+        <button key={it.label} onClick={() => toast.success(it.info)} className="w-full flex items-center justify-between px-4 py-3.5">
+          <span className="text-sm">{it.label}</span>
           <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
       ))}
