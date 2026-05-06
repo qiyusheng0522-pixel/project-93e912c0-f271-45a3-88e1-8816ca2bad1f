@@ -352,7 +352,7 @@ const TherapistHome = ({
           items={[
             { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
-            { label: "待确认医嘱", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: () => onOpenQueue("rx") },
+            { label: "待确认医嘱", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: onGoRx },
           ]}
         />
       </div>
