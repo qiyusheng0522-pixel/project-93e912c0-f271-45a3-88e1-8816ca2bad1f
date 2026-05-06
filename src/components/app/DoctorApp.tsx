@@ -668,17 +668,6 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
         { day: "一", value: 12 }, { day: "二", value: 15 }, { day: "三", value: 9 },
         { day: "四", value: 18 }, { day: "五", value: 14 }, { day: "六", value: 6 }, { day: "日", value: 4 },
       ]}
-      revenue={{
-        monthLabel: "本月收益",
-        monthValue: "32,580",
-        today: "1,240",
-        pending: "4,860",
-        breakdown: [
-          { label: "门诊 / 评估", value: "12,400" },
-          { label: "方案确认", value: "9,800" },
-          { label: "线上会诊", value: "10,380" },
-        ],
-      }}
     />
 
     <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
