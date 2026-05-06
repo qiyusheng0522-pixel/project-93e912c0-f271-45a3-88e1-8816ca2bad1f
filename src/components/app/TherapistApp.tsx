@@ -147,8 +147,8 @@ export const TherapistApp = () => {
         <TherapistHome
           onOpenQueue={openQueue}
           onGoPatients={() => setTab("patients")}
+          onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
-          onOpenSummary={() => open("summary")}
           onOpenMed={() => open("med")}
         />
       )}
@@ -157,7 +157,6 @@ export const TherapistApp = () => {
           onPickPatient={pickPatient}
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
-          onOpenSummary={() => open("summary")}
         />
       )}
       {tab === "plan" && (
@@ -169,6 +168,9 @@ export const TherapistApp = () => {
           title="康复方案"
           subtitle="治疗目标 + 康复处方确认"
         />
+      )}
+      {tab === "rx" && (
+        <RxTab onPick={(item) => { setActivePatient(item.patient); setSheet("rx"); }} />
       )}
       {tab === "chat" && (
         <ChatHub
