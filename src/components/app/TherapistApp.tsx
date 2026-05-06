@@ -3,6 +3,7 @@ import { ScreenShell, TabBar, type TabBarItem } from "@/components/app/TabBar";
 import { AICard, SectionTitle, StatChip } from "@/components/app/UI";
 import { PhoneSheet, FormRow, PrimaryBtn } from "@/components/app/Sheet";
 import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem } from "@/components/app/TodoQueue";
+import { RxDetail } from "@/components/app/RxDetail";
 import {
   PatientsPage,
   PatientDetailSheet,
