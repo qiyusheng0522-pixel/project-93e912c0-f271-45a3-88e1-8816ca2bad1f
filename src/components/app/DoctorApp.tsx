@@ -479,6 +479,53 @@ const TherapistPickerDialog = ({
   );
 };
 
+const DoctorChatHub = ({
+  subTab,
+  onChange,
+  onOpenPatient,
+  meetings,
+  onPickMeeting,
+  onCreateMeeting,
+}: {
+  subTab: "patient" | "team";
+  onChange: (k: "patient" | "team") => void;
+  onOpenPatient: (p: Patient) => void;
+  meetings: TeamMeeting[];
+  onPickMeeting: (m: TeamMeeting) => void;
+  onCreateMeeting: () => void;
+}) => (
+  <div className="pb-4">
+    <div className="gradient-doctor px-5 pt-6 pb-6 text-white">
+      <div className="text-xs opacity-80">沟通中心</div>
+      <div className="text-[15px] font-semibold mt-0.5">患者沟通 + 团队会议</div>
+      <div className="mt-3 flex gap-1.5 bg-white/15 backdrop-blur rounded-full p-1">
+        {(["patient", "team"] as const).map((k) => {
+          const active = subTab === k;
+          return (
+            <button
+              key={k}
+              onClick={() => onChange(k)}
+              className={`flex-1 text-[12px] py-1.5 rounded-full font-semibold transition-all ${active ? "bg-white text-foreground" : "text-white/90"}`}
+            >
+              {k === "patient" ? `患者沟通 · ${PATIENT_UNREAD}` : `团队会议 · ${meetings.length}`}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+    {subTab === "patient" ? (
+      <PatientChatListSheet accent="doctor" onPick={onOpenPatient} />
+    ) : (
+      <TeamMeetingListSheet
+        accent="doctor"
+        meetings={meetings}
+        onPick={onPickMeeting}
+        onCreate={onCreateMeeting}
+      />
+    )}
+  </div>
+);
+
 const DoctorHome = ({
   onOpen,
   onGoPatients,
