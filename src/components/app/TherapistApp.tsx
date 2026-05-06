@@ -403,13 +403,62 @@ const TherapistHome = ({
 /* ============== 患者管理（治疗师视角） ============== */
 const TherapistPatients = ({
   onPickPatient,
+  onOpenQueue,
+  onOpenSummary,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
+  onOpenSummary?: () => void;
 }) => {
+  // 基于康复方案生成的治疗师待办任务
+  const planTodos = [
+    { patient: "张建国", task: "完成 PT 下肢力量 3×10", from: "康复方案 V2", k: "exec" as QueueKey },
+    { patient: "李 强", task: "OT 厨房活动 25min · 评估反馈", from: "康复目标 · 本周", k: "exec" as QueueKey },
+    { patient: "陈丽华", task: "ST 吞咽训练 30min · 记录改善", from: "康复处方 · 新增", k: "exec" as QueueKey },
+  ];
   return (
     <div className="pb-4">
+      <div className="px-4 pt-3 space-y-2">
+        <button
+          onClick={onOpenSummary}
+          className="w-full bg-card rounded-2xl shadow-card p-3.5 flex items-center gap-3 active:scale-[0.99] border border-secondary/20"
+        >
+          <div className="w-10 h-10 rounded-xl gradient-therapist text-white flex items-center justify-center">
+            <ClipboardList className="w-5 h-5" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-[13px] font-semibold">每日小结输入</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">填写治疗记录 / 药物变动等信息</div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
+        </button>
+
+        <div className="bg-card rounded-2xl shadow-card border border-border/40 p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[12px] font-bold text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-secondary" /> 基于康复方案的待办任务
+            </span>
+            <span className="text-[10px] text-muted-foreground">共 {planTodos.length} 项</span>
+          </div>
+          <div className="divide-y divide-border/60">
+            {planTodos.map((t, i) => (
+              <button
+                key={i}
+                onClick={() => onOpenQueue?.(t.k)}
+                className="w-full text-left py-2 flex items-center gap-2 active:bg-muted/40"
+              >
+                <div className="w-6 h-6 rounded-md bg-secondary-soft text-secondary flex items-center justify-center text-[10px] font-bold">{i + 1}</div>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] font-semibold truncate">{t.patient} · {t.task}</div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">来源：{t.from}</div>
+                </div>
+                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
       <PatientsPage accent="therapist" onPick={onPickPatient} />
     </div>
   );
