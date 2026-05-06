@@ -489,12 +489,12 @@ const DoctorHome = ({
   onGoPlan: (stage: PlanStage) => void;
   onGoDischarge: () => void;
 }) => {
-  // 工作台仅保留：患者管理、团队会议、患者沟通、线上会诊（首评/目标/方案/AI处方已上移到顶部待办统计）
+  // 工作台仅保留：患者管理、沟通、线上会诊、出院方案
   const tiles = [
     { icon: UsersRound, label: "患者管理", color: "text-primary bg-primary-soft", count: PATIENTS.length, onClick: () => onGoPatients("all") },
-    { icon: Users, label: "团队会议", color: "text-warning bg-warning-soft", count: DEFAULT_MEETINGS.length, onClick: () => onOpen("meetingList") },
-    { icon: MessageCircle, label: "患者沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD, onClick: () => onOpen("patientChatList") },
+    { icon: MessageCircle, label: "沟通", color: "text-ai bg-ai-soft", count: PATIENT_UNREAD + DEFAULT_MEETINGS.length, onClick: () => onGoChat() },
     { icon: Video, label: "线上会诊", color: "text-primary bg-primary-soft", onClick: () => onOpen("videoPicker") },
+    { icon: LogOut, label: "出院方案", color: "text-warning bg-warning-soft", count: 2, onClick: onGoDischarge },
   ];
   return (
     <div className="pb-4">
