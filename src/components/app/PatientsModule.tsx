@@ -39,6 +39,8 @@ export type Patient = {
   condition: string; // 病症 用于筛选
   admitDays: number; // 入院天数
   needFirstAssess?: boolean; // 是否待首次评估
+  returnedReassess?: boolean; // 治疗师/护士退回，需重新首次评估
+  returnReason?: string;
   shared: string[];
   notes: { author: string; time: string; text: string }[];
   isNew?: boolean;
