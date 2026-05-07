@@ -121,6 +121,12 @@ export const PATIENTS: Patient[] = [
   },
   { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
   { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
+  { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 颈髓损伤 · 入院第 2 天", status: "新患者", condition: "颈髓损伤", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 ASIA + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
+    { author: "王治疗师", time: "今日 10:20", text: "首评结果不确定 · 建议医师重新组织首次评估。" },
+  ] },
+  { id: "p7", name: "黄淑芬", bed: "320", meta: "女 70 · 脑出血恢复期 · 入院第 3 天", status: "新患者", condition: "脑出血", admitDays: 3, needFirstAssess: true, returnedReassess: true, returnReason: "护士反馈：夜间意识波动 GCS 13→11，AI 评估结论与床旁观察存在偏差。", shared: ["李医师", "赵护士"], notes: [
+    { author: "赵护士", time: "今日 06:50", text: "夜间患者一过性意识模糊，建议医师复评 NIHSS / MMSE。" },
+  ] },
 ];
 
 export const NEW_PATIENT_COUNT = PATIENTS.filter(p => p.isNew).length;
