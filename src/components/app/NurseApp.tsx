@@ -65,9 +65,13 @@ type SheetKey =
   | "team"
   | "patientChat"
   | "eduPush"
-  | "dailyNote";
+  | "dailyNote"
+  | "confirmAssess"
+  | "meetingList"
+  | "newMeeting"
+  | "meeting";
 
-type QueueKey = "med" | "vitals" | "inject" | "obs" | "execTask";
+type QueueKey = "med" | "vitals" | "inject" | "obs" | "execTask" | "confirmAssess";
 
 const QUEUE_TITLE: Record<QueueKey, string> = {
   med: "待执行给药",
@@ -75,6 +79,7 @@ const QUEUE_TITLE: Record<QueueKey, string> = {
   inject: "待执行注射",
   obs: "待病情观察",
   execTask: "待执行护理任务",
+  confirmAssess: "待评估确认",
 };
 
 // 根据康复处方生成的待办（按患者维度）
@@ -100,6 +105,10 @@ const QUEUES: Record<QueueKey, TodoItem[]> = {
     { id: "et1", patient: "312 刘伟明", meta: "伤口换药", detail: "术后第 5 天", time: "16:00", urgency: "high" },
     { id: "et2", patient: "303 张建国", meta: "翻身 + 拍背", detail: "q2h", time: "15:00", urgency: "medium" },
     { id: "et3", patient: "307 李 强", meta: "导尿管护理", detail: "每日清洁", time: "17:00", urgency: "medium" },
+  ],
+  confirmAssess: [
+    { id: "ca1", patient: "305 王秀英", meta: "髋关节置换术后", detail: "医师 + 治疗师评估意见 · 待护士确认", urgency: "high" },
+    { id: "ca2", patient: "311 周建华", meta: "脑梗死恢复期", detail: "FMA 38 / DVT Wells 2 · 待护士补充观察", urgency: "medium" },
   ],
 };
 
