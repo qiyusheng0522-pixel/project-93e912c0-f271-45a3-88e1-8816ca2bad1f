@@ -186,6 +186,7 @@ export const PatientsPage = ({
   const filterChips: { key: PatientFilter; label: string; count: number }[] = [
     { key: "all", label: "全部", count: PATIENTS.length },
     { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
+    { key: "退回重评", label: "退回重评", count: RETURNED_REASSESS_COUNT },
     { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
     { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
   ];
