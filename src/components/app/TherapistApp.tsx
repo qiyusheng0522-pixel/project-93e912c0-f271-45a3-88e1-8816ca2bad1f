@@ -120,6 +120,8 @@ export const TherapistApp = () => {
   const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
+  const [role, setRole] = useState<"therapist" | "lead">("therapist");
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -143,13 +145,16 @@ export const TherapistApp = () => {
 
   return (
     <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
+      <RoleSwitch role={role} onChange={setRole} />
       {tab === "home" && (
         <TherapistHome
+          role={role}
           onOpenQueue={openQueue}
           onGoPatients={() => setTab("patients")}
           onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
           onOpenMed={() => open("med")}
+          onOpenSchedule={() => setScheduleOpen(true)}
         />
       )}
       {tab === "patients" && (
