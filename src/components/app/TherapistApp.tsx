@@ -322,17 +322,21 @@ export const TherapistApp = () => {
 
 /* ============== 治疗师首页 ============== */
 const TherapistHome = ({
+  role,
   onOpenQueue,
   onGoPatients,
   onGoRx,
   onUploadDaily,
   onOpenMed,
+  onOpenSchedule,
 }: {
+  role: "therapist" | "lead";
   onOpenQueue: (k: QueueKey) => void;
   onGoPatients: () => void;
   onGoRx: () => void;
   onUploadDaily: () => void;
   onOpenMed: () => void;
+  onOpenSchedule: () => void;
 }) => {
   const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
     ...QUEUES.confirmAssess.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "confirmAssess" as QueueKey })),
@@ -347,14 +351,28 @@ const TherapistHome = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-muted-foreground">下午好</div>
-            <div className="text-xl font-bold mt-0.5 text-foreground">王治疗师 👋</div>
-            <div className="text-[11px] text-muted-foreground mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
+            <div className="text-xl font-bold mt-0.5 text-foreground">{role === "lead" ? "王治疗师长 👋" : "王治疗师 👋"}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">
+              {role === "lead" ? "PT/OT 治疗师长 · 管理 6 位治疗师" : `PT/OT 治疗师 · 共 ${PATIENTS.length} 位患者`}
+            </div>
           </div>
           <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-secondary-soft text-secondary flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
         </div>
+        <button onClick={onOpenSchedule} className="mt-3 w-full bg-secondary-soft border border-secondary/20 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]">
+          <div className="w-9 h-9 rounded-xl gradient-therapist text-white flex items-center justify-center">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-[12px] font-semibold text-secondary">{role === "lead" ? "查看全治疗师排班" : "我今日的治疗排班"}</div>
+            <div className="text-[10px] text-muted-foreground">
+              {role === "lead" ? "6 位治疗师 · 32 项排班 · AI 已优化" : "5 项治疗 · 09:00 - 16:30"}
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-secondary" />
+        </button>
       </div>
 
       <div className="px-4 mt-3">
