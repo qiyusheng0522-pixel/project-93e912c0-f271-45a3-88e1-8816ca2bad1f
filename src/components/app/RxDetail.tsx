@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { SectionTitle, AICard, StatChip } from "@/components/app/UI";
 import { FormRow } from "@/components/app/Sheet";
-import { Edit3, FileText, Activity, Wrench, Pill, Home as HomeIcon, CalendarClock, ClipboardList } from "lucide-react";
+import { Edit3, FileText, Activity, Wrench, Pill, Home as HomeIcon, CalendarClock, ClipboardList, Plus, Sparkles, Trash2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export type RxAccent = "doctor" | "therapist";
 
