@@ -26,6 +26,7 @@ export type PatientFilter =
   | "all"
   | "新患者"
   | "待首次评估"
+  | "退回重评"
   | "康复中"
   | "待出院"
   | "已出院";
