@@ -10,10 +10,16 @@ import {
   TeamManageSheet,
   PatientChatListSheet,
   PatientChatSheet,
+  IMChatSheet,
+  TeamMeetingListSheet,
+  NewMeetingSheet,
   Patient,
   PATIENTS,
   NEW_PATIENT_COUNT,
   PATIENT_UNREAD,
+  DEFAULT_MEETINGS,
+  DEFAULT_MEETING_MSGS,
+  TeamMeeting,
 } from "@/components/app/PatientsModule";
 import {
   Home as HomeIcon,
