@@ -828,3 +828,119 @@ const MedSheet = () => (
     <textarea placeholder="变动原因 / 治疗师观察..." className="w-full bg-card border border-border rounded-2xl p-3 text-xs h-20 outline-none" />
   </div>
 );
+
+/* ============== 角色切换：治疗师 / 治疗师长 ============== */
+const RoleSwitch = ({ role, onChange }: { role: "therapist" | "lead"; onChange: (r: "therapist" | "lead") => void }) => (
+  <div className="px-4 pt-3">
+    <div className="flex items-center gap-1.5 bg-muted rounded-full p-1">
+      {(["therapist", "lead"] as const).map((r) => {
+        const active = role === r;
+        return (
+          <button
+            key={r}
+            onClick={() => onChange(r)}
+            className={`flex-1 text-[11px] py-1.5 rounded-full font-semibold transition-all ${active ? "gradient-therapist text-white shadow-card" : "text-foreground/70"}`}
+          >
+            {r === "therapist" ? "治疗师视角" : "治疗师长视角"}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+/* ============== 排班视图：治疗师本人 / 治疗师长全员 ============== */
+const MY_SCHEDULE: { time: string; patient: string; bed: string; type: "PT" | "OT" | "ST"; room: string; duration: string }[] = [
+  { time: "09:00", patient: "张建国", bed: "303", type: "PT", room: "A-301", duration: "45 min" },
+  { time: "10:30", patient: "王秀英", bed: "305", type: "PT", room: "A-303", duration: "30 min" },
+  { time: "14:00", patient: "李 强", bed: "307", type: "OT", room: "B-201", duration: "45 min" },
+  { time: "15:30", patient: "陈丽华", bed: "310", type: "ST", room: "B-205", duration: "30 min" },
+  { time: "16:30", patient: "刘伟明", bed: "A-301", type: "PT", room: "A-301", duration: "45 min" },
+];
+
+const TEAM_SCHEDULE: { therapist: string; cert: string; items: { time: string; patient: string; bed: string; type: "PT" | "OT" | "ST"; room: string }[] }[] = [
+  {
+    therapist: "王雅琴", cert: "PT/OT · 8 年", items: [
+      { time: "09:00", patient: "张建国", bed: "303", type: "PT", room: "A-301" },
+      { time: "10:30", patient: "王秀英", bed: "305", type: "PT", room: "A-303" },
+      { time: "14:00", patient: "李 强", bed: "307", type: "OT", room: "B-201" },
+    ],
+  },
+  {
+    therapist: "陈治疗师", cert: "OT · 5 年", items: [
+      { time: "09:30", patient: "陈丽华", bed: "310", type: "OT", room: "B-202" },
+      { time: "11:00", patient: "张建国", bed: "303", type: "OT", room: "B-202" },
+      { time: "15:00", patient: "李 强", bed: "307", type: "OT", room: "B-201" },
+    ],
+  },
+  {
+    therapist: "陈思雨", cert: "ST · 6 年", items: [
+      { time: "10:00", patient: "陈丽华", bed: "310", type: "ST", room: "B-205" },
+      { time: "14:30", patient: "李 强", bed: "307", type: "ST", room: "B-205" },
+    ],
+  },
+  {
+    therapist: "李建华", cert: "PT · 4 年", items: [
+      { time: "09:00", patient: "周建华", bed: "311", type: "PT", room: "A-302" },
+      { time: "13:30", patient: "刘伟明", bed: "A-301", type: "PT", room: "A-302" },
+    ],
+  },
+];
+
+const typeColor = (t: "PT" | "OT" | "ST") =>
+  t === "PT" ? "bg-primary/10 text-primary" : t === "OT" ? "bg-secondary-soft text-secondary" : "bg-success-soft text-success";
+
+const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
+  if (role === "therapist") {
+    return (
+      <div className="p-4 space-y-3">
+        <AICard title="今日排班 · AI 已优化训练室占用">
+          共 {MY_SCHEDULE.length} 项治疗 · 时间段 09:00 - 16:30。点击单项可查看患者档案。
+        </AICard>
+        <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+          {MY_SCHEDULE.map((s, i) => (
+            <div key={i} className="px-4 py-3 flex items-center gap-3">
+              <div className="text-[12px] font-bold w-12 text-foreground">{s.time}</div>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${typeColor(s.type)}`}>{s.type}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[12px] font-semibold truncate">{s.patient} <span className="text-muted-foreground font-normal">· 床 {s.bed}</span></div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{s.room} · {s.duration}</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="p-4 space-y-3">
+      <AICard title="治疗师长 · 全员排班总览">
+        共 {TEAM_SCHEDULE.length} 位治疗师 · {TEAM_SCHEDULE.reduce((n, t) => n + t.items.length, 0)} 项治疗。点击单项可调整排班 / 转派。
+      </AICard>
+      {TEAM_SCHEDULE.map((t) => (
+        <div key={t.therapist} className="bg-card rounded-2xl shadow-card overflow-hidden">
+          <div className="px-4 py-2.5 bg-muted/50 flex items-center justify-between">
+            <div>
+              <div className="text-[13px] font-bold">{t.therapist}</div>
+              <div className="text-[10px] text-muted-foreground">{t.cert} · {t.items.length} 项今日</div>
+            </div>
+            <button onClick={() => toast("已进入排班调整")} className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">调整</button>
+          </div>
+          <div className="divide-y divide-border/60">
+            {t.items.map((s, i) => (
+              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+                <div className="text-[12px] font-bold w-12">{s.time}</div>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${typeColor(s.type)}`}>{s.type}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] truncate">{s.patient} <span className="text-muted-foreground">· 床 {s.bed}</span></div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{s.room}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
