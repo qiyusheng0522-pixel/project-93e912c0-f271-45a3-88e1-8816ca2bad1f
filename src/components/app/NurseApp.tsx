@@ -10,10 +10,16 @@ import {
   TeamManageSheet,
   PatientChatListSheet,
   PatientChatSheet,
+  IMChatSheet,
+  TeamMeetingListSheet,
+  NewMeetingSheet,
   Patient,
   PATIENTS,
   NEW_PATIENT_COUNT,
   PATIENT_UNREAD,
+  DEFAULT_MEETINGS,
+  DEFAULT_MEETING_MSGS,
+  TeamMeeting,
 } from "@/components/app/PatientsModule";
 import {
   Home as HomeIcon,
@@ -59,9 +65,13 @@ type SheetKey =
   | "team"
   | "patientChat"
   | "eduPush"
-  | "dailyNote";
+  | "dailyNote"
+  | "confirmAssess"
+  | "meetingList"
+  | "newMeeting"
+  | "meeting";
 
-type QueueKey = "med" | "vitals" | "inject" | "obs" | "execTask";
+type QueueKey = "med" | "vitals" | "inject" | "obs" | "execTask" | "confirmAssess";
 
 const QUEUE_TITLE: Record<QueueKey, string> = {
   med: "待执行给药",
@@ -69,6 +79,7 @@ const QUEUE_TITLE: Record<QueueKey, string> = {
   inject: "待执行注射",
   obs: "待病情观察",
   execTask: "待执行护理任务",
+  confirmAssess: "待评估确认",
 };
 
 // 根据康复处方生成的待办（按患者维度）
@@ -95,6 +106,10 @@ const QUEUES: Record<QueueKey, TodoItem[]> = {
     { id: "et2", patient: "303 张建国", meta: "翻身 + 拍背", detail: "q2h", time: "15:00", urgency: "medium" },
     { id: "et3", patient: "307 李 强", meta: "导尿管护理", detail: "每日清洁", time: "17:00", urgency: "medium" },
   ],
+  confirmAssess: [
+    { id: "ca1", patient: "305 王秀英", meta: "髋关节置换术后", detail: "医师 + 治疗师评估意见 · 待护士确认", urgency: "high" },
+    { id: "ca2", patient: "311 周建华", meta: "脑梗死恢复期", detail: "FMA 38 / DVT Wells 2 · 待护士补充观察", urgency: "medium" },
+  ],
 };
 
 export const NurseApp = () => {
@@ -105,6 +120,9 @@ export const NurseApp = () => {
   const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
   const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
+  const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
+  const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
+  const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -127,6 +145,7 @@ export const NurseApp = () => {
     inject: "inject",
     obs: "obs",
     execTask: "execTask",
+    confirmAssess: "confirmAssess",
   };
 
   return (
@@ -141,14 +160,55 @@ export const NurseApp = () => {
       )}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
       {tab === "edu" && <EduPage onOpenPush={() => open("eduPush")} />}
-      {tab === "chat" && <PatientChatListSheet accent="nurse" onPick={(p) => { setChatPatient(p); setSheet("patientChat"); }} />}
+      {tab === "chat" && (
+        <NurseChatHub
+          subTab={chatSubTab}
+          onChange={setChatSubTab}
+          onOpenPatient={(p) => { setChatPatient(p); setSheet("patientChat"); }}
+          meetings={meetings}
+          onPickMeeting={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreateMeeting={() => setSheet("newMeeting")}
+        />
+      )}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
-      {(["med", "vitals", "inject", "obs", "execTask"] as QueueKey[]).map((k) => (
+      {(["med", "vitals", "inject", "obs", "execTask", "confirmAssess"] as QueueKey[]).map((k) => (
         <PhoneSheet key={k} open={queue === k} onClose={closeQueue} title={QUEUE_TITLE[k]} accent="nurse">
           <TodoQueueList accent="nurse" items={QUEUES[k]} onPick={(item) => pickFromQueue(item, queueToSheet[k])} />
         </PhoneSheet>
       ))}
+
+      <PhoneSheet open={sheet === "confirmAssess"} onClose={close} title={`评估结果确认${activePatient ? " · " + activePatient : ""}`} accent="nurse"
+        footer={<div className="flex gap-2">
+          <button onClick={() => { toast("已请医师再次评估 · 结果不确定"); close(); }} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">结果不确定</button>
+          <button onClick={() => { toast.success("评估已确认 · 已同步医师 / 治疗师"); close(); }} className="flex-1 gradient-nurse text-white rounded-2xl py-3 text-sm font-semibold">确认结果</button>
+        </div>}>
+        <NurseConfirmAssessSheet patient={activePatient} />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "meetingList"} onClose={close} title="团队会议" accent="nurse">
+        <TeamMeetingListSheet
+          accent="nurse"
+          meetings={meetings}
+          onPick={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreate={() => setSheet("newMeeting")}
+        />
+      </PhoneSheet>
+      <PhoneSheet open={sheet === "newMeeting"} onClose={() => setSheet("meetingList")} title="新增团队会议" accent="nurse">
+        <NewMeetingSheet accent="nurse" onCreate={(m) => { setMeetings([m, ...meetings]); setActiveMeeting(m); toast.success("会议已创建"); setSheet("meeting"); }} />
+      </PhoneSheet>
+      <PhoneSheet open={sheet === "meeting"} onClose={() => setSheet("meetingList")} title="团队会议" accent="nurse" flush hideHeader>
+        <IMChatSheet
+          accent="nurse"
+          title={`团队会议 · ${activeMeeting?.patientName ?? "张建国"}`}
+          subtitle={activeMeeting?.topic ?? "护理协同"}
+          participants={activeMeeting?.participants ?? ["李医师", "王治疗师", "赵护士"]}
+          initialMessages={DEFAULT_MEETING_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={() => setSheet("meetingList")}
+        />
+      </PhoneSheet>
 
       <PhoneSheet open={sheet === "med"} onClose={close} title={`给药操作${activePatient ? " · " + activePatient : ""}`} accent="nurse"
         footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("给药完成 · 已自动生成执行记录"); close(); }}>确认给药完成</PrimaryBtn>}>
@@ -267,6 +327,7 @@ const NurseHome = ({
         </div>
         <PendingTodoGrid
           items={[
+            { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
             { label: "待护理", count: QUEUES.execTask.length, icon: HeartPulse, iconClass: "bg-success text-white", onClick: () => onOpenQueue("execTask") },
             { label: "待记录", count: QUEUES.vitals.length, icon: Activity, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("vitals") },
             { label: "待宣教", count: 3, icon: BookOpen, iconClass: "bg-warning text-white", onClick: onOpenEdu },
@@ -538,3 +599,116 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
     </div>
   </div>
 );
+
+/* ============== 沟通 Hub：患者沟通 + 团队会议 ============== */
+const NurseChatHub = ({
+  subTab,
+  onChange,
+  onOpenPatient,
+  meetings,
+  onPickMeeting,
+  onCreateMeeting,
+}: {
+  subTab: "patient" | "team";
+  onChange: (k: "patient" | "team") => void;
+  onOpenPatient: (p: Patient) => void;
+  meetings: TeamMeeting[];
+  onPickMeeting: (m: TeamMeeting) => void;
+  onCreateMeeting: () => void;
+}) => (
+  <div className="pb-4">
+    <div className="gradient-nurse px-5 pt-6 pb-6 text-white">
+      <div className="text-xs opacity-80">沟通中心</div>
+      <div className="text-[15px] font-semibold mt-0.5">患者沟通 + 团队会议</div>
+      <div className="mt-3 flex gap-1.5 bg-white/15 backdrop-blur rounded-full p-1">
+        {(["patient", "team"] as const).map((k) => {
+          const active = subTab === k;
+          return (
+            <button
+              key={k}
+              onClick={() => onChange(k)}
+              className={`flex-1 text-[12px] py-1.5 rounded-full font-semibold transition-all ${active ? "bg-white text-foreground" : "text-white/90"}`}
+            >
+              {k === "patient" ? `患者沟通 · ${PATIENT_UNREAD}` : `团队会议 · ${meetings.length}`}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+    {subTab === "patient" ? (
+      <PatientChatListSheet accent="nurse" onPick={onOpenPatient} />
+    ) : (
+      <TeamMeetingListSheet
+        accent="nurse"
+        meetings={meetings}
+        onPick={onPickMeeting}
+        onCreate={onCreateMeeting}
+      />
+    )}
+  </div>
+);
+
+/* ============== 评估结果确认（护士视角） ============== */
+const NurseConfirmAssessSheet = ({ patient }: { patient?: string }) => {
+  const name = patient ? patient.split(" ").slice(-1)[0] : "王秀英";
+  const [supplement, setSupplement] = useState(
+    "夜间巡视 q2h：意识清楚，伤口干洁；3:00 一过性 BP 152/90 已记录，VAS 由 6 降至 3；尚需观察 24h 跌倒倾向。"
+  );
+  return (
+    <div className="p-4 space-y-3">
+      <div className="bg-card rounded-2xl shadow-card p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl gradient-nurse text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
+          <div className="flex-1">
+            <div className="text-sm font-bold">{patient || "305 王秀英 · 女 68 岁"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">髋关节置换术后 · 入院第 5 天</div>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-rose-50 text-role-nurse font-semibold">评估确认</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">BP</div><div className="text-[12px] font-semibold mt-0.5">128/82</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">VAS</div><div className="text-[12px] font-semibold mt-0.5">6 → 3</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">DVT 风险</div><div className="text-[12px] font-semibold mt-0.5">中</div></div>
+        </div>
+      </div>
+
+      <SectionTitle title="康复医师评估意见" extra={<span className="text-[10px] text-muted-foreground">李志远 · 主任医师</span>} />
+      <div className="bg-card rounded-2xl shadow-card p-3 text-[12px] text-foreground/85 leading-relaxed">
+        Harris 65 / Berg 32 / VAS 6。综合判定：术后早期，疼痛是主要限制因素，康复潜力良好。
+        建议先 1 周疼痛干预 + 渐进负重 + 平衡训练；DVT 中风险，请加强皮下注射依从性与下肢观察。
+      </div>
+
+      <SectionTitle title="治疗师评估意见" extra={<span className="text-[10px] text-muted-foreground">王雅琴 · PT/OT</span>} />
+      <div className="bg-card rounded-2xl shadow-card p-3 text-[12px] text-foreground/85 leading-relaxed">
+        实测 ROM 屈曲 60°、外展 25°，主动活动 VAS 7；床椅转移需中等辅助。
+        建议先 1 周等长收缩 + 疼痛干预，再渐进负重；夜间疼痛与睡眠请护理协助监测。
+      </div>
+
+      <AICard title="AI 多角色对比">
+        医师与治疗师结论一致：术后早期 · 疼痛主导 · 康复潜力良好。
+        请护士结合床旁观察补充意见，确认后将作为康复方案启动依据。
+      </AICard>
+
+      <SectionTitle title="护士补充意见（必填）" extra={<span className="text-[10px] text-muted-foreground">床旁观察 · 用药依从 · 风险</span>} />
+      <div className="bg-card rounded-2xl shadow-card p-3">
+        <textarea
+          value={supplement}
+          onChange={(e) => setSupplement(e.target.value)}
+          placeholder="补充夜间观察、疼痛变化、用药执行、跌倒/压疮风险……"
+          className="w-full bg-muted rounded-xl p-3 text-xs h-28 outline-none"
+        />
+        <div className="flex justify-end mt-2">
+          <button onClick={() => setSupplement("")} className="text-[11px] text-muted-foreground">一键清空</button>
+        </div>
+      </div>
+
+      <SectionTitle title="逐项核对" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="疼痛 VAS 趋势" value="6 → 3 ✓" hint="夜间用药后下降" />
+        <FormRow label="DVT 预防执行" value="低分子肝素 0.4ml ih ✓" />
+        <FormRow label="跌倒预防" value="床栏 + 呼叫器 ✓" />
+        <FormRow label="伤口情况" value="干洁 ✓" />
+      </div>
+    </div>
+  );
+};

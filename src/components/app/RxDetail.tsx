@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { SectionTitle, AICard, StatChip } from "@/components/app/UI";
 import { FormRow } from "@/components/app/Sheet";
-import { Edit3, FileText, Activity, Wrench, Pill, Home as HomeIcon, CalendarClock, ClipboardList } from "lucide-react";
+import { Edit3, FileText, Activity, Wrench, Pill, Home as HomeIcon, CalendarClock, ClipboardList, Plus, Sparkles, Trash2, RefreshCw } from "lucide-react";
+import { toast } from "sonner";
 
 export type RxAccent = "doctor" | "therapist";
 
@@ -103,14 +105,9 @@ export const RxDetail = ({
         <FormRow label="家用握力球" value="1 组 (软/中)" hint="居家手功能训练" />
       </div>
 
-      {/* 5. 用药处方 */}
-      <SectionTitle title="⑤ 用药处方" extra={<span className="text-[10px] text-muted-foreground">合并用药</span>} />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="阿司匹林肠溶片" value="100 mg qd" hint="抗凝 · 早餐后" />
-        <FormRow label="阿托伐他汀钙" value="20 mg qn" hint="调脂 · 睡前" />
-        <FormRow label="甲钴胺胶囊" value="0.5 mg tid" hint="营养神经" />
-        <FormRow label="巴氯芬片" value="10 mg bid" hint="缓解痉挛 · 按需" />
-      </div>
+      {/* 5. 用药处方（AI 建议 + 手动调整） */}
+      <SectionTitle title="⑤ 用药处方" extra={<span className="text-[10px] text-muted-foreground">AI 建议 · 可手动调整</span>} />
+      <MedsEditor accent={accent} />
 
       {/* 6. 居家康复指导 */}
       <SectionTitle title="⑥ 居家康复指导" extra={<span className="text-[10px] text-muted-foreground">家庭自训</span>} />
@@ -151,5 +148,87 @@ export const RxDetail = ({
         <FormRow label="结局评估" value="预计 4 周达 Barthel 75" hint="AI 预测置信度 82%" />
       </div>
     </div>
+  );
+};
+
+type Med = { name: string; dose: string; hint: string; ai?: boolean };
+
+const AI_MEDS: Med[] = [
+  { name: "阿司匹林肠溶片", dose: "100 mg qd", hint: "抗凝 · 早餐后", ai: true },
+  { name: "阿托伐他汀钙", dose: "20 mg qn", hint: "调脂 · 睡前", ai: true },
+  { name: "甲钴胺胶囊", dose: "0.5 mg tid", hint: "营养神经", ai: true },
+  { name: "巴氯芬片", dose: "10 mg bid", hint: "缓解痉挛 · 按需", ai: true },
+];
+
+const MedsEditor = ({ accent }: { accent: RxAccent }) => {
+  const [meds, setMeds] = useState<Med[]>(AI_MEDS);
+  const [editIdx, setEditIdx] = useState<number | null>(null);
+  const [adding, setAdding] = useState(false);
+  const [draft, setDraft] = useState<Med>({ name: "", dose: "", hint: "" });
+  const accentText = accent === "doctor" ? "text-role-doctor" : "text-role-therapist";
+  const accentBtn = accent === "doctor" ? "gradient-doctor" : "gradient-therapist";
+
+  const update = (i: number, m: Med) => setMeds(meds.map((x, idx) => (idx === i ? m : x)));
+  const remove = (i: number) => { setMeds(meds.filter((_, idx) => idx !== i)); setEditIdx(null); toast("已移除该药品"); };
+  const regen = () => { setMeds(AI_MEDS); toast.success("AI 已重新生成用药建议"); };
+
+  return (
+    <>
+      <div className="bg-ai/5 border border-ai/20 rounded-2xl p-3 flex items-center gap-2">
+        <Sparkles className="w-4 h-4 text-ai" />
+        <div className="flex-1 text-[11px] text-foreground/80">AI 已基于诊断、既往史与合并用药生成建议，请医师核对后调整。</div>
+        <button onClick={regen} className="text-[11px] text-ai font-semibold flex items-center gap-1"><RefreshCw className="w-3 h-3" />重新生成</button>
+      </div>
+
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        {meds.map((m, i) => (
+          <div key={i} className="px-3 py-2.5">
+            {editIdx === i ? (
+              <div className="space-y-2">
+                <input value={m.name} onChange={(e) => update(i, { ...m, name: e.target.value })} className="w-full bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="药品名称" />
+                <div className="grid grid-cols-2 gap-2">
+                  <input value={m.dose} onChange={(e) => update(i, { ...m, dose: e.target.value })} className="bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="剂量 · 频次" />
+                  <input value={m.hint} onChange={(e) => update(i, { ...m, hint: e.target.value })} className="bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="说明" />
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button onClick={() => remove(i)} className="text-[11px] text-destructive flex items-center gap-1"><Trash2 className="w-3 h-3" />删除</button>
+                  <button onClick={() => { setEditIdx(null); toast.success("已保存修改"); }} className={`text-[11px] px-3 py-1 rounded-full text-white ${accentBtn}`}>完成</button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Pill className={`w-3.5 h-3.5 ${accentText}`} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[12px] font-semibold">{m.name}</span>
+                    {m.ai && <span className="text-[9px] px-1.5 py-0.5 rounded bg-ai/10 text-ai font-bold">AI</span>}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">{m.dose} · {m.hint}</div>
+                </div>
+                <button onClick={() => setEditIdx(i)} className={accentText}><Edit3 className="w-3.5 h-3.5" /></button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {adding ? (
+        <div className="bg-card rounded-2xl shadow-card p-3 space-y-2 border border-dashed border-border">
+          <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} className="w-full bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="新药品名称" />
+          <div className="grid grid-cols-2 gap-2">
+            <input value={draft.dose} onChange={(e) => setDraft({ ...draft, dose: e.target.value })} className="bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="剂量 · 频次（如 5mg bid）" />
+            <input value={draft.hint} onChange={(e) => setDraft({ ...draft, hint: e.target.value })} className="bg-muted rounded px-2 py-1.5 text-[12px]" placeholder="说明" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <button onClick={() => { setAdding(false); setDraft({ name: "", dose: "", hint: "" }); }} className="text-[11px] text-muted-foreground">取消</button>
+            <button onClick={() => { if (!draft.name) return; setMeds([...meds, draft]); setAdding(false); setDraft({ name: "", dose: "", hint: "" }); toast.success("已新增药品"); }} className={`text-[11px] px-3 py-1 rounded-full text-white ${accentBtn}`}>新增</button>
+          </div>
+        </div>
+      ) : (
+        <button onClick={() => setAdding(true)} className={`w-full flex items-center justify-center gap-1 text-xs ${accentText} font-semibold py-2`}>
+          <Plus className="w-3.5 h-3.5" /> 手动新增药品
+        </button>
+      )}
+    </>
   );
 };

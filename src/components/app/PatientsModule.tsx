@@ -26,6 +26,7 @@ export type PatientFilter =
   | "all"
   | "新患者"
   | "待首次评估"
+  | "退回重评"
   | "康复中"
   | "待出院"
   | "已出院";
@@ -39,6 +40,8 @@ export type Patient = {
   condition: string; // 病症 用于筛选
   admitDays: number; // 入院天数
   needFirstAssess?: boolean; // 是否待首次评估
+  returnedReassess?: boolean; // 治疗师/护士退回，需重新首次评估
+  returnReason?: string;
   shared: string[];
   notes: { author: string; time: string; text: string }[];
   isNew?: boolean;
@@ -119,10 +122,17 @@ export const PATIENTS: Patient[] = [
   },
   { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
   { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
+  { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 颈髓损伤 · 入院第 2 天", status: "新患者", condition: "颈髓损伤", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 ASIA + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
+    { author: "王治疗师", time: "今日 10:20", text: "首评结果不确定 · 建议医师重新组织首次评估。" },
+  ] },
+  { id: "p7", name: "黄淑芬", bed: "320", meta: "女 70 · 脑出血恢复期 · 入院第 3 天", status: "新患者", condition: "脑出血", admitDays: 3, needFirstAssess: true, returnedReassess: true, returnReason: "护士反馈：夜间意识波动 GCS 13→11，AI 评估结论与床旁观察存在偏差。", shared: ["李医师", "赵护士"], notes: [
+    { author: "赵护士", time: "今日 06:50", text: "夜间患者一过性意识模糊，建议医师复评 NIHSS / MMSE。" },
+  ] },
 ];
 
 export const NEW_PATIENT_COUNT = PATIENTS.filter(p => p.isNew).length;
 export const FIRST_ASSESS_COUNT = PATIENTS.filter(p => p.needFirstAssess).length;
+export const RETURNED_REASSESS_COUNT = PATIENTS.filter(p => p.returnedReassess).length;
 export const ALL_CONDITIONS = Array.from(new Set(PATIENTS.map(p => p.condition)));
 
 const accentBg: Record<Accent, string> = {
@@ -156,6 +166,7 @@ export const PatientsPage = ({
   const matchStatus = (p: Patient) => {
     if (statusFilter === "all") return true;
     if (statusFilter === "待首次评估") return p.needFirstAssess;
+    if (statusFilter === "退回重评") return p.returnedReassess;
     if (statusFilter === "新患者") return p.isNew;
     return p.status === statusFilter;
   };
@@ -175,6 +186,7 @@ export const PatientsPage = ({
   const filterChips: { key: PatientFilter; label: string; count: number }[] = [
     { key: "all", label: "全部", count: PATIENTS.length },
     { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
+    { key: "退回重评", label: "退回重评", count: RETURNED_REASSESS_COUNT },
     { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
     { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
   ];
@@ -284,6 +296,7 @@ const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Ac
             <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
             {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
             {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
+            {p.returnedReassess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">退回重评</span>}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -337,6 +350,13 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
           <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">协作成员</div><div className="text-[12px] font-semibold mt-0.5">{patient.shared.length} 人</div></div>
         </div>
       </div>
+
+      {patient.returnedReassess && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-[12px] text-destructive">
+          <div className="font-semibold flex items-center gap-1">⟲ 已被退回 · 需重新首次评估</div>
+          <div className="text-[11px] mt-1 text-destructive/80 leading-relaxed">{patient.returnReason}</div>
+        </div>
+      )}
 
       {actions && actions.length > 0 && (
         <div className={`grid gap-2 ${actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
