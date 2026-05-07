@@ -132,6 +132,7 @@ export const PATIENTS: Patient[] = [
 
 export const NEW_PATIENT_COUNT = PATIENTS.filter(p => p.isNew).length;
 export const FIRST_ASSESS_COUNT = PATIENTS.filter(p => p.needFirstAssess).length;
+export const RETURNED_REASSESS_COUNT = PATIENTS.filter(p => p.returnedReassess).length;
 export const ALL_CONDITIONS = Array.from(new Set(PATIENTS.map(p => p.condition)));
 
 const accentBg: Record<Accent, string> = {
