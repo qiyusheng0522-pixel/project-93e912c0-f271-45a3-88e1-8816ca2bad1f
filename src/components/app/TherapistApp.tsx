@@ -312,6 +312,10 @@ export const TherapistApp = () => {
           onClose={() => setSheet("meetingList")}
         />
       </PhoneSheet>
+
+      <PhoneSheet open={scheduleOpen} onClose={() => setScheduleOpen(false)} title={role === "lead" ? "全治疗师排班 · 治疗师长视图" : "我的排班 · 今日"} accent="therapist">
+        <ScheduleView role={role} />
+      </PhoneSheet>
     </ScreenShell>
   );
 };
