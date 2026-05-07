@@ -586,27 +586,28 @@ const GoalAdjustSheet = ({ patient }: { patient?: string }) => {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
           <div className="flex-1">
-            <div className="text-sm font-bold">{patient || "李 强 · 男 42 岁"}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天</div>
+            <div className="text-sm font-bold">{patient || "李 强 · 男 42 · 床307"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天 · 主管医师：李志远</div>
           </div>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">治疗目标</span>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">康复目标</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <StatChip label="FMA" value="42" accent="primary" />
+          <StatChip label="Barthel" value="70" accent="success" />
+          <StatChip label="VAS" value="3" accent="warning" />
         </div>
       </div>
-
-      <AICard title="医师已确认康复目标 · 治疗师细化生成">
-        医师设定整体目标：ADL Barthel ≥ 85，独立步行 50m。请在此基础上拆解为可执行的治疗目标并可手动调整。
+      <AICard title="AI 智能设定康复目标（与医师端一致）">
+        基于评估数据与同类病例匹配，AI 已生成 4 周分阶段目标。治疗师可在此基础上微调并回传医师。
       </AICard>
-
-      <SectionTitle title="治疗目标（可调整）" />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="ADL Barthel" value={<input defaultValue="70" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="医师目标 85 · 本周分阶段 70" />
-        <FormRow label="步行距离 (m)" value={<input defaultValue="20" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="本周阶段目标" />
-        <FormRow label="FMA 提升" value={<input defaultValue="4" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="分 · 本周" />
-        <FormRow label="目标周期" value={<input defaultValue="1" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="周" />
+        <FormRow label="短期目标 (1 周)" value={<input defaultValue="床椅转移独立完成" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="中期目标 (2 周)" value={<input defaultValue="助行器辅助步行 30m" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="长期目标 (4 周)" value={<input defaultValue="独立步行 ≥ 50m，FMA +8" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="ADL 目标" value={<input defaultValue="Barthel ≥ 75" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
       </div>
-
       <button className="w-full flex items-center justify-center gap-1 text-xs text-secondary font-semibold py-2" onClick={() => toast("已新增自定义目标项")}>
-        <Plus className="w-3.5 h-3.5" /> 新增治疗目标项
+        <Plus className="w-3.5 h-3.5" /> 新增自定义目标
       </button>
     </div>
   );
