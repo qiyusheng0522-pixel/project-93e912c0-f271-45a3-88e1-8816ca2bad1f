@@ -357,6 +357,8 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
           <div className="text-[11px] mt-1 text-destructive/80 leading-relaxed">{patient.returnReason}</div>
         </div>
       )}
+
+      {actions && actions.length > 0 && (
         <div className={`grid gap-2 ${actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
           {actions.map((a) => {
             const Icon = a.icon;
