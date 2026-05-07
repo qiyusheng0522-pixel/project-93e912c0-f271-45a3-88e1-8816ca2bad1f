@@ -913,34 +913,63 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
       </div>
     );
   }
+  // 治疗师长视图：横向时间 × 纵向人员的矩阵表
+  const SLOTS = ["09:00", "09:30", "10:00", "10:30", "11:00", "13:30", "14:00", "14:30", "15:00", "15:30", "16:30"];
+  const total = TEAM_SCHEDULE.reduce((n, t) => n + t.items.length, 0);
   return (
     <div className="p-4 space-y-3">
       <AICard title="治疗师长 · 全员排班总览">
-        共 {TEAM_SCHEDULE.length} 位治疗师 · {TEAM_SCHEDULE.reduce((n, t) => n + t.items.length, 0)} 项治疗。点击单项可调整排班 / 转派。
+        共 {TEAM_SCHEDULE.length} 位治疗师 · {total} 项治疗 · 横向时间 / 纵向人员。点击单元格可调整 / 转派。
       </AICard>
-      {TEAM_SCHEDULE.map((t) => (
-        <div key={t.therapist} className="bg-card rounded-2xl shadow-card overflow-hidden">
-          <div className="px-4 py-2.5 bg-muted/50 flex items-center justify-between">
-            <div>
-              <div className="text-[13px] font-bold">{t.therapist}</div>
-              <div className="text-[10px] text-muted-foreground">{t.cert} · {t.items.length} 项今日</div>
-            </div>
-            <button onClick={() => toast("已进入排班调整")} className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">调整</button>
-          </div>
-          <div className="divide-y divide-border/60">
-            {t.items.map((s, i) => (
-              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
-                <div className="text-[12px] font-bold w-12">{s.time}</div>
-                <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${typeColor(s.type)}`}>{s.type}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[12px] truncate">{s.patient} <span className="text-muted-foreground">· 床 {s.bed}</span></div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">{s.room}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+      <div className="bg-card rounded-2xl shadow-card overflow-hidden">
+        <div className="overflow-x-auto scrollbar-hide">
+          <table className="text-[10px] border-collapse min-w-full">
+            <thead>
+              <tr className="bg-muted/60">
+                <th className="sticky left-0 z-10 bg-muted/60 px-2 py-2 text-left font-semibold text-foreground border-r border-border/60 w-[88px]">治疗师</th>
+                {SLOTS.map((t) => (
+                  <th key={t} className="px-1.5 py-2 font-semibold text-muted-foreground border-r border-border/60 last:border-0 w-[60px]">{t}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {TEAM_SCHEDULE.map((row) => (
+                <tr key={row.therapist} className="border-t border-border/60">
+                  <td className="sticky left-0 z-10 bg-card px-2 py-2 border-r border-border/60 align-top">
+                    <div className="text-[11px] font-bold leading-tight">{row.therapist}</div>
+                    <div className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{row.cert}</div>
+                  </td>
+                  {SLOTS.map((slot) => {
+                    const item = row.items.find((i) => i.time === slot);
+                    return (
+                      <td key={slot} className="px-1 py-1 border-r border-border/60 last:border-0 align-top">
+                        {item ? (
+                          <button
+                            onClick={() => toast(`${row.therapist} · ${item.time} · ${item.patient}`)}
+                            className={`w-full rounded-md px-1 py-1 text-left ${typeColor(item.type)}`}
+                          >
+                            <div className="font-bold leading-tight">{item.type}</div>
+                            <div className="leading-tight truncate">{item.patient}</div>
+                            <div className="text-[9px] opacity-75 leading-tight truncate">{item.room}</div>
+                          </button>
+                        ) : (
+                          <div className="h-10 rounded-md border border-dashed border-border/50" />
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ))}
+      </div>
+      <div className="flex items-center gap-3 text-[10px] text-muted-foreground px-1">
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-primary/30" />PT</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-secondary-soft" />OT</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-sm bg-success-soft" />ST</span>
+        <span className="ml-auto">空白格 = 空闲时段</span>
+      </div>
     </div>
   );
 };
