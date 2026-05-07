@@ -120,6 +120,9 @@ export const NurseApp = () => {
   const [pickedPatient, setPickedPatient] = useState<Patient | null>(null);
   const [chatPatient, setChatPatient] = useState<Patient | null>(null);
   const [patientNotes, setPatientNotes] = useState<Record<string, Patient["notes"]>>({});
+  const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
+  const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
+  const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -142,6 +145,7 @@ export const NurseApp = () => {
     inject: "inject",
     obs: "obs",
     execTask: "execTask",
+    confirmAssess: "confirmAssess",
   };
 
   return (
@@ -156,14 +160,55 @@ export const NurseApp = () => {
       )}
       {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
       {tab === "edu" && <EduPage onOpenPush={() => open("eduPush")} />}
-      {tab === "chat" && <PatientChatListSheet accent="nurse" onPick={(p) => { setChatPatient(p); setSheet("patientChat"); }} />}
+      {tab === "chat" && (
+        <NurseChatHub
+          subTab={chatSubTab}
+          onChange={setChatSubTab}
+          onOpenPatient={(p) => { setChatPatient(p); setSheet("patientChat"); }}
+          meetings={meetings}
+          onPickMeeting={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreateMeeting={() => setSheet("newMeeting")}
+        />
+      )}
       {tab === "me" && <Me onOpenTeam={() => open("team")} />}
 
-      {(["med", "vitals", "inject", "obs", "execTask"] as QueueKey[]).map((k) => (
+      {(["med", "vitals", "inject", "obs", "execTask", "confirmAssess"] as QueueKey[]).map((k) => (
         <PhoneSheet key={k} open={queue === k} onClose={closeQueue} title={QUEUE_TITLE[k]} accent="nurse">
           <TodoQueueList accent="nurse" items={QUEUES[k]} onPick={(item) => pickFromQueue(item, queueToSheet[k])} />
         </PhoneSheet>
       ))}
+
+      <PhoneSheet open={sheet === "confirmAssess"} onClose={close} title={`评估结果确认${activePatient ? " · " + activePatient : ""}`} accent="nurse"
+        footer={<div className="flex gap-2">
+          <button onClick={() => { toast("已请医师再次评估 · 结果不确定"); close(); }} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">结果不确定</button>
+          <button onClick={() => { toast.success("评估已确认 · 已同步医师 / 治疗师"); close(); }} className="flex-1 gradient-nurse text-white rounded-2xl py-3 text-sm font-semibold">确认结果</button>
+        </div>}>
+        <NurseConfirmAssessSheet patient={activePatient} />
+      </PhoneSheet>
+
+      <PhoneSheet open={sheet === "meetingList"} onClose={close} title="团队会议" accent="nurse">
+        <TeamMeetingListSheet
+          accent="nurse"
+          meetings={meetings}
+          onPick={(m) => { setActiveMeeting(m); setSheet("meeting"); }}
+          onCreate={() => setSheet("newMeeting")}
+        />
+      </PhoneSheet>
+      <PhoneSheet open={sheet === "newMeeting"} onClose={() => setSheet("meetingList")} title="新增团队会议" accent="nurse">
+        <NewMeetingSheet accent="nurse" onCreate={(m) => { setMeetings([m, ...meetings]); setActiveMeeting(m); toast.success("会议已创建"); setSheet("meeting"); }} />
+      </PhoneSheet>
+      <PhoneSheet open={sheet === "meeting"} onClose={() => setSheet("meetingList")} title="团队会议" accent="nurse" flush hideHeader>
+        <IMChatSheet
+          accent="nurse"
+          title={`团队会议 · ${activeMeeting?.patientName ?? "张建国"}`}
+          subtitle={activeMeeting?.topic ?? "护理协同"}
+          participants={activeMeeting?.participants ?? ["李医师", "王治疗师", "赵护士"]}
+          initialMessages={DEFAULT_MEETING_MSGS}
+          onAISummary={() => {}}
+          enablePatientReminder
+          onClose={() => setSheet("meetingList")}
+        />
+      </PhoneSheet>
 
       <PhoneSheet open={sheet === "med"} onClose={close} title={`给药操作${activePatient ? " · " + activePatient : ""}`} accent="nurse"
         footer={<PrimaryBtn variant="nurse" onClick={() => { toast.success("给药完成 · 已自动生成执行记录"); close(); }}>确认给药完成</PrimaryBtn>}>
