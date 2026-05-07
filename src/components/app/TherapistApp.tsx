@@ -120,6 +120,8 @@ export const TherapistApp = () => {
   const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
+  const [role, setRole] = useState<"therapist" | "lead">("therapist");
+  const [scheduleOpen, setScheduleOpen] = useState(false);
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -143,13 +145,16 @@ export const TherapistApp = () => {
 
   return (
     <ScreenShell tabBar={<TabBar active={tab} onChange={setTab} accent="therapist" newPatientCount={NEW_PATIENT_COUNT} items={THERAPIST_TABS} />}>
+      <RoleSwitch role={role} onChange={setRole} />
       {tab === "home" && (
         <TherapistHome
+          role={role}
           onOpenQueue={openQueue}
           onGoPatients={() => setTab("patients")}
           onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
           onOpenMed={() => open("med")}
+          onOpenSchedule={() => setScheduleOpen(true)}
         />
       )}
       {tab === "patients" && (
@@ -307,23 +312,31 @@ export const TherapistApp = () => {
           onClose={() => setSheet("meetingList")}
         />
       </PhoneSheet>
+
+      <PhoneSheet open={scheduleOpen} onClose={() => setScheduleOpen(false)} title={role === "lead" ? "全治疗师排班 · 治疗师长视图" : "我的排班 · 今日"} accent="therapist">
+        <ScheduleView role={role} />
+      </PhoneSheet>
     </ScreenShell>
   );
 };
 
 /* ============== 治疗师首页 ============== */
 const TherapistHome = ({
+  role,
   onOpenQueue,
   onGoPatients,
   onGoRx,
   onUploadDaily,
   onOpenMed,
+  onOpenSchedule,
 }: {
+  role: "therapist" | "lead";
   onOpenQueue: (k: QueueKey) => void;
   onGoPatients: () => void;
   onGoRx: () => void;
   onUploadDaily: () => void;
   onOpenMed: () => void;
+  onOpenSchedule: () => void;
 }) => {
   const allTodos: { patient: string; meta: string; time?: string; urgency: "high" | "medium" | "low"; k: QueueKey }[] = [
     ...QUEUES.confirmAssess.map(t => ({ patient: t.patient, meta: t.meta, time: t.time, urgency: t.urgency ?? "medium", k: "confirmAssess" as QueueKey })),
@@ -338,14 +351,28 @@ const TherapistHome = ({
         <div className="flex items-center justify-between">
           <div>
             <div className="text-xs text-muted-foreground">下午好</div>
-            <div className="text-xl font-bold mt-0.5 text-foreground">王治疗师 👋</div>
-            <div className="text-[11px] text-muted-foreground mt-1">PT/OT 治疗师 · 共 {PATIENTS.length} 位患者</div>
+            <div className="text-xl font-bold mt-0.5 text-foreground">{role === "lead" ? "王治疗师长 👋" : "王治疗师 👋"}</div>
+            <div className="text-[11px] text-muted-foreground mt-1">
+              {role === "lead" ? "PT/OT 治疗师长 · 管理 6 位治疗师" : `PT/OT 治疗师 · 共 ${PATIENTS.length} 位患者`}
+            </div>
           </div>
           <button onClick={() => toast("您有 2 条新任务")} className="w-9 h-9 rounded-full bg-secondary-soft text-secondary flex items-center justify-center relative">
             <Bell className="w-4 h-4" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-warning rounded-full" />
           </button>
         </div>
+        <button onClick={onOpenSchedule} className="mt-3 w-full bg-secondary-soft border border-secondary/20 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]">
+          <div className="w-9 h-9 rounded-xl gradient-therapist text-white flex items-center justify-center">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-[12px] font-semibold text-secondary">{role === "lead" ? "查看全治疗师排班" : "我今日的治疗排班"}</div>
+            <div className="text-[10px] text-muted-foreground">
+              {role === "lead" ? "6 位治疗师 · 32 项排班 · AI 已优化" : "5 项治疗 · 09:00 - 16:30"}
+            </div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-secondary" />
+        </button>
       </div>
 
       <div className="px-4 mt-3">
@@ -586,27 +613,28 @@ const GoalAdjustSheet = ({ patient }: { patient?: string }) => {
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
           <div className="flex-1">
-            <div className="text-sm font-bold">{patient || "李 强 · 男 42 岁"}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天</div>
+            <div className="text-sm font-bold">{patient || "李 强 · 男 42 · 床307"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天 · 主管医师：李志远</div>
           </div>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">治疗目标</span>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">康复目标</span>
+        </div>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <StatChip label="FMA" value="42" accent="primary" />
+          <StatChip label="Barthel" value="70" accent="success" />
+          <StatChip label="VAS" value="3" accent="warning" />
         </div>
       </div>
-
-      <AICard title="医师已确认康复目标 · 治疗师细化生成">
-        医师设定整体目标：ADL Barthel ≥ 85，独立步行 50m。请在此基础上拆解为可执行的治疗目标并可手动调整。
+      <AICard title="AI 智能设定康复目标（与医师端一致）">
+        基于评估数据与同类病例匹配，AI 已生成 4 周分阶段目标。治疗师可在此基础上微调并回传医师。
       </AICard>
-
-      <SectionTitle title="治疗目标（可调整）" />
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="ADL Barthel" value={<input defaultValue="70" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="医师目标 85 · 本周分阶段 70" />
-        <FormRow label="步行距离 (m)" value={<input defaultValue="20" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="本周阶段目标" />
-        <FormRow label="FMA 提升" value={<input defaultValue="4" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="分 · 本周" />
-        <FormRow label="目标周期" value={<input defaultValue="1" className="w-14 text-right bg-muted rounded px-2 py-1 text-xs" />} hint="周" />
+        <FormRow label="短期目标 (1 周)" value={<input defaultValue="床椅转移独立完成" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="中期目标 (2 周)" value={<input defaultValue="助行器辅助步行 30m" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="长期目标 (4 周)" value={<input defaultValue="独立步行 ≥ 50m，FMA +8" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+        <FormRow label="ADL 目标" value={<input defaultValue="Barthel ≥ 75" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
       </div>
-
       <button className="w-full flex items-center justify-center gap-1 text-xs text-secondary font-semibold py-2" onClick={() => toast("已新增自定义目标项")}>
-        <Plus className="w-3.5 h-3.5" /> 新增治疗目标项
+        <Plus className="w-3.5 h-3.5" /> 新增自定义目标
       </button>
     </div>
   );
@@ -800,3 +828,119 @@ const MedSheet = () => (
     <textarea placeholder="变动原因 / 治疗师观察..." className="w-full bg-card border border-border rounded-2xl p-3 text-xs h-20 outline-none" />
   </div>
 );
+
+/* ============== 角色切换：治疗师 / 治疗师长 ============== */
+const RoleSwitch = ({ role, onChange }: { role: "therapist" | "lead"; onChange: (r: "therapist" | "lead") => void }) => (
+  <div className="px-4 pt-3">
+    <div className="flex items-center gap-1.5 bg-muted rounded-full p-1">
+      {(["therapist", "lead"] as const).map((r) => {
+        const active = role === r;
+        return (
+          <button
+            key={r}
+            onClick={() => onChange(r)}
+            className={`flex-1 text-[11px] py-1.5 rounded-full font-semibold transition-all ${active ? "gradient-therapist text-white shadow-card" : "text-foreground/70"}`}
+          >
+            {r === "therapist" ? "治疗师视角" : "治疗师长视角"}
+          </button>
+        );
+      })}
+    </div>
+  </div>
+);
+
+/* ============== 排班视图：治疗师本人 / 治疗师长全员 ============== */
+const MY_SCHEDULE: { time: string; patient: string; bed: string; type: "PT" | "OT" | "ST"; room: string; duration: string }[] = [
+  { time: "09:00", patient: "张建国", bed: "303", type: "PT", room: "A-301", duration: "45 min" },
+  { time: "10:30", patient: "王秀英", bed: "305", type: "PT", room: "A-303", duration: "30 min" },
+  { time: "14:00", patient: "李 强", bed: "307", type: "OT", room: "B-201", duration: "45 min" },
+  { time: "15:30", patient: "陈丽华", bed: "310", type: "ST", room: "B-205", duration: "30 min" },
+  { time: "16:30", patient: "刘伟明", bed: "A-301", type: "PT", room: "A-301", duration: "45 min" },
+];
+
+const TEAM_SCHEDULE: { therapist: string; cert: string; items: { time: string; patient: string; bed: string; type: "PT" | "OT" | "ST"; room: string }[] }[] = [
+  {
+    therapist: "王雅琴", cert: "PT/OT · 8 年", items: [
+      { time: "09:00", patient: "张建国", bed: "303", type: "PT", room: "A-301" },
+      { time: "10:30", patient: "王秀英", bed: "305", type: "PT", room: "A-303" },
+      { time: "14:00", patient: "李 强", bed: "307", type: "OT", room: "B-201" },
+    ],
+  },
+  {
+    therapist: "陈治疗师", cert: "OT · 5 年", items: [
+      { time: "09:30", patient: "陈丽华", bed: "310", type: "OT", room: "B-202" },
+      { time: "11:00", patient: "张建国", bed: "303", type: "OT", room: "B-202" },
+      { time: "15:00", patient: "李 强", bed: "307", type: "OT", room: "B-201" },
+    ],
+  },
+  {
+    therapist: "陈思雨", cert: "ST · 6 年", items: [
+      { time: "10:00", patient: "陈丽华", bed: "310", type: "ST", room: "B-205" },
+      { time: "14:30", patient: "李 强", bed: "307", type: "ST", room: "B-205" },
+    ],
+  },
+  {
+    therapist: "李建华", cert: "PT · 4 年", items: [
+      { time: "09:00", patient: "周建华", bed: "311", type: "PT", room: "A-302" },
+      { time: "13:30", patient: "刘伟明", bed: "A-301", type: "PT", room: "A-302" },
+    ],
+  },
+];
+
+const typeColor = (t: "PT" | "OT" | "ST") =>
+  t === "PT" ? "bg-primary/10 text-primary" : t === "OT" ? "bg-secondary-soft text-secondary" : "bg-success-soft text-success";
+
+const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
+  if (role === "therapist") {
+    return (
+      <div className="p-4 space-y-3">
+        <AICard title="今日排班 · AI 已优化训练室占用">
+          共 {MY_SCHEDULE.length} 项治疗 · 时间段 09:00 - 16:30。点击单项可查看患者档案。
+        </AICard>
+        <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+          {MY_SCHEDULE.map((s, i) => (
+            <div key={i} className="px-4 py-3 flex items-center gap-3">
+              <div className="text-[12px] font-bold w-12 text-foreground">{s.time}</div>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${typeColor(s.type)}`}>{s.type}</span>
+              <div className="flex-1 min-w-0">
+                <div className="text-[12px] font-semibold truncate">{s.patient} <span className="text-muted-foreground font-normal">· 床 {s.bed}</span></div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{s.room} · {s.duration}</div>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="p-4 space-y-3">
+      <AICard title="治疗师长 · 全员排班总览">
+        共 {TEAM_SCHEDULE.length} 位治疗师 · {TEAM_SCHEDULE.reduce((n, t) => n + t.items.length, 0)} 项治疗。点击单项可调整排班 / 转派。
+      </AICard>
+      {TEAM_SCHEDULE.map((t) => (
+        <div key={t.therapist} className="bg-card rounded-2xl shadow-card overflow-hidden">
+          <div className="px-4 py-2.5 bg-muted/50 flex items-center justify-between">
+            <div>
+              <div className="text-[13px] font-bold">{t.therapist}</div>
+              <div className="text-[10px] text-muted-foreground">{t.cert} · {t.items.length} 项今日</div>
+            </div>
+            <button onClick={() => toast("已进入排班调整")} className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">调整</button>
+          </div>
+          <div className="divide-y divide-border/60">
+            {t.items.map((s, i) => (
+              <div key={i} className="px-4 py-2.5 flex items-center gap-3">
+                <div className="text-[12px] font-bold w-12">{s.time}</div>
+                <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${typeColor(s.type)}`}>{s.type}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[12px] truncate">{s.patient} <span className="text-muted-foreground">· 床 {s.bed}</span></div>
+                  <div className="text-[10px] text-muted-foreground mt-0.5">{s.room}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
