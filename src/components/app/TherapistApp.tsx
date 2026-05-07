@@ -419,40 +419,8 @@ const TherapistPatients = ({
   onUploadDaily?: () => void;
   onSummaryPatient?: (p: Patient) => void;
 }) => {
-  // 基于康复方案生成的治疗师待办任务
-  const planTodos = [
-    { patient: "张建国", task: "完成 PT 下肢力量 3×10", from: "康复方案 V2", k: "exec" as QueueKey },
-    { patient: "李 强", task: "OT 厨房活动 25min · 评估反馈", from: "康复目标 · 本周", k: "exec" as QueueKey },
-    { patient: "陈丽华", task: "ST 吞咽训练 30min · 记录改善", from: "康复处方 · 新增", k: "exec" as QueueKey },
-  ];
   return (
     <div className="pb-4">
-      <div className="px-4 pt-3 space-y-2">
-        <div className="bg-card rounded-2xl shadow-card border border-border/40 p-3">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[12px] font-bold text-foreground flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-secondary" /> 基于康复方案的待办任务
-            </span>
-            <span className="text-[10px] text-muted-foreground">共 {planTodos.length} 项</span>
-          </div>
-          <div className="divide-y divide-border/60">
-            {planTodos.map((t, i) => (
-              <button
-                key={i}
-                onClick={() => onOpenQueue?.(t.k)}
-                className="w-full text-left py-2 flex items-center gap-2 active:bg-muted/40"
-              >
-                <div className="w-6 h-6 rounded-md bg-secondary-soft text-secondary flex items-center justify-center text-[10px] font-bold">{i + 1}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="text-[12px] font-semibold truncate">{t.patient} · {t.task}</div>
-                  <div className="text-[10px] text-muted-foreground mt-0.5">来源：{t.from}</div>
-                </div>
-                <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
       <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} />
     </div>
   );
