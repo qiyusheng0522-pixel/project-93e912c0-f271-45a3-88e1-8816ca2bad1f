@@ -105,14 +105,9 @@ export const RxDetail = ({
         <FormRow label="家用握力球" value="1 组 (软/中)" hint="居家手功能训练" />
       </div>
 
-      {/* 5. 用药处方 */}
-      <SectionTitle title="⑤ 用药处方" extra={<span className="text-[10px] text-muted-foreground">合并用药</span>} />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="阿司匹林肠溶片" value="100 mg qd" hint="抗凝 · 早餐后" />
-        <FormRow label="阿托伐他汀钙" value="20 mg qn" hint="调脂 · 睡前" />
-        <FormRow label="甲钴胺胶囊" value="0.5 mg tid" hint="营养神经" />
-        <FormRow label="巴氯芬片" value="10 mg bid" hint="缓解痉挛 · 按需" />
-      </div>
+      {/* 5. 用药处方（AI 建议 + 手动调整） */}
+      <SectionTitle title="⑤ 用药处方" extra={<span className="text-[10px] text-muted-foreground">AI 建议 · 可手动调整</span>} />
+      <MedsEditor accent={accent} />
 
       {/* 6. 居家康复指导 */}
       <SectionTitle title="⑥ 居家康复指导" extra={<span className="text-[10px] text-muted-foreground">家庭自训</span>} />
