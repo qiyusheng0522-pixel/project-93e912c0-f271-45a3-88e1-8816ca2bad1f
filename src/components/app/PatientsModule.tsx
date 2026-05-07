@@ -351,7 +351,12 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
         </div>
       </div>
 
-      {actions && actions.length > 0 && (
+      {patient.returnedReassess && (
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3 text-[12px] text-destructive">
+          <div className="font-semibold flex items-center gap-1">⟲ 已被退回 · 需重新首次评估</div>
+          <div className="text-[11px] mt-1 text-destructive/80 leading-relaxed">{patient.returnReason}</div>
+        </div>
+      )}
         <div className={`grid gap-2 ${actions.length >= 4 ? "grid-cols-4" : actions.length === 3 ? "grid-cols-3" : "grid-cols-2"}`}>
           {actions.map((a) => {
             const Icon = a.icon;
