@@ -246,16 +246,27 @@ export const NurseApp = () => {
         <EduPushSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="nurse">
+      <PhoneSheet
+        open={sheet === "patientDetail"}
+        onClose={close}
+        title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`}
+        accent="nurse"
+        footer={
+          pickedPatient ? (
+            <PatientActionsBar
+              accent="nurse"
+              actions={[
+                { key: "care", label: "护理记录", icon: ClipboardCheck, onClick: () => setSheet("dailyNote") },
+                { key: "note", label: "备注", icon: Activity, onClick: () => setSheet("addNote") },
+              ]}
+            />
+          ) : undefined
+        }
+      >
         <PatientDetailSheet
           patient={pickedPatient}
           accent="nurse"
           onAddNote={() => setSheet("addNote")}
-          actions={[
-            { key: "med", label: "给药", icon: Pill, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.bed} ${pickedPatient.name}` : ""); setSheet("med"); } },
-            { key: "care", label: "护理记录", icon: ClipboardCheck, onClick: () => setSheet("dailyNote") },
-            { key: "note", label: "备注", icon: Activity, onClick: () => setSheet("addNote") },
-          ]}
         />
       </PhoneSheet>
 
