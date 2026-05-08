@@ -95,13 +95,14 @@ export const PrimaryBtn = ({
 }: {
   children: ReactNode;
   onClick?: () => void;
-  variant?: "doctor" | "therapist" | "nurse" | "ai";
+  variant?: "doctor" | "therapist" | "nurse" | "ai" | "physio";
 }) => {
   const grad = {
     doctor: "gradient-doctor",
     therapist: "gradient-therapist",
     nurse: "gradient-nurse",
     ai: "gradient-ai",
+    physio: "gradient-physio",
   }[variant];
   return (
     <button
