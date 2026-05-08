@@ -124,8 +124,8 @@ export const PATIENTS: Patient[] = [
       { label: "心理 · 出院适应", value: "家属同伴支持", hint: "孙博士" },
     ],
   },
-  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 卒中后认知障碍", status: "康复中", condition: "脑卒中", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
-  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
+  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 卒中后认知障碍", status: "康复中", condition: "脑卒中", admitDays: 18, needPlanConfirm: true, shared: ["李医师", "陈治疗师"], notes: [] },
+  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "新患者", condition: "脑梗死", admitDays: 2, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师"], notes: [] },
   { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 大面积脑梗死 · 入院第 2 天", status: "新患者", condition: "脑卒中", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 NIHSS + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
     { author: "王治疗师", time: "今日 10:20", text: "首评结果不确定 · 建议医师重新组织首次评估。" },
   ] },
