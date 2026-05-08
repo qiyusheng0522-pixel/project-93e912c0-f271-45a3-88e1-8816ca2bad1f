@@ -700,8 +700,17 @@ const DoctorMe = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
 
 /* ===================== Sheets ===================== */
 
+const AI_DEFAULT_CONCLUSION = `综合判定：急性缺血性卒中后右侧偏瘫，NIHSS 14 分（中度），mRS 4 级（中重度残疾）。
+当前主要功能障碍：右上下肢运动重度受损（肌力 2 级）、轻度表达性失语、左侧空间忽略、吞咽可疑异常。
+合并高跌倒/DVT/压疮风险与营养及认知风险，整体康复潜力中等。
+建议方向：① 床旁早期 PT（良肢位、被动 ROM、坐位平衡）；② OT 介入 ADL + 视空间忽略训练；③ ST 进行吞咽与构音训练，暂予糊状饮食；④ 护理重点落实跌倒/压疮/DVT 三大预防 + 营养支持；⑤ 7 天后复评 NIHSS / mRS / MoCA，必要时再次发起 MDT。`;
+
 const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchMeeting: () => void }) => {
-  const name = patient ? patient.split(" ")[0] : "王秀英";
+  const name = patient ? patient.split(" ")[0] : "张建国";
+  const [editing, setEditing] = useState(false);
+  const [conclusion, setConclusion] = useState(AI_DEFAULT_CONCLUSION);
+  const [draft, setDraft] = useState(conclusion);
+
   return (
     <div className="p-4 space-y-3">
       <button
@@ -718,67 +727,129 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
         <ChevronRight className="w-4 h-4 text-warning" />
       </button>
 
+      {/* 1. 患者基本信息 */}
       <div className="bg-card rounded-2xl shadow-card p-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl gradient-doctor text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
           <div className="flex-1">
-            <div className="text-sm font-bold">{patient || "王秀英 · 女 68 岁"}</div>
-            <div className="text-[11px] text-muted-foreground mt-0.5">床号 305 · 入院第 5 天 · 主管医师：李志远</div>
+            <div className="text-sm font-bold">{patient || "张建国 · 男 68 岁"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">床号 303 · 病案号 ZY-052266 · 主诊：李敏 副主任医师</div>
           </div>
           <span className="text-[10px] px-2 py-1 rounded-full bg-primary-soft text-primary font-semibold">首次评估</span>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">身高/体重</div><div className="text-[11px] font-semibold mt-0.5">158 / 56</div></div>
-          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">血型 / 过敏</div><div className="text-[11px] font-semibold mt-0.5">A 型 / 无</div></div>
-          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">医保</div><div className="text-[11px] font-semibold mt-0.5">城镇职工</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">发病时间</div><div className="text-[11px] font-semibold mt-0.5">05-06 19:20</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">评估日期</div><div className="text-[11px] font-semibold mt-0.5">05-08 第2天</div></div>
+          <div className="bg-muted rounded-xl py-2"><div className="text-[9px] text-muted-foreground">诊断</div><div className="text-[11px] font-semibold mt-0.5">急性缺血卒中</div></div>
         </div>
       </div>
 
-      <SectionTitle title="档案信息" extra={<button onClick={() => toast("已查看完整电子病历")} className="text-[11px] text-primary font-semibold flex items-center"><FileHeart className="w-3 h-3 mr-1" />完整病历</button>} />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="主诉" value="右髋疼痛伴活动受限 3 个月" />
-        <FormRow label="现病史" value="跌倒致伤 ▾" hint="术前 X 线示右股骨颈骨折" />
-        <FormRow label="既往史" value="高血压 8 年 · 2 型糖尿病 5 年" hint="降压、降糖药规律服用" />
-        <FormRow label="手术史" value="2026-04-23 右髋关节置换术" />
-        <FormRow label="家族史" value="父：脑卒中；母：冠心病" />
-        <FormRow label="过敏史" value="无" />
-      </div>
-
-      <SectionTitle title="入院病症与体征" />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="意识 / 认知" value="清醒 · MMSE 28" />
-        <FormRow label="肌力（右下肢）" value="III 级" hint="髋屈 / 伸 III 级，膝伸 IV 级" />
-        <FormRow label="ROM 屈曲" value="60° / 100°" hint="左 / 右" />
-        <FormRow label="肌张力 (MAS)" value="0 级" />
-        <FormRow label="负重耐受" value="患肢 30%" hint="术后渐进负重" />
-        <FormRow label="感觉" value="正常" />
-        <FormRow label="伤口情况" value="愈合良好" />
-        <FormRow label="并发症风险" value="DVT 中风险 · 跌倒高风险" />
-      </div>
-
-      <AICard title="AI 风险与病史智能分析">
-        基于上述基本信息 + 档案 + 体征：跌倒高风险 ★★★ · DVT 中风险 ★★ · 疼痛 6/10。
-        合并糖尿病：建议关注伤口愈合与运动负荷；高血压：注意运动中血压监测。
-        推荐优先评估：Harris 髋关节、Berg 平衡、Barthel ADL、ROM。
-      </AICard>
-
-      <SectionTitle title="评估量表（团队线上协同）" />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="Harris 髋关节评分" value="65 ✓" hint="负责：王治疗师 · 已完成" />
-        <FormRow label="VAS 疼痛评分" value="6 / 10" hint="负责：赵护士 · 已完成" />
-        <FormRow label="Berg 平衡量表" value="32 分" hint="负责：王治疗师 · 已完成" />
-        <FormRow label="Barthel 指数" value="55 分" hint="负责：李医师 · 已完成" />
-        <FormRow label="DVT Wells" value="2 分（中）" hint="负责：赵护士 · 已完成" />
-      </div>
-
-      <AICard title="AI 评估结果初判" action={
-        <div className="flex gap-2">
-          <button className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold" onClick={onLaunchMeeting}>
-            结果不确定 · 发起会议
-          </button>
+      {/* 2. 核心评分 */}
+      <SectionTitle title="核心评分" />
+      <div className="grid grid-cols-2 gap-2">
+        <div className="bg-card rounded-2xl shadow-card p-3">
+          <div className="text-[10px] text-muted-foreground">NIHSS</div>
+          <div className="text-2xl font-bold text-primary mt-1">14<span className="text-xs text-muted-foreground ml-1">分</span></div>
+          <div className="text-[10px] text-warning font-semibold mt-1">中度卒中 (5–15)</div>
         </div>
-      }>
-        综合判定：术后早期，疼痛是主要限制因素；康复潜力良好。建议进入「目标设定 → 方案制定」，重点：疼痛干预 + 渐进负重 + 平衡训练。
+        <div className="bg-card rounded-2xl shadow-card p-3">
+          <div className="text-[10px] text-muted-foreground">mRS（当前）</div>
+          <div className="text-2xl font-bold text-primary mt-1">4<span className="text-xs text-muted-foreground ml-1">级</span></div>
+          <div className="text-[10px] text-warning font-semibold mt-1">中重度残疾</div>
+        </div>
+      </div>
+
+      {/* 3. NIHSS 详细 */}
+      <SectionTitle title="NIHSS 详细条目" extra={<span className="text-[10px] text-muted-foreground">总分 14</span>} />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="1a. 意识水平" value="1 分" hint="嗜睡，轻微刺激能唤醒" />
+        <FormRow label="1b. 提问（月份/年龄）" value="1 分" hint="仅月份正确" />
+        <FormRow label="1c. 指令（睁闭眼/握拳）" value="1 分" hint="仅完成睁闭眼" />
+        <FormRow label="2. 水平凝视" value="1 分" hint="部分凝视麻痹（右向欠充分）" />
+        <FormRow label="3. 视野" value="1 分" hint="左侧同向偏盲" />
+        <FormRow label="4. 面瘫" value="2 分" hint="右侧鼻唇沟浅，下面部瘫痪" />
+        <FormRow label="5a. 左上肢运动" value="0 分" hint="正常" />
+        <FormRow label="5b. 右上肢运动" value="3 分" hint="不能抵抗重力，快速下落" />
+        <FormRow label="6a. 左下肢运动" value="0 分" hint="正常" />
+        <FormRow label="6b. 右下肢运动" value="3 分" hint="立即下落，肌力 2 级" />
+        <FormRow label="7. 肢体共济失调" value="1 分" hint="右侧跟膝胫试验不稳" />
+        <FormRow label="8. 感觉" value="1 分" hint="右侧肢体针刺感减退" />
+        <FormRow label="9. 语言" value="1 分" hint="轻度表达性失语" />
+        <FormRow label="10. 构音障碍" value="1 分" hint="说话含糊但可被理解" />
+        <FormRow label="11. 忽视/注意" value="1 分" hint="左侧空间忽略" />
+      </div>
+
+      {/* 4. mRS */}
+      <SectionTitle title="mRS 改良 Rankin 量表" />
+      <div className="bg-card rounded-2xl shadow-card p-4 space-y-1.5">
+        <div className="text-[12px] font-semibold text-warning">4 级 — 中重度残疾</div>
+        <ul className="text-[11px] text-foreground/80 leading-relaxed list-disc pl-4 space-y-0.5">
+          <li>无法独立行走，需一人扶持或使用轮椅</li>
+          <li>穿衣、如厕、进食等需大量帮助</li>
+          <li>每日需要看护至少 2 次</li>
+          <li>不能独立完成自我照料</li>
+        </ul>
+      </div>
+
+      {/* 5. 并发症风险 */}
+      <SectionTitle title="并发症风险评估" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="跌倒风险 · Morse" value={<span className="text-destructive font-semibold">高 55 分</span>} hint="偏瘫/步态不稳/认知忽略 · 床栏 + 陪护下离床" />
+        <FormRow label="压疮风险 · Braden" value={<span className="text-warning font-semibold">中 16 分</span>} hint="活动受限、感觉减退 · 每 2h 翻身 + 减压气垫" />
+        <FormRow label="吞咽风险 · 洼田饮水" value={<span className="text-warning font-semibold">可疑异常 3 级</span>} hint="饮水呛咳 · 糊状饮食 + 口肌训练" />
+        <FormRow label="DVT 风险 · Caprini" value={<span className="text-destructive font-semibold">高危 5 分</span>} hint="偏瘫制动 + 高龄 · IPC + 低分子肝素预防" />
+      </div>
+
+      {/* 6. 营养与认知 */}
+      <SectionTitle title="营养与认知状态" />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        <FormRow label="营养 · NRS2002" value={<span className="text-warning font-semibold">3 分（有风险）</span>} hint="进食量减少 50%，体重下降 3kg，白蛋白 32g/L" />
+        <FormRow label="认知 · MoCA 基础版" value={<span className="text-warning font-semibold">18/30（轻度损害）</span>} hint="执行/视空间（左忽略）/延迟回忆受损，定向力尚可" />
+      </div>
+
+      {/* AI 辅助结论 + 自定义编辑 */}
+      <AICard
+        title="AI 首次评估辅助结论"
+        action={
+          editing ? (
+            <div className="flex gap-2">
+              <button
+                className="flex-1 border border-border rounded-xl py-2 text-xs font-semibold"
+                onClick={() => { setDraft(conclusion); setEditing(false); }}
+              >取消</button>
+              <button
+                className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold"
+                onClick={() => { setDraft(AI_DEFAULT_CONCLUSION); toast("已重新生成 AI 结论"); }}
+              >重新生成</button>
+              <button
+                className="flex-1 gradient-doctor text-white rounded-xl py-2 text-xs font-semibold"
+                onClick={() => { setConclusion(draft); setEditing(false); toast.success("结论已保存"); }}
+              >保存</button>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <button
+                className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold"
+                onClick={onLaunchMeeting}
+              >结果不确定 · 发起会议</button>
+              <button
+                className="flex-1 gradient-doctor text-white rounded-xl py-2 text-xs font-semibold"
+                onClick={() => { setDraft(conclusion); setEditing(true); }}
+              >编辑结论</button>
+            </div>
+          )
+        }
+      >
+        {editing ? (
+          <textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            className="w-full min-h-[160px] text-[12px] leading-relaxed bg-background/60 border border-ai/20 rounded-xl p-2 focus:outline-none focus:ring-1 focus:ring-ai/40"
+          />
+        ) : (
+          <div className="whitespace-pre-line text-[12px] leading-relaxed">{conclusion}</div>
+        )}
+        <div className="mt-2 text-[10px] text-muted-foreground">评估医师：康复医学科 王敏 · 审核：卒中中心 MDT</div>
       </AICard>
     </div>
   );
