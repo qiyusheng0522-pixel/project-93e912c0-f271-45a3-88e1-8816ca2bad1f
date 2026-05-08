@@ -139,6 +139,14 @@ export const FIRST_ASSESS_COUNT = PATIENTS.filter(p => p.needFirstAssess).length
 export const RETURNED_REASSESS_COUNT = PATIENTS.filter(p => p.returnedReassess).length;
 export const ALL_CONDITIONS = Array.from(new Set(PATIENTS.map(p => p.condition)));
 
+/** 根据状态推导患者所处阶段 */
+export const getPatientStage = (p: Patient): PatientStage => {
+  if (p.status === "已出院") return "院后";
+  if (p.status === "待出院") return "待出院";
+  if (p.needFirstAssess || p.returnedReassess || p.needPlanConfirm || p.needRxConfirm) return "院前";
+  return "院中";
+};
+
 const accentBg: Record<Accent, string> = {
   doctor: "gradient-doctor",
   therapist: "gradient-therapist",
