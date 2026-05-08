@@ -349,7 +349,7 @@ const TherapistHome = ({
 }: {
   role: "therapist" | "lead";
   onOpenQueue: (k: QueueKey) => void;
-  onGoPatients: () => void;
+  onGoPatients: (filter?: import("@/components/app/PatientsModule").PatientFilter) => void;
   onGoRx: () => void;
   onUploadDaily: () => void;
   onOpenMed: () => void;
