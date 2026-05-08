@@ -177,10 +177,9 @@ export const PatientsPage = ({
 
   const matchStatus = (p: Patient) => {
     if (statusFilter === "all") return true;
-    if (statusFilter === "待首次评估") return p.needFirstAssess;
-    if (statusFilter === "退回重评") return p.returnedReassess;
-    if (statusFilter === "新患者") return p.isNew;
-    return p.status === statusFilter;
+    if (statusFilter === "待首次评估") return !!p.needFirstAssess;
+    if (statusFilter === "退回重评") return !!p.returnedReassess;
+    return getPatientStage(p) === statusFilter;
   };
   const matchAdmit = (p: Patient) => {
     if (admitRange === "all") return true;
@@ -195,12 +194,13 @@ export const PatientsPage = ({
     matchAdmit(p)
   );
 
+  const stageCount = (s: PatientStage) => PATIENTS.filter(p => getPatientStage(p) === s).length;
   const filterChips: { key: PatientFilter; label: string; count: number }[] = [
     { key: "all", label: "全部", count: PATIENTS.length },
-    { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
-    { key: "退回重评", label: "退回重评", count: RETURNED_REASSESS_COUNT },
-    { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
-    { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
+    { key: "院前", label: "院前", count: stageCount("院前") },
+    { key: "院中", label: "院中", count: stageCount("院中") },
+    { key: "待出院", label: "待出院", count: stageCount("待出院") },
+    { key: "院后", label: "院后", count: stageCount("院后") },
   ];
 
   return (
