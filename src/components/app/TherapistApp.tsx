@@ -457,15 +457,17 @@ const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
   onSummaryPatient,
+  initialFilter,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
   onSummaryPatient?: (p: Patient) => void;
+  initialFilter?: import("@/components/app/PatientsModule").PatientFilter;
 }) => {
   return (
     <div className="pb-4">
-      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} />
+      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} initialFilter={initialFilter} />
     </div>
   );
 };
