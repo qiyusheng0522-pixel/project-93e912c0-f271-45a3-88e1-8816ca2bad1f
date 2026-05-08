@@ -147,7 +147,20 @@ export const DoctorApp = () => {
           onGoChat={() => setTab("chat")}
         />
       )}
-      {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} initialFilter={patientsFilter} />}
+      {tab === "patients" && (
+        <PatientsPage
+          accent="doctor"
+          onPick={pickPatient}
+          initialFilter={patientsFilter}
+          onAction={(key, p) => {
+            setActivePatient(`${p.name} · 床${p.bed}`);
+            setPickedPatient({ ...p, notes: patientNotes[p.id] ?? p.notes });
+            if (key === "assess") setSheet("assess");
+            else if (key === "plan") setSheet("plan");
+            else setSheet("rx");
+          }}
+        />
+      )}
       {tab === "plan" && (
         <RehabPlanModule
           accent="doctor"
