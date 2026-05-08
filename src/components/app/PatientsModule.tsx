@@ -564,9 +564,9 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
       )}
 
       {/* 康复中 / 待出院 患者：AI 基于当前状态给出方案 / 出院建议 */}
-      {(patient.status === "康复中" || patient.status === "待出院") && (
-        <AICard title={patient.status === "待出院" ? "AI 出院建议" : "AI 方案调整建议"}>
-          {patient.status === "待出院" ? (
+      {(getPatientStage(patient) === "院中" || getPatientStage(patient) === "待出院") && (
+        <AICard title={getPatientStage(patient) === "待出院" ? "AI 出院建议" : "AI 方案调整建议"}>
+          {getPatientStage(patient) === "待出院" ? (
             <div className="text-[12px] leading-relaxed">
               基于近 7 日康复执行（PT/OT 完成率 100%）、Barthel 已达 85、Berg 48、独立步行 60m，已满足出院标准。
               建议：① 启动院外二级方案二次确认；② 完成家属跌倒预防与转移培训；③ 对接社区康复站每周 2 次随访。
