@@ -507,10 +507,48 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
         </>
       )}
 
-      {patient.isNew && (
-        <AICard title="新患者接入提醒">
-          AI 已根据入院信息生成首次评估排期建议，建议尽快组织团队线上评估。
-        </AICard>
+      {(patient.needFirstAssess || patient.isNew) && (
+        <>
+          <SectionTitle title="首次评估 · 核心评分" extra={<span className="text-[10px] text-muted-foreground">AI 辅助生成</span>} />
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-card rounded-2xl shadow-card p-3">
+              <div className="text-[10px] text-muted-foreground">NIHSS</div>
+              <div className="text-2xl font-bold text-primary mt-1">14<span className="text-xs text-muted-foreground ml-1">分</span></div>
+              <div className="text-[10px] text-warning font-semibold mt-1">中度卒中</div>
+            </div>
+            <div className="bg-card rounded-2xl shadow-card p-3">
+              <div className="text-[10px] text-muted-foreground">mRS</div>
+              <div className="text-2xl font-bold text-primary mt-1">4<span className="text-xs text-muted-foreground ml-1">级</span></div>
+              <div className="text-[10px] text-warning font-semibold mt-1">中重度残疾</div>
+            </div>
+          </div>
+
+          <SectionTitle title="并发症 / 营养 / 认知" />
+          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+            <FormRow label="跌倒 · Morse" value={<span className="text-destructive font-semibold">高 55</span>} />
+            <FormRow label="压疮 · Braden" value={<span className="text-warning font-semibold">中 16</span>} />
+            <FormRow label="吞咽 · 洼田" value={<span className="text-warning font-semibold">3 级</span>} />
+            <FormRow label="DVT · Caprini" value={<span className="text-destructive font-semibold">高 5</span>} />
+            <FormRow label="营养 · NRS2002" value={<span className="text-warning font-semibold">3 分</span>} />
+            <FormRow label="认知 · MoCA" value={<span className="text-warning font-semibold">18/30</span>} />
+          </div>
+
+          <AICard title="AI 首次评估辅助结论">
+            <div className="whitespace-pre-line text-[12px] leading-relaxed">
+              {`综合判定：急性缺血性卒中后右侧偏瘫，NIHSS 14 分（中度），mRS 4 级（中重度残疾）。
+当前主要功能障碍：右上下肢运动重度受损（肌力 2 级）、轻度表达性失语、左侧空间忽略、吞咽可疑异常。
+合并高跌倒/DVT/压疮风险与营养及认知风险，整体康复潜力中等。
+建议方向：① 床旁早期 PT；② OT 介入 ADL + 视空间忽略训练；③ ST 吞咽与构音训练；④ 护理重点跌倒/压疮/DVT 预防 + 营养支持；⑤ 7 天后复评。`}
+            </div>
+            <div className="mt-2 text-[10px] text-muted-foreground">点击下方"确认首次评估"可进入完整评估表编辑 / 重新生成 AI 结论</div>
+          </AICard>
+
+          {patient.isNew && (
+            <AICard title="新患者接入提醒">
+              AI 已根据入院信息生成首次评估排期建议，建议尽快组织团队线上评估。
+            </AICard>
+          )}
+        </>
       )}
     </div>
   );
