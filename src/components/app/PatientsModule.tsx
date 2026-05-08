@@ -286,7 +286,7 @@ export const PatientsPage = ({
             <div className="bg-card rounded-2xl p-8 text-center text-xs text-muted-foreground">无匹配患者</div>
           ) : (
             <div className="space-y-2">
-              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} onSummary={onSummary ? () => onSummary(p) : undefined} />)}
+              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} onSummary={onSummary ? () => onSummary(p) : undefined} onAction={onAction ? (k) => onAction(k, p) : undefined} />)}
             </div>
           )}
         </div>
@@ -295,13 +295,20 @@ export const PatientsPage = ({
   );
 };
 
-const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Accent; onClick: () => void; onSummary?: () => void }) => {
-  const statusMap = {
-    "新患者": "bg-warning/15 text-warning",
-    "康复中": "bg-primary/10 text-primary",
+const PatientCard = ({ p, accent, onClick, onSummary, onAction }: { p: Patient; accent: Accent; onClick: () => void; onSummary?: () => void; onAction?: (key: PatientPendingKey) => void }) => {
+  const stage = getPatientStage(p);
+  const stageMap: Record<PatientStage, string> = {
+    "院前": "bg-warning/15 text-warning",
+    "院中": "bg-primary/10 text-primary",
     "待出院": "bg-success-soft text-success",
-    "已出院": "bg-muted text-muted-foreground",
-  }[p.status];
+    "院后": "bg-muted text-muted-foreground",
+  };
+  const pending: { key: PatientPendingKey; label: string; show: boolean }[] = [
+    { key: "assess", label: "待首评", show: !!p.needFirstAssess },
+    { key: "plan", label: "待确认方案", show: !!p.needPlanConfirm },
+    { key: "rx", label: "待确认医嘱", show: !!p.needRxConfirm },
+  ];
+  const pendingVisible = pending.filter(x => x.show);
   return (
     <div className="w-full bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99]">
       <button onClick={onClick} className="w-full text-left flex items-start gap-3">
@@ -311,12 +318,11 @@ const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Ac
             <div className="text-[13px] font-semibold">{p.name}</div>
             <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
             {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
-            {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
             {p.returnedReassess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">退回重评</span>}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusMap}`}>{p.status}</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${stageMap[stage]}`}>{stage}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{p.condition}</span>
             <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length}</span>
             {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length}</span>}
@@ -324,14 +330,26 @@ const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Ac
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground self-center" />
       </button>
-      {onSummary && (
-        <div className="mt-2.5 pt-2.5 border-t border-border/60 flex justify-end">
-          <button
-            onClick={(e) => { e.stopPropagation(); onSummary(); }}
-            className={`text-[11px] px-3 py-1.5 rounded-full font-semibold ${accentBg[accent]} text-white shadow-card`}
-          >
-            每日小结
-          </button>
+      {(pendingVisible.length > 0 || onSummary) && (
+        <div className="mt-2.5 pt-2.5 border-t border-border/60 flex flex-wrap items-center gap-1.5">
+          {pendingVisible.map((b) => (
+            <button
+              key={b.key}
+              onClick={(e) => { e.stopPropagation(); onAction?.(b.key); }}
+              disabled={!onAction}
+              className={`text-[11px] px-2.5 py-1 rounded-full font-semibold border ${accentText[accent]} border-current/30 bg-background hover:bg-muted disabled:opacity-60`}
+            >
+              {b.label}
+            </button>
+          ))}
+          {onSummary && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onSummary(); }}
+              className={`ml-auto text-[11px] px-3 py-1 rounded-full font-semibold ${accentBg[accent]} text-white shadow-card`}
+            >
+              每日小结
+            </button>
+          )}
         </div>
       )}
     </div>
