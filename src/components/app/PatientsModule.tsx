@@ -416,7 +416,7 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
         <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
         <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
-        <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="当前状态" value={getPatientStage(patient)} />
         <FormRow label="主管医师" value="李志远 主任医师" hint="神经康复科" />
         <FormRow label="既往史" value="高血压 8 年 · 糖尿病 5 年" />
         <FormRow label="手术史" value="2026-04-23 关节置换 / 减压内固定" />
