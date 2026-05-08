@@ -124,6 +124,11 @@ export const NurseApp = () => {
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
   const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
+  const [patientsFilter, setPatientsFilter] = useState<import("@/components/app/PatientsModule").PatientFilter>("all");
+  const goPatients = (filter: import("@/components/app/PatientsModule").PatientFilter = "all") => {
+    setPatientsFilter(filter);
+    setTab("patients");
+  };
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -154,12 +159,13 @@ export const NurseApp = () => {
       {tab === "home" && (
         <NurseHome
           onOpenQueue={openQueue}
+          onGoPatients={goPatients}
           onOpenDailyNote={() => open("dailyNote")}
           onOpenEdu={() => setTab("edu")}
           onOpenChat={() => setTab("chat")}
         />
       )}
-      {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
+      {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} initialFilter={patientsFilter} />}
       {tab === "edu" && <EduPage onOpenPush={() => open("eduPush")} />}
       {tab === "chat" && (
         <NurseChatHub
@@ -300,11 +306,13 @@ export const NurseApp = () => {
 /* ============== 工作台首页：根据康复处方生成的不同患者待办列 ============== */
 const NurseHome = ({
   onOpenQueue,
+  onGoPatients,
   onOpenDailyNote,
   onOpenEdu,
   onOpenChat,
 }: {
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: (filter?: import("@/components/app/PatientsModule").PatientFilter) => void;
   onOpenDailyNote: () => void;
   onOpenEdu: () => void;
   onOpenChat: () => void;
@@ -339,7 +347,7 @@ const NurseHome = ({
         </div>
         <PendingTodoGrid
           items={[
-            { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
+            { label: "待首次评估", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onGoPatients("待首次评估") },
             { label: "待护理", count: QUEUES.execTask.length, icon: HeartPulse, iconClass: "bg-success text-white", onClick: () => onOpenQueue("execTask") },
             { label: "待记录", count: QUEUES.vitals.length, icon: Activity, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("vitals") },
             { label: "待宣教", count: 3, icon: BookOpen, iconClass: "bg-warning text-white", onClick: onOpenEdu },

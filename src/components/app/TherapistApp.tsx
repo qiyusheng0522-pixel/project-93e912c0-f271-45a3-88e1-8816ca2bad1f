@@ -123,6 +123,11 @@ export const TherapistApp = () => {
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
   const [role, setRole] = useState<"therapist" | "lead">("therapist");
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [patientsFilter, setPatientsFilter] = useState<import("@/components/app/PatientsModule").PatientFilter>("all");
+  const goPatients = (filter: import("@/components/app/PatientsModule").PatientFilter = "all") => {
+    setPatientsFilter(filter);
+    setTab("patients");
+  };
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
@@ -151,7 +156,7 @@ export const TherapistApp = () => {
         <TherapistHome
           role={role}
           onOpenQueue={openQueue}
-          onGoPatients={() => setTab("patients")}
+          onGoPatients={goPatients}
           onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
           onOpenMed={() => open("med")}
@@ -163,6 +168,7 @@ export const TherapistApp = () => {
           onPickPatient={pickPatient}
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
+          initialFilter={patientsFilter}
           onSummaryPatient={(p) => {
             setActivePatient(`${p.name} · 床${p.bed}`);
             setSheet("summary");
@@ -343,7 +349,7 @@ const TherapistHome = ({
 }: {
   role: "therapist" | "lead";
   onOpenQueue: (k: QueueKey) => void;
-  onGoPatients: () => void;
+  onGoPatients: (filter?: import("@/components/app/PatientsModule").PatientFilter) => void;
   onGoRx: () => void;
   onUploadDaily: () => void;
   onOpenMed: () => void;
@@ -392,7 +398,7 @@ const TherapistHome = ({
         </div>
         <PendingTodoGrid
           items={[
-            { label: "待评估确认", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onOpenQueue("confirmAssess") },
+            { label: "待首次评估", count: QUEUES.confirmAssess.length, icon: ClipboardCheck, iconClass: "bg-warning text-white", onClick: () => onGoPatients("待首次评估") },
             { label: "待确认目标", count: QUEUES.goal.length, icon: Target, iconClass: "bg-primary text-white", onClick: () => onOpenQueue("goal") },
             { label: "待确认医嘱", count: QUEUES.rx.length, icon: FileText, iconClass: "bg-secondary text-white", onClick: onGoRx },
           ]}
@@ -451,15 +457,17 @@ const TherapistPatients = ({
   onPickPatient,
   onOpenQueue,
   onSummaryPatient,
+  initialFilter,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
   onSummaryPatient?: (p: Patient) => void;
+  initialFilter?: import("@/components/app/PatientsModule").PatientFilter;
 }) => {
   return (
     <div className="pb-4">
-      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} />
+      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} initialFilter={initialFilter} />
     </div>
   );
 };
