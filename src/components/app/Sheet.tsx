@@ -19,7 +19,7 @@ export const PhoneSheet = ({
   title: string;
   onClose: () => void;
   children: ReactNode;
-  accent?: "doctor" | "therapist" | "nurse" | "ai";
+  accent?: "doctor" | "therapist" | "nurse" | "ai" | "physio";
   footer?: ReactNode;
   flush?: boolean;
   hideHeader?: boolean;
@@ -36,6 +36,7 @@ export const PhoneSheet = ({
     therapist: "gradient-therapist",
     nurse: "gradient-nurse",
     ai: "gradient-ai",
+    physio: "gradient-physio",
   }[accent];
 
   return (
