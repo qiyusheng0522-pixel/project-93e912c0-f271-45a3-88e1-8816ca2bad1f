@@ -86,7 +86,7 @@ export const PATIENTS: Patient[] = [
       { label: "护理 · 康复护理", value: "q4h 体位 + 跌倒预防", hint: "赵静怡" },
     ],
   },
-  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 脑梗死急性期第 5 天 · 右侧肢体无力", status: "康复中", condition: "脑卒中", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
+  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 脑梗死急性期第 5 天 · 右侧肢体无力", status: "新患者", condition: "脑卒中", admitDays: 5, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间言语含糊好转，吞咽训练耐受良好。" },
   ] },
   { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脑出血恢复期 · 入院第 28 天", status: "待出院", condition: "脑出血", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
