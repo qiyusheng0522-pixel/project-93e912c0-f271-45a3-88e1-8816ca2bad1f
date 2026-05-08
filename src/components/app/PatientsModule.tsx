@@ -82,17 +82,17 @@ export const PATIENTS: Patient[] = [
       { label: "护理 · 康复护理", value: "q4h 体位 + 跌倒预防", hint: "赵静怡" },
     ],
   },
-  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 髋关节置换术后第 5 天", status: "康复中", condition: "髋关节置换", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
-    { author: "赵护士", time: "今日 11:00", text: "夜间疼痛缓解，VAS 由 6 降至 3。" },
+  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 脑梗死急性期第 5 天 · 右侧肢体无力", status: "康复中", condition: "脑卒中", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
+    { author: "赵护士", time: "今日 11:00", text: "夜间言语含糊好转，吞咽训练耐受良好。" },
   ] },
-  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脊髓损伤 · 入院第 28 天", status: "待出院", condition: "脊髓损伤", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
+  { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脑出血恢复期 · 入院第 28 天", status: "待出院", condition: "脑出血", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
     notes: [
       { author: "李医师", time: "今日 08:30", text: "Barthel 已达 85，符合出院条件，准备启动院外二级方案。" },
       { author: "王治疗师", time: "昨日 17:00", text: "下肢肌力 IV 级，独立步行 60m，平衡 Berg 48。" },
       { author: "孙博士", time: "前日 16:20", text: "患者出院焦虑下降，家属支持充足。" },
     ],
     therapyRecords: [
-      { type: "PT", author: "王治疗师", time: "今日 09:00", text: "步行训练 40min · 独立步行 60m，无跌倒。" },
+      { type: "PT", author: "王治疗师", time: "今日 09:00", text: "步行训练 40min · 独立步行 60m，无跌倒，步频 96 步/分。" },
       { type: "OT", author: "陈治疗师", time: "今日 10:30", text: "厨房 ADL 训练 30min · 可独立完成切配 + 烹饪。" },
       { type: "ST", author: "陈思雨", time: "昨日 15:00", text: "构音清晰度 92%，吞咽 EAT-10：2 分。" },
       { type: "PT", author: "王治疗师", time: "昨日 09:00", text: "上下楼梯训练 20min · 双足交替，扶手辅助。" },
@@ -120,9 +120,9 @@ export const PATIENTS: Patient[] = [
       { label: "心理 · 出院适应", value: "家属同伴支持", hint: "孙博士" },
     ],
   },
-  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 认知障碍", status: "康复中", condition: "认知障碍", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
+  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 卒中后认知障碍", status: "康复中", condition: "脑卒中", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
   { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
-  { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 颈髓损伤 · 入院第 2 天", status: "新患者", condition: "颈髓损伤", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 ASIA + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
+  { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 大面积脑梗死 · 入院第 2 天", status: "新患者", condition: "脑卒中", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 NIHSS + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
     { author: "王治疗师", time: "今日 10:20", text: "首评结果不确定 · 建议医师重新组织首次评估。" },
   ] },
   { id: "p7", name: "黄淑芬", bed: "320", meta: "女 70 · 脑出血恢复期 · 入院第 3 天", status: "新患者", condition: "脑出血", admitDays: 3, needFirstAssess: true, returnedReassess: true, returnReason: "护士反馈：夜间意识波动 GCS 13→11，AI 评估结论与床旁观察存在偏差。", shared: ["李医师", "赵护士"], notes: [
