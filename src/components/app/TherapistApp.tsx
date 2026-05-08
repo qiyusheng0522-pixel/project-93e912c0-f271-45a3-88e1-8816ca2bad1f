@@ -156,7 +156,7 @@ export const TherapistApp = () => {
         <TherapistHome
           role={role}
           onOpenQueue={openQueue}
-          onGoPatients={() => setTab("patients")}
+          onGoPatients={goPatients}
           onGoRx={() => setTab("rx")}
           onUploadDaily={() => open("uploadDaily")}
           onOpenMed={() => open("med")}
