@@ -159,12 +159,13 @@ export const NurseApp = () => {
       {tab === "home" && (
         <NurseHome
           onOpenQueue={openQueue}
+          onGoPatients={goPatients}
           onOpenDailyNote={() => open("dailyNote")}
           onOpenEdu={() => setTab("edu")}
           onOpenChat={() => setTab("chat")}
         />
       )}
-      {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} />}
+      {tab === "patients" && <PatientsPage accent="nurse" onPick={pickPatient} initialFilter={patientsFilter} />}
       {tab === "edu" && <EduPage onOpenPush={() => open("eduPush")} />}
       {tab === "chat" && (
         <NurseChatHub
