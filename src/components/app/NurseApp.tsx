@@ -306,11 +306,13 @@ export const NurseApp = () => {
 /* ============== 工作台首页：根据康复处方生成的不同患者待办列 ============== */
 const NurseHome = ({
   onOpenQueue,
+  onGoPatients,
   onOpenDailyNote,
   onOpenEdu,
   onOpenChat,
 }: {
   onOpenQueue: (k: QueueKey) => void;
+  onGoPatients: (filter?: import("@/components/app/PatientsModule").PatientFilter) => void;
   onOpenDailyNote: () => void;
   onOpenEdu: () => void;
   onOpenChat: () => void;
