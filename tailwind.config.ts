@@ -48,6 +48,7 @@ export default {
           doctor: "hsl(var(--role-doctor))",
           therapist: "hsl(var(--role-therapist))",
           nurse: "hsl(var(--role-nurse))",
+          physio: "hsl(var(--role-physio))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
