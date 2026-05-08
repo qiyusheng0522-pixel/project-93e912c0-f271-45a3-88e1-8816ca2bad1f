@@ -159,15 +159,19 @@ const accentText: Record<Accent, string> = {
 };
 
 /* ============== 患者管理主页 ============== */
+export type PatientPendingKey = "assess" | "plan" | "rx";
+
 export const PatientsPage = ({
   accent,
   onPick,
   onSummary,
+  onAction,
   initialFilter = "all",
 }: {
   accent: Accent;
   onPick: (p: Patient) => void;
   onSummary?: (p: Patient) => void;
+  onAction?: (key: PatientPendingKey, p: Patient) => void;
   initialFilter?: PatientFilter;
 }) => {
   const [q, setQ] = useState("");
