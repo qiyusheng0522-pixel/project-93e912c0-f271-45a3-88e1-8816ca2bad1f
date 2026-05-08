@@ -57,8 +57,8 @@ export type Patient = {
 };
 
 export const PATIENTS: Patient[] = [
-  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 急性缺血性脑卒中 · 今日入院", status: "新患者", condition: "脑卒中", admitDays: 0, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
-  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 脑出血急性期 · 今日入院", status: "新患者", condition: "脑出血", admitDays: 0, needFirstAssess: true, shared: ["李医师"], notes: [], isNew: true },
+  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 急性缺血性脑卒中 · 今日入院", status: "新患者", condition: "脑卒中", admitDays: 0, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
+  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 脑出血急性期 · 今日入院", status: "新患者", condition: "脑出血", admitDays: 0, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师"], notes: [], isNew: true },
   { id: "p1", name: "张建国", bed: "303", meta: "男 56 · 脑卒中后偏瘫 · 入院第 12 天", status: "康复中", condition: "脑卒中", admitDays: 12, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士"],
     notes: [
       { author: "李医师", time: "今日 09:20", text: "FMA 提升明显，下周复评后可考虑加强 OT 训练。" },
