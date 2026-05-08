@@ -919,7 +919,7 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
   return (
     <div className="p-4 space-y-3">
       <AICard title="治疗师长 · 全员排班总览">
-        共 {TEAM_SCHEDULE.length} 位治疗师 · {total} 项治疗 · 横向时间 / 纵向人员。点击单元格可调整 / 转派。
+        共 {TEAM_SCHEDULE.length} 位治疗师 · {total} 项治疗 · 横向时间 / 纵向人员，<span className="font-semibold text-secondary">高亮行为我本人排班</span>。点击单元格可调整 / 转派。
       </AICard>
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide">
@@ -933,10 +933,15 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
               </tr>
             </thead>
             <tbody>
-              {TEAM_SCHEDULE.map((row) => (
-                <tr key={row.therapist} className="border-t border-border/60">
-                  <td className="sticky left-0 z-10 bg-card px-2 py-2 border-r border-border/60 align-top">
-                    <div className="text-[11px] font-bold leading-tight">{row.therapist}</div>
+              {TEAM_SCHEDULE.map((row) => {
+                const isMine = row.therapist === "王雅琴";
+                return (
+                <tr key={row.therapist} className={`border-t border-border/60 ${isMine ? "bg-secondary-soft/40" : ""}`}>
+                  <td className={`sticky left-0 z-10 px-2 py-2 border-r border-border/60 align-top ${isMine ? "bg-secondary-soft/60" : "bg-card"}`}>
+                    <div className="text-[11px] font-bold leading-tight flex items-center gap-1">
+                      {row.therapist}
+                      {isMine && <span className="text-[8px] px-1 py-px rounded bg-secondary text-white font-bold">我</span>}
+                    </div>
                     <div className="text-[9px] text-muted-foreground mt-0.5 leading-tight">{row.cert}</div>
                   </td>
                   {SLOTS.map((slot) => {
@@ -946,7 +951,7 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
                         {item ? (
                           <button
                             onClick={() => toast(`${row.therapist} · ${item.time} · ${item.patient}`)}
-                            className={`w-full rounded-md px-1 py-1 text-left ${typeColor(item.type)}`}
+                            className={`w-full rounded-md px-1 py-1 text-left ${typeColor(item.type)} ${isMine ? "ring-2 ring-secondary/60" : ""}`}
                           >
                             <div className="font-bold leading-tight">{item.type}</div>
                             <div className="leading-tight truncate">{item.patient}</div>
@@ -959,7 +964,8 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
                     );
                   })}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

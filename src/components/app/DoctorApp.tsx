@@ -349,6 +349,30 @@ export const DoctorApp = () => {
           patient={pickedPatient}
           accent="doctor"
           onAddNote={() => setSheet("addNote")}
+          actions={
+            pickedPatient
+              ? (pickedPatient.needFirstAssess
+                  ? [
+                      { key: "assess", label: "首次评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
+                      { key: "goal", label: "设定目标", icon: Target, onClick: () => setSheet("goal") },
+                      { key: "plan", label: "确认方案", icon: FileText, onClick: () => setSheet("plan") },
+                      { key: "rx", label: "确认医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+                    ]
+                  : pickedPatient.status === "待出院"
+                  ? [
+                      { key: "plan", label: "复评方案", icon: FileText, onClick: () => setSheet("plan") },
+                      { key: "rx", label: "调整医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+                      { key: "discharge", label: "出院方案", icon: LogOut, onClick: () => setSheet("discharge") },
+                      { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
+                    ]
+                  : [
+                      { key: "assess", label: "复评", icon: ClipboardCheck, onClick: () => setSheet("assess") },
+                      { key: "plan", label: "调整方案", icon: FileText, onClick: () => setSheet("plan") },
+                      { key: "rx", label: "调整医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+                      { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
+                    ])
+              : undefined
+          }
         />
       </PhoneSheet>
 
