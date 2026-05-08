@@ -22,14 +22,16 @@ import { toast } from "sonner";
 
 export type Accent = "doctor" | "therapist" | "nurse";
 
+export type PatientStage = "院前" | "院中" | "待出院" | "院后";
+
 export type PatientFilter =
   | "all"
-  | "新患者"
-  | "待首次评估"
-  | "退回重评"
-  | "康复中"
+  | "院前"
+  | "院中"
   | "待出院"
-  | "已出院";
+  | "院后"
+  | "待首次评估"
+  | "退回重评";
 
 export type Patient = {
   id: string;
@@ -40,6 +42,8 @@ export type Patient = {
   condition: string; // 病症 用于筛选
   admitDays: number; // 入院天数
   needFirstAssess?: boolean; // 是否待首次评估
+  needPlanConfirm?: boolean; // 是否待确认康复方案
+  needRxConfirm?: boolean; // 是否待确认康复医嘱
   returnedReassess?: boolean; // 治疗师/护士退回，需重新首次评估
   returnReason?: string;
   shared: string[];
@@ -53,8 +57,8 @@ export type Patient = {
 };
 
 export const PATIENTS: Patient[] = [
-  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 急性缺血性脑卒中 · 今日入院", status: "新患者", condition: "脑卒中", admitDays: 0, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
-  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 脑出血急性期 · 今日入院", status: "新患者", condition: "脑出血", admitDays: 0, needFirstAssess: true, shared: ["李医师"], notes: [], isNew: true },
+  { id: "p0", name: "孙德强", bed: "315", meta: "男 60 · 急性缺血性脑卒中 · 今日入院", status: "新患者", condition: "脑卒中", admitDays: 0, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [], isNew: true },
+  { id: "p9", name: "吴丽君", bed: "316", meta: "女 55 · 脑出血急性期 · 今日入院", status: "新患者", condition: "脑出血", admitDays: 0, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师"], notes: [], isNew: true },
   { id: "p1", name: "张建国", bed: "303", meta: "男 56 · 脑卒中后偏瘫 · 入院第 12 天", status: "康复中", condition: "脑卒中", admitDays: 12, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士"],
     notes: [
       { author: "李医师", time: "今日 09:20", text: "FMA 提升明显，下周复评后可考虑加强 OT 训练。" },
@@ -82,7 +86,7 @@ export const PATIENTS: Patient[] = [
       { label: "护理 · 康复护理", value: "q4h 体位 + 跌倒预防", hint: "赵静怡" },
     ],
   },
-  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 脑梗死急性期第 5 天 · 右侧肢体无力", status: "康复中", condition: "脑卒中", admitDays: 5, needFirstAssess: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
+  { id: "p2", name: "王秀英", bed: "305", meta: "女 68 · 脑梗死急性期第 5 天 · 右侧肢体无力", status: "新患者", condition: "脑卒中", admitDays: 5, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师", "赵护士"], notes: [
     { author: "赵护士", time: "今日 11:00", text: "夜间言语含糊好转，吞咽训练耐受良好。" },
   ] },
   { id: "p3", name: "李 强", bed: "307", meta: "男 42 · 脑出血恢复期 · 入院第 28 天", status: "待出院", condition: "脑出血", admitDays: 28, shared: ["李医师", "王治疗师", "陈治疗师", "赵护士", "孙博士"],
@@ -120,8 +124,8 @@ export const PATIENTS: Patient[] = [
       { label: "心理 · 出院适应", value: "家属同伴支持", hint: "孙博士" },
     ],
   },
-  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 卒中后认知障碍", status: "康复中", condition: "脑卒中", admitDays: 18, shared: ["李医师", "陈治疗师"], notes: [] },
-  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "康复中", condition: "脑梗死", admitDays: 2, needFirstAssess: true, shared: ["李医师", "王治疗师"], notes: [] },
+  { id: "p4", name: "陈丽华", bed: "310", meta: "女 65 · 卒中后认知障碍", status: "康复中", condition: "脑卒中", admitDays: 18, needPlanConfirm: true, shared: ["李医师", "陈治疗师"], notes: [] },
+  { id: "p5", name: "周建华", bed: "311", meta: "男 72 · 脑梗死恢复期", status: "新患者", condition: "脑梗死", admitDays: 2, needFirstAssess: true, needPlanConfirm: true, needRxConfirm: true, shared: ["李医师", "王治疗师"], notes: [] },
   { id: "p6", name: "赵子轩", bed: "318", meta: "男 48 · 大面积脑梗死 · 入院第 2 天", status: "新患者", condition: "脑卒中", admitDays: 2, needFirstAssess: true, returnedReassess: true, returnReason: "治疗师反馈：实际触诊肌力与首评 MMT 等级不符，建议复测 NIHSS + Berg。", shared: ["李医师", "王治疗师", "陈治疗师"], notes: [
     { author: "王治疗师", time: "今日 10:20", text: "首评结果不确定 · 建议医师重新组织首次评估。" },
   ] },
@@ -135,6 +139,14 @@ export const FIRST_ASSESS_COUNT = PATIENTS.filter(p => p.needFirstAssess).length
 export const RETURNED_REASSESS_COUNT = PATIENTS.filter(p => p.returnedReassess).length;
 export const ALL_CONDITIONS = Array.from(new Set(PATIENTS.map(p => p.condition)));
 
+/** 根据状态推导患者所处阶段 */
+export const getPatientStage = (p: Patient): PatientStage => {
+  if (p.status === "已出院") return "院后";
+  if (p.status === "待出院") return "待出院";
+  if (p.needFirstAssess || p.returnedReassess || p.needPlanConfirm || p.needRxConfirm) return "院前";
+  return "院中";
+};
+
 const accentBg: Record<Accent, string> = {
   doctor: "gradient-doctor",
   therapist: "gradient-therapist",
@@ -147,15 +159,19 @@ const accentText: Record<Accent, string> = {
 };
 
 /* ============== 患者管理主页 ============== */
+export type PatientPendingKey = "assess" | "plan" | "rx";
+
 export const PatientsPage = ({
   accent,
   onPick,
   onSummary,
+  onAction,
   initialFilter = "all",
 }: {
   accent: Accent;
   onPick: (p: Patient) => void;
   onSummary?: (p: Patient) => void;
+  onAction?: (key: PatientPendingKey, p: Patient) => void;
   initialFilter?: PatientFilter;
 }) => {
   const [q, setQ] = useState("");
@@ -165,10 +181,9 @@ export const PatientsPage = ({
 
   const matchStatus = (p: Patient) => {
     if (statusFilter === "all") return true;
-    if (statusFilter === "待首次评估") return p.needFirstAssess;
-    if (statusFilter === "退回重评") return p.returnedReassess;
-    if (statusFilter === "新患者") return p.isNew;
-    return p.status === statusFilter;
+    if (statusFilter === "待首次评估") return !!p.needFirstAssess;
+    if (statusFilter === "退回重评") return !!p.returnedReassess;
+    return getPatientStage(p) === statusFilter;
   };
   const matchAdmit = (p: Patient) => {
     if (admitRange === "all") return true;
@@ -183,12 +198,13 @@ export const PatientsPage = ({
     matchAdmit(p)
   );
 
+  const stageCount = (s: PatientStage) => PATIENTS.filter(p => getPatientStage(p) === s).length;
   const filterChips: { key: PatientFilter; label: string; count: number }[] = [
     { key: "all", label: "全部", count: PATIENTS.length },
-    { key: "待首次评估", label: "待首次评估", count: PATIENTS.filter(p => p.needFirstAssess).length },
-    { key: "退回重评", label: "退回重评", count: RETURNED_REASSESS_COUNT },
-    { key: "康复中", label: "康复中", count: PATIENTS.filter(p => p.status === "康复中").length },
-    { key: "待出院", label: "待出院", count: PATIENTS.filter(p => p.status === "待出院").length },
+    { key: "院前", label: "院前", count: stageCount("院前") },
+    { key: "院中", label: "院中", count: stageCount("院中") },
+    { key: "待出院", label: "待出院", count: stageCount("待出院") },
+    { key: "院后", label: "院后", count: stageCount("院后") },
   ];
 
   return (
@@ -270,7 +286,7 @@ export const PatientsPage = ({
             <div className="bg-card rounded-2xl p-8 text-center text-xs text-muted-foreground">无匹配患者</div>
           ) : (
             <div className="space-y-2">
-              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} onSummary={onSummary ? () => onSummary(p) : undefined} />)}
+              {list.map(p => <PatientCard key={p.id} p={p} accent={accent} onClick={() => onPick(p)} onSummary={onSummary ? () => onSummary(p) : undefined} onAction={onAction ? (k) => onAction(k, p) : undefined} />)}
             </div>
           )}
         </div>
@@ -279,13 +295,20 @@ export const PatientsPage = ({
   );
 };
 
-const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Accent; onClick: () => void; onSummary?: () => void }) => {
-  const statusMap = {
-    "新患者": "bg-warning/15 text-warning",
-    "康复中": "bg-primary/10 text-primary",
+const PatientCard = ({ p, accent, onClick, onSummary, onAction }: { p: Patient; accent: Accent; onClick: () => void; onSummary?: () => void; onAction?: (key: PatientPendingKey) => void }) => {
+  const stage = getPatientStage(p);
+  const stageMap: Record<PatientStage, string> = {
+    "院前": "bg-warning/15 text-warning",
+    "院中": "bg-primary/10 text-primary",
     "待出院": "bg-success-soft text-success",
-    "已出院": "bg-muted text-muted-foreground",
-  }[p.status];
+    "院后": "bg-muted text-muted-foreground",
+  };
+  const pending: { key: PatientPendingKey; label: string; show: boolean }[] = [
+    { key: "assess", label: "待首评", show: !!p.needFirstAssess },
+    { key: "plan", label: "待确认方案", show: !!p.needPlanConfirm },
+    { key: "rx", label: "待确认医嘱", show: !!p.needRxConfirm },
+  ];
+  const pendingVisible = pending.filter(x => x.show);
   return (
     <div className="w-full bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99]">
       <button onClick={onClick} className="w-full text-left flex items-start gap-3">
@@ -295,12 +318,11 @@ const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Ac
             <div className="text-[13px] font-semibold">{p.name}</div>
             <span className="text-[10px] text-muted-foreground">床 {p.bed}</span>
             {p.isNew && <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning text-white font-bold">NEW</span>}
-            {p.needFirstAssess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-primary-soft text-primary font-semibold">待首评</span>}
             {p.returnedReassess && <span className="text-[9px] px-1.5 py-0.5 rounded bg-destructive/10 text-destructive font-semibold">退回重评</span>}
           </div>
           <div className="text-[11px] text-muted-foreground mt-0.5 truncate">{p.meta}</div>
           <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${statusMap}`}>{p.status}</span>
+            <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${stageMap[stage]}`}>{stage}</span>
             <span className="text-[10px] px-2 py-0.5 rounded-full bg-muted text-foreground/70">{p.condition}</span>
             <span className="text-[10px] text-muted-foreground flex items-center gap-1"><Users className="w-3 h-3" />{p.shared.length}</span>
             {p.notes.length > 0 && <span className="text-[10px] text-muted-foreground flex items-center gap-1"><StickyNote className="w-3 h-3" />{p.notes.length}</span>}
@@ -308,14 +330,26 @@ const PatientCard = ({ p, accent, onClick, onSummary }: { p: Patient; accent: Ac
         </div>
         <ChevronRight className="w-4 h-4 text-muted-foreground self-center" />
       </button>
-      {onSummary && (
-        <div className="mt-2.5 pt-2.5 border-t border-border/60 flex justify-end">
-          <button
-            onClick={(e) => { e.stopPropagation(); onSummary(); }}
-            className={`text-[11px] px-3 py-1.5 rounded-full font-semibold ${accentBg[accent]} text-white shadow-card`}
-          >
-            每日小结
-          </button>
+      {(pendingVisible.length > 0 || onSummary) && (
+        <div className="mt-2.5 pt-2.5 border-t border-border/60 flex flex-wrap items-center gap-1.5">
+          {pendingVisible.map((b) => (
+            <button
+              key={b.key}
+              onClick={(e) => { e.stopPropagation(); onAction?.(b.key); }}
+              disabled={!onAction}
+              className={`text-[11px] px-2.5 py-1 rounded-full font-semibold border ${accentText[accent]} border-current/30 bg-background hover:bg-muted disabled:opacity-60`}
+            >
+              {b.label}
+            </button>
+          ))}
+          {onSummary && (
+            <button
+              onClick={(e) => { e.stopPropagation(); onSummary(); }}
+              className={`ml-auto text-[11px] px-3 py-1 rounded-full font-semibold ${accentBg[accent]} text-white shadow-card`}
+            >
+              每日小结
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -342,7 +376,7 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
             <div className="text-base font-bold">{patient.name} · 床 {patient.bed}</div>
             <div className="text-[11px] opacity-90 mt-0.5">{patient.meta}</div>
           </div>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{patient.status}</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{getPatientStage(patient)}</span>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
           <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">入院天数</div><div className="text-[12px] font-semibold mt-0.5">{patient.admitDays} 天</div></div>
@@ -382,7 +416,7 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
       <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
         <FormRow label="主诉 / 病症" value={patient.condition} hint={patient.meta} />
         <FormRow label="入院时间" value={`${patient.admitDays} 天前`} />
-        <FormRow label="当前状态" value={patient.status} />
+        <FormRow label="当前状态" value={getPatientStage(patient)} />
         <FormRow label="主管医师" value="李志远 主任医师" hint="神经康复科" />
         <FormRow label="既往史" value="高血压 8 年 · 糖尿病 5 年" />
         <FormRow label="手术史" value="2026-04-23 关节置换 / 减压内固定" />
@@ -530,9 +564,9 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
       )}
 
       {/* 康复中 / 待出院 患者：AI 基于当前状态给出方案 / 出院建议 */}
-      {(patient.status === "康复中" || patient.status === "待出院") && (
-        <AICard title={patient.status === "待出院" ? "AI 出院建议" : "AI 方案调整建议"}>
-          {patient.status === "待出院" ? (
+      {(getPatientStage(patient) === "院中" || getPatientStage(patient) === "待出院") && (
+        <AICard title={getPatientStage(patient) === "待出院" ? "AI 出院建议" : "AI 方案调整建议"}>
+          {getPatientStage(patient) === "待出院" ? (
             <div className="text-[12px] leading-relaxed">
               基于近 7 日康复执行（PT/OT 完成率 100%）、Barthel 已达 85、Berg 48、独立步行 60m，已满足出院标准。
               建议：① 启动院外二级方案二次确认；② 完成家属跌倒预防与转移培训；③ 对接社区康复站每周 2 次随访。

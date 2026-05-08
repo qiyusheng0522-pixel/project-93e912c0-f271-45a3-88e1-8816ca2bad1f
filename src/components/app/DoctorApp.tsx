@@ -15,6 +15,8 @@ import {
   PatientChatSheet,
   Patient,
   PatientFilter,
+  PatientPendingKey,
+  getPatientStage,
   PATIENTS,
   NEW_PATIENT_COUNT,
   FIRST_ASSESS_COUNT,
@@ -145,7 +147,20 @@ export const DoctorApp = () => {
           onGoChat={() => setTab("chat")}
         />
       )}
-      {tab === "patients" && <PatientsPage accent="doctor" onPick={pickPatient} initialFilter={patientsFilter} />}
+      {tab === "patients" && (
+        <PatientsPage
+          accent="doctor"
+          onPick={pickPatient}
+          initialFilter={patientsFilter}
+          onAction={(key, p) => {
+            setActivePatient(`${p.name} · 床${p.bed}`);
+            setPickedPatient({ ...p, notes: patientNotes[p.id] ?? p.notes });
+            if (key === "assess") setSheet("assess");
+            else if (key === "plan") setSheet("plan");
+            else setSheet("rx");
+          }}
+        />
+      )}
       {tab === "plan" && (
         <RehabPlanModule
           accent="doctor"
@@ -323,27 +338,7 @@ export const DoctorApp = () => {
         onClose={close}
         title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`}
         accent="doctor"
-        footer={
-          pickedPatient?.needFirstAssess ? (
-            <div className="flex gap-2">
-              <button
-                onClick={() => { setActiveMeeting(null); setSheet("meeting"); toast("已发起团队会议评估"); }}
-                className="flex-1 border border-primary/30 text-primary rounded-2xl py-3 text-sm font-semibold"
-              >
-                团队会议评估
-              </button>
-              <button
-                onClick={() => {
-                  toast.success("首次评估已确认 · 请指派治疗师");
-                  setTherapistPickerOpen(true);
-                }}
-                className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
-              >
-                确认首次评估
-              </button>
-            </div>
-          ) : undefined
-        }
+        footer={undefined}
       >
         <PatientDetailSheet
           patient={pickedPatient}
@@ -351,26 +346,32 @@ export const DoctorApp = () => {
           onAddNote={() => setSheet("addNote")}
           actions={
             pickedPatient
-              ? (pickedPatient.needFirstAssess
-                  ? [
-                      { key: "assess", label: "首次评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
-                      { key: "goal", label: "设定目标", icon: Target, onClick: () => setSheet("goal") },
-                      { key: "plan", label: "确认方案", icon: FileText, onClick: () => setSheet("plan") },
-                      { key: "rx", label: "确认医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
-                    ]
-                  : pickedPatient.status === "待出院"
-                  ? [
-                      { key: "plan", label: "复评方案", icon: FileText, onClick: () => setSheet("plan") },
-                      { key: "rx", label: "调整医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+              ? (() => {
+                  const stage = getPatientStage(pickedPatient);
+                  if (stage === "院前") {
+                    // 院前操作已在患者卡片上提供，详情页面只展示档案 + 查看入口
+                    const acts: any[] = [];
+                    if (!pickedPatient.needFirstAssess) acts.push({ key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") });
+                    if (!pickedPatient.needPlanConfirm) acts.push({ key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") });
+                    if (!pickedPatient.needRxConfirm) acts.push({ key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") });
+                    return acts.length ? acts : undefined;
+                  }
+                  if (stage === "待出院") {
+                    return [
+                      { key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
+                      { key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") },
+                      { key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
                       { key: "discharge", label: "出院方案", icon: LogOut, onClick: () => setSheet("discharge") },
-                      { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
-                    ]
-                  : [
-                      { key: "assess", label: "复评", icon: ClipboardCheck, onClick: () => setSheet("assess") },
-                      { key: "plan", label: "调整方案", icon: FileText, onClick: () => setSheet("plan") },
-                      { key: "rx", label: "调整医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
-                      { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
-                    ])
+                    ];
+                  }
+                  // 院中
+                  return [
+                    { key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
+                    { key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") },
+                    { key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+                    { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
+                  ];
+                })()
               : undefined
           }
         />
