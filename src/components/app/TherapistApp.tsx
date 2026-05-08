@@ -919,7 +919,7 @@ const ScheduleView = ({ role }: { role: "therapist" | "lead" }) => {
   return (
     <div className="p-4 space-y-3">
       <AICard title="治疗师长 · 全员排班总览">
-        共 {TEAM_SCHEDULE.length} 位治疗师 · {total} 项治疗 · 横向时间 / 纵向人员。点击单元格可调整 / 转派。
+        共 {TEAM_SCHEDULE.length} 位治疗师 · {total} 项治疗 · 横向时间 / 纵向人员，<span className="font-semibold text-secondary">高亮行为我本人排班</span>。点击单元格可调整 / 转派。
       </AICard>
       <div className="bg-card rounded-2xl shadow-card overflow-hidden">
         <div className="overflow-x-auto scrollbar-hide">
