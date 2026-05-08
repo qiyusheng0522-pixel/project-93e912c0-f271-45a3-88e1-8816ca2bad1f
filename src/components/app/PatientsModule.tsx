@@ -540,7 +540,7 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
           ) : (
             <div className="text-[12px] leading-relaxed">
               基于本周评估趋势（FMA +6、Borg 9、跌倒 0 次），患者耐受良好。
-              建议：① PT 强度上调 15-20% 并加入双任务训练；② 暂不调整 ST；③ 7 天后复评 FMA / Berg，若进步>10% 可启动出院评估。
+              建议：① PT 强度上调 15-20% 并加入双任务训练；② 暂不调整 ST；③ 7 天后复评 FMA / Berg，若进步 ≥ 10% 可启动出院评估。
             </div>
           )}
           <div className="mt-2 text-[10px] text-muted-foreground">AI 仅供辅助，最终由康复医师决策。</div>
