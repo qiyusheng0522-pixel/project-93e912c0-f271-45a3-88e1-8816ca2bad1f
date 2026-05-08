@@ -7,6 +7,7 @@ import { RxDetail } from "@/components/app/RxDetail";
 import {
   PatientsPage,
   PatientDetailSheet,
+  PatientActionsBar,
   AddNoteSheet,
   TeamManageSheet,
   PatientChatListSheet,
