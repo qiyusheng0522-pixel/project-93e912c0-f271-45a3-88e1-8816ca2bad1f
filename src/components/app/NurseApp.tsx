@@ -124,6 +124,11 @@ export const NurseApp = () => {
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
   const [meetings, setMeetings] = useState<TeamMeeting[]>(DEFAULT_MEETINGS);
   const [activeMeeting, setActiveMeeting] = useState<TeamMeeting | null>(null);
+  const [patientsFilter, setPatientsFilter] = useState<import("@/components/app/PatientsModule").PatientFilter>("all");
+  const goPatients = (filter: import("@/components/app/PatientsModule").PatientFilter = "all") => {
+    setPatientsFilter(filter);
+    setTab("patients");
+  };
 
   const open = (k: SheetKey) => setSheet(k);
   const close = () => setSheet(null);
