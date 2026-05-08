@@ -10,7 +10,7 @@ export interface TabBarItem {
 
 interface TabBarProps {
   active: string;
-  accent: "doctor" | "therapist" | "nurse";
+  accent: "doctor" | "therapist" | "nurse" | "physio";
   onChange?: (key: string) => void;
   newPatientCount?: number;
   items?: TabBarItem[];
@@ -32,6 +32,7 @@ export const TabBar = ({ active, accent, onChange, newPatientCount = 0, items }:
     doctor: "text-role-doctor",
     therapist: "text-role-therapist",
     nurse: "text-role-nurse",
+    physio: "text-role-physio",
   }[accent];
 
   return (
