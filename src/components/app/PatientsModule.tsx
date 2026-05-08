@@ -418,58 +418,42 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
         </button>
       )}
 
-      <SectionTitle title={`协作备注 · ${patient.notes.length}`} extra={<button onClick={onAddNote} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Plus className="w-3 h-3" />添加备注</button>} />
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        {patient.notes.length === 0 ? (
-          <div className="p-4 text-[11px] text-muted-foreground text-center">暂无备注，点击右上角添加</div>
-        ) : patient.notes.map((n, i) => (
-          <div key={i} className="p-3.5">
-            <div className="flex items-center justify-between">
-              <div className="text-[12px] font-semibold">{n.author}</div>
-              <div className="text-[10px] text-muted-foreground">{n.time}</div>
-            </div>
-            <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{n.text}</div>
-          </div>
-        ))}
-      </div>
-
-      {/* 治疗师档案：PT/OT/ST 治疗记录 */}
+      {/* 治疗师档案：PT/OT/ST 治疗记录（默认仅展示最新一条，历史可展开） */}
       {patient.therapyRecords && patient.therapyRecords.length > 0 && (
-        <>
-          <SectionTitle title={`治疗记录 · ${patient.therapyRecords.length}`} extra={<span className="text-[10px] text-muted-foreground">PT / OT / ST · 医师可查看</span>} />
-          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-            {patient.therapyRecords.map((r, i) => {
-              const tagColor = { PT: "bg-secondary-soft text-secondary", OT: "bg-primary-soft text-primary", ST: "bg-ai-soft text-ai" }[r.type];
-              return (
-                <div key={i} className="p-3.5">
-                  <div className="flex items-center gap-2">
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${tagColor}`}>{r.type}</span>
-                    <span className="text-[12px] font-semibold">{r.author}</span>
-                    <span className="text-[10px] text-muted-foreground ml-auto">{r.time}</span>
-                  </div>
-                  <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{r.text}</div>
+        <CollapsibleRecords
+          title={`治疗记录 · ${patient.therapyRecords.length}`}
+          extra={<span className="text-[10px] text-muted-foreground">PT / OT / ST · 医师可查看</span>}
+          items={patient.therapyRecords}
+          renderItem={(r, i) => {
+            const tagColor = { PT: "bg-secondary-soft text-secondary", OT: "bg-primary-soft text-primary", ST: "bg-ai-soft text-ai" }[r.type];
+            return (
+              <div key={i} className="p-3.5">
+                <div className="flex items-center gap-2">
+                  <span className={`text-[10px] px-1.5 py-0.5 rounded font-bold ${tagColor}`}>{r.type}</span>
+                  <span className="text-[12px] font-semibold">{r.author}</span>
+                  <span className="text-[10px] text-muted-foreground ml-auto">{r.time}</span>
                 </div>
-              );
-            })}
-          </div>
-        </>
+                <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{r.text}</div>
+              </div>
+            );
+          }}
+        />
       )}
 
       {patient.summaries && patient.summaries.length > 0 && (
-        <>
-          <SectionTitle title={`工作小结 · ${patient.summaries.length}`} />
-          <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-            {patient.summaries.map((s, i) => (
-              <div key={i} className="p-3.5">
-                <div className="flex items-center justify-between">
-                  <div className="text-[12px] font-semibold">{s.author}</div>
-                  <div className="text-[10px] text-muted-foreground">{s.time}</div>
-                </div>
-                <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{s.text}</div>
+        <CollapsibleRecords
+          title={`工作小结 · ${patient.summaries.length}`}
+          items={patient.summaries}
+          renderItem={(s, i) => (
+            <div key={i} className="p-3.5">
+              <div className="flex items-center justify-between">
+                <div className="text-[12px] font-semibold">{s.author}</div>
+                <div className="text-[10px] text-muted-foreground">{s.time}</div>
               </div>
-            ))}
-          </div>
-        </>
+              <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{s.text}</div>
+            </div>
+          )}
+        />
       )}
 
       {patient.medChanges && patient.medChanges.length > 0 && (
@@ -542,17 +526,85 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
             </div>
             <div className="mt-2 text-[10px] text-muted-foreground">点击下方"确认首次评估"可进入完整评估表编辑 / 重新生成 AI 结论</div>
           </AICard>
-
-          {patient.isNew && (
-            <AICard title="新患者接入提醒">
-              AI 已根据入院信息生成首次评估排期建议，建议尽快组织团队线上评估。
-            </AICard>
-          )}
         </>
       )}
+
+      {/* 康复中 / 待出院 患者：AI 基于当前状态给出方案 / 出院建议 */}
+      {(patient.status === "康复中" || patient.status === "待出院") && (
+        <AICard title={patient.status === "待出院" ? "AI 出院建议" : "AI 方案调整建议"}>
+          {patient.status === "待出院" ? (
+            <div className="text-[12px] leading-relaxed">
+              基于近 7 日康复执行（PT/OT 完成率 100%）、Barthel 已达 85、Berg 48、独立步行 60m，已满足出院标准。
+              建议：① 启动院外二级方案二次确认；② 完成家属跌倒预防与转移培训；③ 对接社区康复站每周 2 次随访。
+            </div>
+          ) : (
+            <div className="text-[12px] leading-relaxed">
+              基于本周评估趋势（FMA +6、Borg 9、跌倒 0 次），患者耐受良好。
+              建议：① PT 强度上调 15-20% 并加入双任务训练；② 暂不调整 ST；③ 7 天后复评 FMA / Berg，若进步>10% 可启动出院评估。
+            </div>
+          )}
+          <div className="mt-2 text-[10px] text-muted-foreground">AI 仅供辅助，最终由康复医师决策。</div>
+        </AICard>
+      )}
+
+      {/* 协作备注 · 始终置于详情最底部 */}
+      <SectionTitle title={`协作备注 · ${patient.notes.length}`} extra={<button onClick={onAddNote} className={`text-[11px] font-semibold ${accentText[accent]} flex items-center gap-1`}><Plus className="w-3 h-3" />添加备注</button>} />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        {patient.notes.length === 0 ? (
+          <div className="p-4 text-[11px] text-muted-foreground text-center">暂无备注，点击右上角添加</div>
+        ) : patient.notes.map((n, i) => (
+          <div key={i} className="p-3.5">
+            <div className="flex items-center justify-between">
+              <div className="text-[12px] font-semibold">{n.author}</div>
+              <div className="text-[10px] text-muted-foreground">{n.time}</div>
+            </div>
+            <div className="text-[12px] text-foreground/80 mt-1 leading-relaxed">{n.text}</div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
+
+/* 折叠历史记录组件：默认仅显示最新一条，多于一条时可展开 */
+function CollapsibleRecords<T>({
+  title,
+  extra,
+  items,
+  renderItem,
+}: {
+  title: string;
+  extra?: ReactNode;
+  items: T[];
+  renderItem: (item: T, i: number) => ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const hasHistory = items.length > 1;
+  const visible = open || !hasHistory ? items : items.slice(0, 1);
+  return (
+    <>
+      <SectionTitle
+        title={title}
+        extra={
+          <div className="flex items-center gap-2">
+            {extra}
+            {hasHistory && (
+              <button
+                onClick={() => setOpen((v) => !v)}
+                className="text-[11px] text-primary font-semibold"
+              >
+                {open ? "收起历史" : `展开历史 (+${items.length - 1})`}
+              </button>
+            )}
+          </div>
+        }
+      />
+      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+        {visible.map((it, i) => renderItem(it, i))}
+      </div>
+    </>
+  );
+}
 
 /* ============== 添加备注 Sheet ============== */
 export const AddNoteSheet = ({ patient, accent, onSave }: { patient: Patient | null; accent: Accent; onSave: (text: string) => void }) => {
