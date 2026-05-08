@@ -239,8 +239,8 @@ const DeviceMiniCard = ({ device, onClick }: { device: PhysioDevice; onClick: ()
   return (
     <button onClick={onClick} className="text-left rounded-2xl bg-card border border-border/60 p-3 shadow-sm">
       <div className="flex items-start justify-between mb-2">
-        <div className="w-9 h-9 rounded-xl gradient-physio/10 bg-orange-50 flex items-center justify-center">
-          <Icon className="w-4.5 h-4.5 text-role-physio" />
+        <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
+          <Icon className="w-[18px] h-[18px] text-role-physio" />
         </div>
         <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-semibold ${meta.cls}`}>{meta.label}</span>
       </div>
@@ -270,7 +270,7 @@ const AlertItem = ({
   return (
     <div className="rounded-2xl bg-card border border-border/60 p-3 flex items-start gap-3">
       <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${cls}`}>
-        <Icon className="w-4.5 h-4.5" />
+        <Icon className="w-[18px] h-[18px]" />
       </div>
       <div className="min-w-0">
         <div className="text-[13px] font-semibold text-foreground">{title}</div>
@@ -588,7 +588,7 @@ const MeView = () => (
         return (
           <button key={i} className="w-full px-3 py-3 flex items-center gap-3 text-left">
             <div className="w-9 h-9 rounded-xl bg-orange-50 flex items-center justify-center">
-              <Icon className="w-4.5 h-4.5 text-role-physio" />
+              <Icon className="w-[18px] h-[18px] text-role-physio" />
             </div>
             <div className="flex-1 text-[13px] font-medium">{it.label}</div>
             {typeof it.n === "number" && (
