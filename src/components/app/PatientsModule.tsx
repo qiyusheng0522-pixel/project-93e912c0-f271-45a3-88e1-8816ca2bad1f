@@ -376,7 +376,7 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
             <div className="text-base font-bold">{patient.name} · 床 {patient.bed}</div>
             <div className="text-[11px] opacity-90 mt-0.5">{patient.meta}</div>
           </div>
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{patient.status}</span>
+          <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-semibold">{getPatientStage(patient)}</span>
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 text-center">
           <div className="bg-white/15 backdrop-blur rounded-xl py-1.5"><div className="text-[9px] opacity-80">入院天数</div><div className="text-[12px] font-semibold mt-0.5">{patient.admitDays} 天</div></div>
