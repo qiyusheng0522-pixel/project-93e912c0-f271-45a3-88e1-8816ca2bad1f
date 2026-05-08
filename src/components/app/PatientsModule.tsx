@@ -22,14 +22,16 @@ import { toast } from "sonner";
 
 export type Accent = "doctor" | "therapist" | "nurse";
 
+export type PatientStage = "院前" | "院中" | "待出院" | "院后";
+
 export type PatientFilter =
   | "all"
-  | "新患者"
-  | "待首次评估"
-  | "退回重评"
-  | "康复中"
+  | "院前"
+  | "院中"
   | "待出院"
-  | "已出院";
+  | "院后"
+  | "待首次评估"
+  | "退回重评";
 
 export type Patient = {
   id: string;
@@ -40,6 +42,8 @@ export type Patient = {
   condition: string; // 病症 用于筛选
   admitDays: number; // 入院天数
   needFirstAssess?: boolean; // 是否待首次评估
+  needPlanConfirm?: boolean; // 是否待确认康复方案
+  needRxConfirm?: boolean; // 是否待确认康复医嘱
   returnedReassess?: boolean; // 治疗师/护士退回，需重新首次评估
   returnReason?: string;
   shared: string[];
