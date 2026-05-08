@@ -7,6 +7,7 @@ import { RxDetail } from "@/components/app/RxDetail";
 import {
   PatientsPage,
   PatientDetailSheet,
+  PatientActionsBar,
   AddNoteSheet,
   TeamManageSheet,
   PatientChatListSheet,
@@ -251,17 +252,27 @@ export const TherapistApp = () => {
         <MedSheet />
       </PhoneSheet>
 
-      <PhoneSheet open={sheet === "patientDetail"} onClose={close} title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`} accent="therapist">
+      <PhoneSheet
+        open={sheet === "patientDetail"}
+        onClose={close}
+        title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`}
+        accent="therapist"
+        footer={
+          pickedPatient ? (
+            <PatientActionsBar
+              accent="therapist"
+              actions={[
+                { key: "summary", label: "每日小结", icon: ClipboardList, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.name} · 床${pickedPatient.bed}` : ""); setSheet("summary"); } },
+                { key: "note", label: "备注", icon: Edit3, onClick: () => setSheet("addNote") },
+              ]}
+            />
+          ) : undefined
+        }
+      >
         <PatientDetailSheet
           patient={pickedPatient}
           accent="therapist"
           onAddNote={() => setSheet("addNote")}
-          actions={[
-            { key: "summary", label: "每日小结", icon: ClipboardList, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.name} · 床${pickedPatient.bed}` : ""); setSheet("summary"); } },
-            { key: "therapy", label: "治疗记录", icon: Activity, onClick: () => setSheet("uploadDaily") },
-            { key: "med", label: "药物变动", icon: Pill, onClick: () => { setActivePatient(pickedPatient ? `${pickedPatient.name} · 床${pickedPatient.bed}` : ""); setSheet("med"); } },
-            { key: "note", label: "备注", icon: Edit3, onClick: () => setSheet("addNote") },
-          ]}
         />
       </PhoneSheet>
 
