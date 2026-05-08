@@ -6,6 +6,7 @@ import { TodoQueueList, WorkbenchTile, PendingStatRow, PendingTodoGrid, TodoItem
 import {
   PatientsPage,
   PatientDetailSheet,
+  PatientActionsBar,
   AddNoteSheet,
   TeamManageSheet,
   IMChatSheet,
