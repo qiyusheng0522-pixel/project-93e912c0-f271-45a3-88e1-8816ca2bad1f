@@ -308,7 +308,8 @@ const PatientCard = ({ p, accent, onClick, onSummary, onAction }: { p: Patient; 
     { key: "plan", label: "待确认方案", show: !!p.needPlanConfirm },
     { key: "rx", label: "待确认医嘱", show: !!p.needRxConfirm },
   ];
-  const pendingVisible = pending.filter(x => x.show);
+  // 仅当父级提供 onAction（即该角色支持处理待办，例如康复医师）时才展示待办按钮
+  const pendingVisible = onAction ? pending.filter(x => x.show) : [];
   return (
     <div className="w-full bg-card rounded-2xl shadow-card p-3.5 active:scale-[0.99]">
       <button onClick={onClick} className="w-full text-left flex items-start gap-3">
