@@ -583,6 +583,34 @@ export const PatientDetailSheet = ({ patient, accent, onAddNote, onShare, action
   );
 };
 
+/* ============== 患者详情底部操作按钮（冻结在 PhoneSheet footer 区域） ============== */
+export const PatientActionsBar = ({
+  accent,
+  actions,
+}: {
+  accent: Accent;
+  actions: PatientDetailAction[];
+}) => {
+  if (!actions || actions.length === 0) return null;
+  return (
+    <div className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+      {actions.map((a) => {
+        const Icon = a.icon;
+        return (
+          <button
+            key={a.key}
+            onClick={a.onClick}
+            className={`shrink-0 flex-1 min-w-[88px] ${accentBg[accent]} text-white rounded-2xl py-2.5 px-3 flex items-center justify-center gap-1.5 text-[12px] font-semibold shadow-card active:scale-[0.98]`}
+          >
+            {Icon && <Icon className="w-3.5 h-3.5" />}
+            <span className="whitespace-nowrap">{a.label}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
 /* 折叠历史记录组件：默认仅显示最新一条，多于一条时可展开 */
 function CollapsibleRecords<T>({
   title,
