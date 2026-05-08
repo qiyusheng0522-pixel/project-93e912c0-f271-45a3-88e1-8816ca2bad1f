@@ -338,42 +338,36 @@ export const DoctorApp = () => {
         onClose={close}
         title={`患者档案${pickedPatient ? " · " + pickedPatient.name : ""}`}
         accent="doctor"
-        footer={undefined}
+        footer={
+          pickedPatient
+            ? (() => {
+                const stage = getPatientStage(pickedPatient);
+                const noteAct = { key: "note", label: "备注", icon: Edit3, onClick: () => setSheet("addNote") };
+                let acts: any[] = [];
+                if (stage === "院前") {
+                  if (!pickedPatient.needFirstAssess) acts.push({ key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") });
+                  if (!pickedPatient.needPlanConfirm) acts.push({ key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") });
+                  if (!pickedPatient.needRxConfirm) acts.push({ key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") });
+                } else if (stage === "待出院") {
+                  // 待出院：仅查看详情 + 备注，无其他操作
+                  acts = [];
+                } else if (stage === "院中") {
+                  acts = [
+                    { key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
+                    { key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") },
+                    { key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
+                  ];
+                }
+                acts.push(noteAct);
+                return <PatientActionsBar accent="doctor" actions={acts} />;
+              })()
+            : undefined
+        }
       >
         <PatientDetailSheet
           patient={pickedPatient}
           accent="doctor"
           onAddNote={() => setSheet("addNote")}
-          actions={
-            pickedPatient
-              ? (() => {
-                  const stage = getPatientStage(pickedPatient);
-                  if (stage === "院前") {
-                    // 院前操作已在患者卡片上提供，详情页面只展示档案 + 查看入口
-                    const acts: any[] = [];
-                    if (!pickedPatient.needFirstAssess) acts.push({ key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") });
-                    if (!pickedPatient.needPlanConfirm) acts.push({ key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") });
-                    if (!pickedPatient.needRxConfirm) acts.push({ key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") });
-                    return acts.length ? acts : undefined;
-                  }
-                  if (stage === "待出院") {
-                    return [
-                      { key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
-                      { key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") },
-                      { key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
-                      { key: "discharge", label: "出院方案", icon: LogOut, onClick: () => setSheet("discharge") },
-                    ];
-                  }
-                  // 院中
-                  return [
-                    { key: "assess", label: "查看评估", icon: ClipboardCheck, onClick: () => setSheet("assess") },
-                    { key: "plan", label: "查看方案", icon: FileText, onClick: () => setSheet("plan") },
-                    { key: "rx", label: "查看医嘱", icon: Sparkles, onClick: () => setSheet("rx") },
-                    { key: "meeting", label: "团队会议", icon: Users, onClick: () => { setActiveMeeting(null); setSheet("meeting"); } },
-                  ];
-                })()
-              : undefined
-          }
         />
       </PhoneSheet>
 
