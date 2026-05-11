@@ -1129,7 +1129,7 @@ const GoalSheet = ({ patient }: { patient?: string }) => {
                 onClick={() => { setAdding(dim); setDraft(""); }}
                 className="text-[11px] font-semibold text-primary flex items-center gap-1"
               >
-                <Plus className="w-3 h-3" />大目标
+                <Plus className="w-3 h-3" />添加目标
               </button>
             </div>
 
