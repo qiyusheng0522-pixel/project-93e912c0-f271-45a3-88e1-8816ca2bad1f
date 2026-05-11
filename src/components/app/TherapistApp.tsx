@@ -218,7 +218,14 @@ export const TherapistApp = () => {
             onPick={(item) => pickFromQueue(item, k === "confirmAssess" ? "confirmAssess" : k === "goal" ? "goal" : k === "rx" ? "rx" : "exec")}
           />
         </PhoneSheet>
-      ))}
+
+      <PhoneSheet open={sheet === "firstAssess"} onClose={close} title={`首次评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
+        footer={<div className="flex gap-2">
+          <button onClick={() => { setActiveMeeting(null); setSheet("meeting"); toast("已发起团队会议评估"); }} className="flex-1 border border-secondary/30 text-secondary rounded-2xl py-3 text-sm font-semibold">团队会议评估</button>
+          <button onClick={() => { toast.success(`首次评估已确认 · ${therapistType} 结果已同步医师`); close(); }} className="flex-1 gradient-therapist text-white rounded-2xl py-3 text-sm font-semibold">确定</button>
+        </div>}>
+        <FirstAssessSheet patient={activePatient} type={therapistType} onChangeType={setTherapistType} />
+      </PhoneSheet>
 
       <PhoneSheet open={sheet === "confirmAssess"} onClose={close} title={`评估结果确认${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
         footer={<div className="flex gap-2">
