@@ -821,8 +821,69 @@ const ConfirmAssessSheet = ({ patient }: { patient?: string }) => {
   );
 };
 
+/* ============== ICF 康复目标（与医师端一致，含子目标示例） ============== */
+type ICFDim = "function" | "activity" | "participation";
+type Goal = {
+  id: string;
+  dim: ICFDim;
+  text: string;
+  period: "1 周" | "2 周" | "4 周" | "8 周";
+  source: "AI" | "医师" | "治疗师";
+  subs: { id: string; text: string; by: string }[];
+};
+
+const ICF_DIM: Record<ICFDim, { label: string; desc: string; cls: string }> = {
+  function: { label: "身体功能与结构", desc: "Body Functions · 损伤层面：肌力 / 张力 / 感觉 / 认知", cls: "bg-primary-soft text-primary" },
+  activity: { label: "活动", desc: "Activity · 个体执行任务的能力：转移 / 步行 / ADL", cls: "bg-secondary-soft text-secondary" },
+  participation: { label: "参与", desc: "Participation · 投入生活情境：家庭 / 社交 / 工作", cls: "bg-warning-soft text-warning" },
+};
+
+const DEFAULT_GOALS: Goal[] = [
+  { id: "g1", dim: "function", period: "4 周", source: "医师", text: "右上下肢肌力由 2 级提升至 3+ 级，痉挛 MAS ≤ 1+", subs: [
+    { id: "g1s1", text: "PT：右下肢直腿抬高 ×10/组 ×3 组，渐进抗阻", by: "PT 王雅琴" },
+    { id: "g1s2", text: "PT：腘绳肌牵伸 30s ×3，每日 2 次", by: "PT 王雅琴" },
+    { id: "g1s3", text: "OT：右上肢 Bobath 抑制性手法 + 主动伸展训练", by: "OT 林思" },
+  ] },
+  { id: "g2", dim: "function", period: "4 周", source: "AI", text: "MoCA 由 18 提升至 ≥ 24，左侧空间忽略明显改善", subs: [
+    { id: "g2s1", text: "ST：左侧视觉扫描训练 15min/次 ×2/日", by: "ST 周敏" },
+    { id: "g2s2", text: "OT：分类卡片 + 数字消除任务（含左侧目标）", by: "OT 林思" },
+  ] },
+  { id: "g3", dim: "activity", period: "2 周", source: "医师", text: "床椅转移独立完成，助行器辅助步行 30m", subs: [
+    { id: "g3s1", text: "PT：坐站转换连续 5 次 / 不借助上肢", by: "PT 王雅琴" },
+    { id: "g3s2", text: "PT：平行杠内步行 20m ×2 组，步态对称性 ≥ 80%", by: "PT 王雅琴" },
+    { id: "g3s3", text: "OT：床→轮椅独立转移成功率 ≥ 90%", by: "OT 林思" },
+  ] },
+  { id: "g4", dim: "activity", period: "4 周", source: "AI", text: "独立步行 ≥ 50m（FAC ≥ 3），Barthel ≥ 75", subs: [
+    { id: "g4s1", text: "PT：助行器步行 50m，休息 ≤ 1 次", by: "PT 王雅琴" },
+    { id: "g4s2", text: "OT：穿衣 / 进食独立完成（Barthel 单项 ≥ 8）", by: "OT 林思" },
+  ] },
+  { id: "g5", dim: "participation", period: "8 周", source: "AI", text: "回归家庭：可独立完成进食、如厕、穿衣，参与家庭对话", subs: [
+    { id: "g5s1", text: "ST：日常对话 5 轮以上，言语清晰度 ≥ 80%", by: "ST 周敏" },
+    { id: "g5s2", text: "OT：模拟厨房活动 25min（取物 / 倒水 / 整理）", by: "OT 林思" },
+  ] },
+];
+
 const GoalAdjustSheet = ({ patient }: { patient?: string }) => {
   const name = patient ? patient.split(" ")[0] : "李 强";
+  const [goals, setGoals] = useState<Goal[]>(DEFAULT_GOALS);
+  const [adding, setAdding] = useState<ICFDim | null>(null);
+  const [draft, setDraft] = useState("");
+  const [subFor, setSubFor] = useState<string | null>(null);
+  const [subDraft, setSubDraft] = useState("");
+
+  const addGoal = (dim: ICFDim) => {
+    if (!draft.trim()) return;
+    setGoals([...goals, { id: `g${Date.now()}`, dim, period: "4 周", source: "治疗师", text: draft.trim(), subs: [] }]);
+    setDraft(""); setAdding(null);
+    toast.success("已新增大目标");
+  };
+  const addSub = (goalId: string) => {
+    if (!subDraft.trim()) return;
+    setGoals(goals.map((g) => g.id === goalId ? { ...g, subs: [...g.subs, { id: `s${Date.now()}`, text: subDraft.trim(), by: "治疗师 王雅琴" }] } : g));
+    setSubDraft(""); setSubFor(null);
+    toast.success("已新增子目标");
+  };
+
   return (
     <div className="p-4 space-y-3">
       <div className="bg-card rounded-2xl shadow-card p-4">
@@ -832,26 +893,104 @@ const GoalAdjustSheet = ({ patient }: { patient?: string }) => {
             <div className="text-sm font-bold">{patient || "李 强 · 男 42 · 床307"}</div>
             <div className="text-[11px] text-muted-foreground mt-0.5">脊髓损伤 · 入院第 28 天 · 主管医师：李志远</div>
           </div>
-          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">康复目标</span>
-        </div>
-        <div className="mt-3 grid grid-cols-3 gap-2">
-          <StatChip label="FMA" value="42" accent="primary" />
-          <StatChip label="Barthel" value="70" accent="success" />
-          <StatChip label="VAS" value="3" accent="warning" />
+          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">ICF 康复目标</span>
         </div>
       </div>
-      <AICard title="AI 智能设定康复目标（与医师端一致）">
-        基于评估数据与同类病例匹配，AI 已生成 4 周分阶段目标。治疗师可在此基础上微调并回传医师。
+
+      <AICard title="AI 基于 ICF 框架生成大目标（与医师端一致）">
+        从「身体功能 / 活动 / 参与」三个维度自动生成 4–8 周分阶段目标。治疗师可在每个大目标下添加可执行的子目标，或新增大目标回传医师。
       </AICard>
-      <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
-        <FormRow label="短期目标 (1 周)" value={<input defaultValue="床椅转移独立完成" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
-        <FormRow label="中期目标 (2 周)" value={<input defaultValue="助行器辅助步行 30m" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
-        <FormRow label="长期目标 (4 周)" value={<input defaultValue="独立步行 ≥ 50m，FMA +8" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
-        <FormRow label="ADL 目标" value={<input defaultValue="Barthel ≥ 75" className="w-44 text-right bg-muted rounded px-2 py-1 text-xs" />} />
+
+      {(Object.keys(ICF_DIM) as ICFDim[]).map((dim) => {
+        const list = goals.filter((g) => g.dim === dim);
+        const meta = ICF_DIM[dim];
+        return (
+          <div key={dim} className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className={`text-[11px] px-2 py-0.5 rounded font-semibold ${meta.cls}`}>{meta.label}</span>
+                  <span className="text-[10px] text-muted-foreground">{list.length} 项</span>
+                </div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{meta.desc}</div>
+              </div>
+              <button
+                onClick={() => { setAdding(dim); setDraft(""); }}
+                className="text-[11px] font-semibold text-secondary flex items-center gap-1"
+              >
+                <Plus className="w-3 h-3" />添加目标
+              </button>
+            </div>
+
+            <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+              {list.map((g) => (
+                <div key={g.id} className="px-4 py-3">
+                  <div className="flex items-start gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-foreground/70 font-semibold">{g.period}</span>
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-semibold ${g.source === "AI" ? "bg-ai/10 text-ai" : g.source === "医师" ? "bg-primary-soft text-primary" : "bg-secondary-soft text-secondary"}`}>
+                          {g.source}
+                        </span>
+                      </div>
+                      <div className="text-[12px] text-foreground/90 mt-1 leading-relaxed">{g.text}</div>
+                    </div>
+                  </div>
+
+                  {g.subs.length > 0 && (
+                    <div className="mt-2 pl-3 border-l-2 border-border space-y-1.5">
+                      {g.subs.map((s) => (
+                        <div key={s.id} className="text-[11px] text-foreground/75 leading-relaxed">
+                          <span className="text-muted-foreground">└ </span>{s.text}
+                          <span className="text-[10px] text-muted-foreground ml-1.5">· {s.by}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {subFor === g.id ? (
+                    <div className="mt-2 flex gap-2">
+                      <input
+                        value={subDraft}
+                        onChange={(e) => setSubDraft(e.target.value)}
+                        placeholder="输入子目标，例如：PT 坐站转换 ×5/组"
+                        className="flex-1 text-[11px] bg-background border border-border rounded-lg px-2 py-1.5"
+                        autoFocus
+                      />
+                      <button onClick={() => addSub(g.id)} className="text-[11px] gradient-therapist text-white rounded-lg px-3 font-semibold">添加</button>
+                      <button onClick={() => setSubFor(null)} className="text-[11px] text-muted-foreground">取消</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => { setSubFor(g.id); setSubDraft(""); }} className="mt-2 text-[11px] text-secondary font-semibold flex items-center gap-1">
+                      <Plus className="w-3 h-3" />添加子目标
+                    </button>
+                  )}
+                </div>
+              ))}
+
+              {adding === dim && (
+                <div className="px-4 py-3 bg-muted/40">
+                  <textarea
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder={`输入「${meta.label}」层面的大目标，例如：${dim === "function" ? "肌力提升至 4 级" : dim === "activity" ? "独立完成室内行走" : "回归社区活动"}`}
+                    className="w-full text-[11px] bg-background border border-border rounded-lg p-2 min-h-[60px]"
+                    autoFocus
+                  />
+                  <div className="mt-2 flex gap-2">
+                    <button onClick={() => setAdding(null)} className="flex-1 text-[11px] border border-border rounded-lg py-1.5">取消</button>
+                    <button onClick={() => addGoal(dim)} className="flex-1 text-[11px] gradient-therapist text-white rounded-lg py-1.5 font-semibold">保存</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="text-[10px] text-muted-foreground text-center pt-2">
+        ICF · International Classification of Functioning, Disability and Health
       </div>
-      <button className="w-full flex items-center justify-center gap-1 text-xs text-secondary font-semibold py-2" onClick={() => toast("已新增自定义目标项")}>
-        <Plus className="w-3.5 h-3.5" /> 新增自定义目标
-      </button>
     </div>
   );
 };
