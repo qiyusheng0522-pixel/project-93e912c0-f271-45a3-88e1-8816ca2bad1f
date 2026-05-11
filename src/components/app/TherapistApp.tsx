@@ -126,6 +126,7 @@ export const TherapistApp = () => {
   const [chatSubTab, setChatSubTab] = useState<"patient" | "team">("patient");
   const [role, setRole] = useState<"therapist" | "lead">("therapist");
   const [scheduleOpen, setScheduleOpen] = useState(false);
+  const [therapistType, setTherapistType] = useState<TherapistType>("PT");
   const [patientsFilter, setPatientsFilter] = useState<import("@/components/app/PatientsModule").PatientFilter>("all");
   const goPatients = (filter: import("@/components/app/PatientsModule").PatientFilter = "all") => {
     setPatientsFilter(filter);
