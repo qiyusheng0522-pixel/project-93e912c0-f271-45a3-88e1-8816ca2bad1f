@@ -78,7 +78,10 @@ type SheetKey =
   | "meetingList"
   | "newMeeting"
   | "meeting"
-  | "uploadDaily";
+  | "uploadDaily"
+  | "firstAssess";
+
+type TherapistType = "PT" | "OT" | "ST";
 
 type QueueKey = "confirmAssess" | "goal" | "rx" | "exec";
 
