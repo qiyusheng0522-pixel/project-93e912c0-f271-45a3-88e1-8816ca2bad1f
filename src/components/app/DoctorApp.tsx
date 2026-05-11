@@ -1117,7 +1117,11 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
         <FormRow label="认知 · MoCA 基础版" value={<span className="text-warning font-semibold">18/30（轻度损害）</span>} hint="执行/视空间（左忽略）/延迟回忆受损，定向力尚可" />
       </div>
 
-      {/* AI 辅助结论 + 自定义编辑 */}
+      {/* 7. MAS 在线量表 */}
+      <SectionTitle title="MAS 卒中运动功能评估" extra={<span className="text-[10px] text-muted-foreground">在线填写 / 拍照上传</span>} />
+      <MASForm />
+
+
       <AICard
         title="AI 首次评估辅助结论"
         action={
