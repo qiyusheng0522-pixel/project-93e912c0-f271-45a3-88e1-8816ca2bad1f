@@ -63,7 +63,7 @@ import {
   User as UserIcon,
   LogOut,
   MessageCircle,
-  Camera,
+  
   Edit2,
   RotateCcw,
 } from "lucide-react";
