@@ -173,6 +173,12 @@ export const TherapistApp = () => {
           onOpenQueue={openQueue}
           onUploadDaily={() => open("uploadDaily")}
           initialFilter={patientsFilter}
+          onAction={(key, p) => {
+            setActivePatient(`${p.name} · 床${p.bed}`);
+            if (key === "assess") setSheet("firstAssess");
+            else if (key === "plan") setSheet("goal");
+            else setSheet("rx");
+          }}
           onSummaryPatient={(p) => {
             setActivePatient(`${p.name} · 床${p.bed}`);
             setSheet("summary");
