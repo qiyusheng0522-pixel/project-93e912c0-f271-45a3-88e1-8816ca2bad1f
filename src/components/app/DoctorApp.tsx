@@ -846,6 +846,7 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
   );
   const [showLib, setShowLib] = useState(false);
   const [libRole, setLibRole] = useState<ScaleRole | "ALL">("ALL");
+  const [viewing, setViewing] = useState<Scale | null>(null);
 
   const addScale = (s: Scale) => {
     if (extraScales.find((x) => x.key === s.key)) {
@@ -857,10 +858,7 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
   };
   const removeScale = (k: string) => setExtraScales(extraScales.filter((x) => x.key !== k));
 
-  const viewScale = (s: Scale) => {
-    if (s.status === "待填写") toast(`打开「${s.name}」填写表单（支持 OCR 拍照上传）`);
-    else toast(`查看「${s.name}」结果：${s.result ?? "—"}`);
-  };
+  const viewScale = (s: Scale) => setViewing(s);
 
   const libList = THERAPIST_SCALE_LIB.filter((s) => libRole === "ALL" || s.role === libRole);
   const completedCount = [...docScales, ...extraScales].filter((s) => s.status !== "待填写").length;
