@@ -66,6 +66,8 @@ import {
   
   Edit2,
   RotateCcw,
+  X,
+  Camera,
 } from "lucide-react";
 
 type SheetKey =
@@ -832,6 +834,175 @@ const ScaleRow = ({ s, onView, onRemove }: { s: Scale; onView: () => void; onRem
   );
 };
 
+// 量表条目模板（按 key 提供典型条目，未配置则用通用条目）
+const SCALE_ITEM_TEMPLATES: Record<string, { label: string; value: string }[]> = {
+  nihss: [
+    { label: "1a 意识水平", value: "1 嗜睡" },
+    { label: "1b 意识水平提问", value: "1 一项正确" },
+    { label: "2 凝视", value: "1 部分凝视麻痹" },
+    { label: "3 视野", value: "1 部分偏盲" },
+    { label: "4 面瘫", value: "2 部分性瘫" },
+    { label: "5a 右上肢运动", value: "3 不能抗重力" },
+    { label: "6a 右下肢运动", value: "3 不能抗重力" },
+    { label: "9 语言", value: "1 轻-中度失语" },
+    { label: "10 构音障碍", value: "1 轻度" },
+  ],
+  mrs: [{ label: "mRS 等级", value: "4 中重度残疾" }],
+  morse: [
+    { label: "跌倒史", value: "25" },
+    { label: "多种诊断", value: "15" },
+    { label: "步态/转移", value: "10" },
+    { label: "精神状态", value: "0" },
+  ],
+  braden: [
+    { label: "感觉", value: "3" },
+    { label: "潮湿", value: "3" },
+    { label: "活动", value: "2" },
+    { label: "移动", value: "2" },
+    { label: "营养", value: "3" },
+    { label: "摩擦剪切", value: "3" },
+  ],
+  wada: [{ label: "饮 30ml 温水分级", value: "3 级 · 可疑异常" }],
+  caprini: [{ label: "Caprini 评分", value: "5 分 · 高危" }],
+  nrs2002: [
+    { label: "营养状况受损", value: "1" },
+    { label: "疾病严重程度", value: "1" },
+    { label: "年龄 ≥70", value: "1" },
+  ],
+  moca: [
+    { label: "视空间执行", value: "3/5" },
+    { label: "命名", value: "2/3" },
+    { label: "注意力", value: "3/6" },
+    { label: "语言", value: "1/3" },
+    { label: "延迟回忆", value: "2/5" },
+    { label: "定向力", value: "6/6" },
+  ],
+  mbi: [
+    { label: "进食", value: "10" },
+    { label: "洗澡", value: "0" },
+    { label: "修饰", value: "5" },
+    { label: "穿衣", value: "5" },
+    { label: "如厕", value: "5" },
+    { label: "床椅转移", value: "10" },
+    { label: "平地行走", value: "10" },
+    { label: "上下楼梯", value: "5" },
+  ],
+};
+
+const ScaleDetail = ({ scale, onClose }: { scale: Scale; onClose: () => void }) => {
+  const initial = SCALE_ITEM_TEMPLATES[scale.key] ?? [
+    { label: "条目 1", value: "" },
+    { label: "条目 2", value: "" },
+    { label: "条目 3", value: "" },
+    { label: "条目 4", value: "" },
+    { label: "条目 5", value: "" },
+  ];
+  const [items, setItems] = useState(initial);
+  const [note, setNote] = useState("");
+  const [name, setName] = useState(scale.name);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const role = ROLE_BADGE[scale.role];
+
+  const addItem = () => setItems([...items, { label: `自定义条目 ${items.length + 1}`, value: "" }]);
+  const removeItem = (i: number) => setItems(items.filter((_, idx) => idx !== i));
+  const update = (i: number, k: "label" | "value", v: string) =>
+    setItems(items.map((it, idx) => (idx === i ? { ...it, [k]: v } : it)));
+
+  return (
+    <div className="absolute inset-0 z-40 bg-background flex flex-col">
+      <div className="gradient-doctor text-white px-4 pt-3 pb-4 flex items-center gap-2">
+        <button onClick={onClose} className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+          <X className="w-4 h-4" />
+        </button>
+        <div className="flex-1 min-w-0">
+          {editingTitle ? (
+            <input
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              onBlur={() => setEditingTitle(false)}
+              autoFocus
+              className="text-sm font-semibold bg-white/20 text-white rounded px-2 py-1 w-full"
+            />
+          ) : (
+            <button onClick={() => setEditingTitle(true)} className="text-sm font-semibold flex items-center gap-1">
+              {name} <Edit3 className="w-3 h-3 opacity-70" />
+            </button>
+          )}
+          <div className="text-[10px] opacity-80 mt-0.5">{scale.brief} · 支持自定义编辑</div>
+        </div>
+        <span className={`text-[10px] px-2 py-0.5 rounded font-semibold ${role.cls}`}>{role.label}</span>
+      </div>
+
+      <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-3 pb-24">
+        <AICard title="AI 预填说明">
+          已基于患者档案自动预填本量表 {scale.status === "AI 已预填" ? "全部" : "部分"} 条目，请逐项核对并修改；所有条目均可编辑或自定义新增。
+        </AICard>
+
+        <button
+          onClick={() => toast("打开摄像头识别纸质量表...")}
+          className="w-full bg-ai/10 border border-ai/30 rounded-2xl p-3 flex items-center gap-3"
+        >
+          <div className="w-9 h-9 rounded-xl bg-ai text-white flex items-center justify-center">
+            <Camera className="w-4 h-4" />
+          </div>
+          <div className="flex-1 text-left">
+            <div className="text-[12px] font-semibold text-ai">OCR 拍照上传纸质量表</div>
+            <div className="text-[10px] text-muted-foreground">AI 自动识别并填入条目</div>
+          </div>
+          <ChevronRight className="w-4 h-4 text-ai" />
+        </button>
+
+        <SectionTitle
+          title={`量表条目 · ${items.length}`}
+          extra={
+            <button onClick={addItem} className="text-[11px] text-primary font-semibold flex items-center gap-0.5">
+              <Plus className="w-3 h-3" />新增条目
+            </button>
+          }
+        />
+        <div className="bg-card rounded-2xl shadow-card divide-y divide-border/60">
+          {items.map((it, i) => (
+            <div key={i} className="px-3 py-2.5 flex items-center gap-2">
+              <input
+                value={it.label}
+                onChange={(e) => update(i, "label", e.target.value)}
+                className="flex-1 min-w-0 text-[12px] bg-transparent border-b border-transparent focus:border-primary/40 outline-none py-1"
+              />
+              <input
+                value={it.value}
+                onChange={(e) => update(i, "value", e.target.value)}
+                placeholder="评分"
+                className="w-24 text-[12px] bg-muted rounded px-2 py-1 text-right"
+              />
+              <button onClick={() => removeItem(i)} className="text-[10px] text-destructive p-1">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+
+        <SectionTitle title="备注" />
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="补充说明、配合度、特殊情况..."
+          className="w-full text-[12px] bg-card rounded-2xl shadow-card p-3 min-h-[80px] resize-none"
+        />
+      </div>
+
+      <div className="absolute left-0 right-0 bottom-0 bg-card/95 backdrop-blur-xl border-t border-border/60 px-4 py-3 pb-6 flex gap-2">
+        <button onClick={onClose} className="flex-1 border border-border rounded-2xl py-3 text-sm font-semibold">取消</button>
+        <button
+          onClick={() => { toast.success(`「${name}」已保存`); onClose(); }}
+          className="flex-1 gradient-doctor text-white rounded-2xl py-3 text-sm font-semibold"
+        >
+          保存
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchMeeting: () => void }) => {
   const name = patient ? patient.split(" ")[0] : "张建国";
   const [conclusion, setConclusion] = useState(AI_DEFAULT_CONCLUSION);
@@ -846,6 +1017,7 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
   );
   const [showLib, setShowLib] = useState(false);
   const [libRole, setLibRole] = useState<ScaleRole | "ALL">("ALL");
+  const [viewing, setViewing] = useState<Scale | null>(null);
 
   const addScale = (s: Scale) => {
     if (extraScales.find((x) => x.key === s.key)) {
@@ -857,10 +1029,7 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
   };
   const removeScale = (k: string) => setExtraScales(extraScales.filter((x) => x.key !== k));
 
-  const viewScale = (s: Scale) => {
-    if (s.status === "待填写") toast(`打开「${s.name}」填写表单（支持 OCR 拍照上传）`);
-    else toast(`查看「${s.name}」结果：${s.result ?? "—"}`);
-  };
+  const viewScale = (s: Scale) => setViewing(s);
 
   const libList = THERAPIST_SCALE_LIB.filter((s) => libRole === "ALL" || s.role === libRole);
   const completedCount = [...docScales, ...extraScales].filter((s) => s.status !== "待填写").length;
@@ -1020,19 +1189,9 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
         <div className="mt-2 text-[10px] text-muted-foreground">评估医师：康复医学科 王敏 · 已纳入 {completedCount} 份量表数据</div>
       </AICard>
 
-      <button
-        onClick={onLaunchMeeting}
-        className="w-full bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]"
-      >
-        <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
-          <Users className="w-4 h-4" />
-        </div>
-        <div className="flex-1 text-left">
-          <div className="text-[12px] font-semibold text-warning">就该患者发起团队会议评估</div>
-          <div className="text-[10px] text-muted-foreground">医师 / 治疗师 / 护士线上协同 · AI 自动记录纪要</div>
-        </div>
-        <ChevronRight className="w-4 h-4 text-warning" />
-      </button>
+      {viewing && (
+        <ScaleDetail scale={viewing} onClose={() => setViewing(null)} />
+      )}
     </div>
   );
 };
@@ -1129,7 +1288,7 @@ const GoalSheet = ({ patient }: { patient?: string }) => {
                 onClick={() => { setAdding(dim); setDraft(""); }}
                 className="text-[11px] font-semibold text-primary flex items-center gap-1"
               >
-                <Plus className="w-3 h-3" />大目标
+                <Plus className="w-3 h-3" />添加目标
               </button>
             </div>
 
@@ -1173,7 +1332,7 @@ const GoalSheet = ({ patient }: { patient?: string }) => {
                     </div>
                   ) : (
                     <button onClick={() => { setSubFor(g.id); setSubDraft(""); }} className="mt-2 text-[11px] text-secondary font-semibold flex items-center gap-1">
-                      <Plus className="w-3 h-3" />治疗师添加子目标
+                      <Plus className="w-3 h-3" />添加子目标
                     </button>
                   )}
                 </div>
