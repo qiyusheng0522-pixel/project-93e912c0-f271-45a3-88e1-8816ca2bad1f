@@ -1140,18 +1140,7 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
                 onClick={() => { setConclusion(draft); setEditing(false); toast.success("结论已保存"); }}
               >保存</button>
             </div>
-          ) : (
-            <div className="flex gap-2">
-              <button
-                className="flex-1 border border-ai/30 text-ai rounded-xl py-2 text-xs font-semibold"
-                onClick={onLaunchMeeting}
-              >结果不确定 · 发起会议</button>
-              <button
-                className="flex-1 gradient-doctor text-white rounded-xl py-2 text-xs font-semibold"
-                onClick={() => { setDraft(conclusion); setEditing(true); }}
-              >编辑结论</button>
-            </div>
-          )
+          ) : null
         }
       >
         {editing ? (
