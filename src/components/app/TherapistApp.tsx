@@ -218,6 +218,7 @@ export const TherapistApp = () => {
             onPick={(item) => pickFromQueue(item, k === "confirmAssess" ? "confirmAssess" : k === "goal" ? "goal" : k === "rx" ? "rx" : "exec")}
           />
         </PhoneSheet>
+      ))}
 
       <PhoneSheet open={sheet === "firstAssess"} onClose={close} title={`首次评估${activePatient ? " · " + activePatient.split(" ")[0] : ""}`} accent="therapist"
         footer={<div className="flex gap-2">
