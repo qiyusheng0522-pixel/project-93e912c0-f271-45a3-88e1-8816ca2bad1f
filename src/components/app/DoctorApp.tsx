@@ -1020,19 +1020,9 @@ const AssessSheet = ({ patient, onLaunchMeeting }: { patient?: string; onLaunchM
         <div className="mt-2 text-[10px] text-muted-foreground">评估医师：康复医学科 王敏 · 已纳入 {completedCount} 份量表数据</div>
       </AICard>
 
-      <button
-        onClick={onLaunchMeeting}
-        className="w-full bg-warning-soft border border-warning/30 rounded-2xl p-3 flex items-center gap-3 active:scale-[0.99]"
-      >
-        <div className="w-9 h-9 rounded-xl bg-warning text-white flex items-center justify-center">
-          <Users className="w-4 h-4" />
-        </div>
-        <div className="flex-1 text-left">
-          <div className="text-[12px] font-semibold text-warning">就该患者发起团队会议评估</div>
-          <div className="text-[10px] text-muted-foreground">医师 / 治疗师 / 护士线上协同 · AI 自动记录纪要</div>
-        </div>
-        <ChevronRight className="w-4 h-4 text-warning" />
-      </button>
+      {viewing && (
+        <ScaleDetail scale={viewing} onClose={() => setViewing(null)} />
+      )}
     </div>
   );
 };
