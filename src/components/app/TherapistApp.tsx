@@ -589,6 +589,184 @@ const Me = ({ onOpenTeam }: { onOpenTeam: () => void }) => (
 
 /* ===================== Sheets ===================== */
 
+/* ============== 治疗师首次评估（按 PT/OT/ST 类型） ============== */
+type ScaleItem = { label: string; value: string; hint?: string };
+const SCALE_LIB: Record<TherapistType, { name: string; desc: string; items: ScaleItem[] }[]> = {
+  PT: [
+    { name: "Fugl-Meyer 下肢 (FMA-LE)", desc: "下肢运动功能 · 满分 34", items: [
+      { label: "髋屈曲（仰卧）", value: "1" },
+      { label: "膝屈曲（坐位）", value: "1" },
+      { label: "踝背屈（坐位）", value: "0" },
+      { label: "协同运动 / 反射", value: "1" },
+      { label: "总分", value: "18 / 34", hint: "中度功能障碍" },
+    ]},
+    { name: "Berg 平衡量表 (BBS)", desc: "动静态平衡 · 满分 56", items: [
+      { label: "由坐到站", value: "3" },
+      { label: "无支撑站立 2 min", value: "2" },
+      { label: "闭眼站立", value: "2" },
+      { label: "转身 360°", value: "2" },
+      { label: "总分", value: "32 / 56", hint: "跌倒风险中-高" },
+    ]},
+    { name: "FAC 步行能力分级", desc: "0-5 级", items: [
+      { label: "分级", value: "2 级", hint: "需治疗师持续接触辅助" },
+    ]},
+    { name: "改良 Ashworth (MAS)", desc: "肌张力 · 0-4", items: [
+      { label: "膝伸肌", value: "1+" },
+      { label: "踝跖屈肌", value: "2", hint: "明显增高" },
+    ]},
+    { name: "6 分钟步行距离 (6MWT)", desc: "心肺耐力", items: [
+      { label: "距离", value: "120 m", hint: "受力弱限制" },
+      { label: "Borg 主观疲劳", value: "13" },
+    ]},
+  ],
+  OT: [
+    { name: "Fugl-Meyer 上肢 (FMA-UE)", desc: "上肢运动功能 · 满分 66", items: [
+      { label: "肩 / 肘 / 前臂", value: "12" },
+      { label: "腕", value: "4" },
+      { label: "手", value: "6" },
+      { label: "协调与速度", value: "2" },
+      { label: "总分", value: "24 / 66", hint: "重度上肢障碍" },
+    ]},
+    { name: "改良 Barthel 指数 (MBI)", desc: "ADL · 满分 100", items: [
+      { label: "进食", value: "5" },
+      { label: "穿衣", value: "5" },
+      { label: "如厕", value: "5" },
+      { label: "转移", value: "8" },
+      { label: "总分", value: "45 / 100", hint: "中度依赖" },
+    ]},
+    { name: "ARAT 上肢动作研究", desc: "抓握 / 捏 / 粗大动作", items: [
+      { label: "抓握", value: "8" },
+      { label: "握持", value: "5" },
+      { label: "捏", value: "4" },
+      { label: "粗大运动", value: "6" },
+      { label: "总分", value: "23 / 57" },
+    ]},
+    { name: "MoCA 蒙特利尔认知", desc: "认知筛查 · 满分 30", items: [
+      { label: "总分", value: "21 / 30", hint: "轻度认知障碍" },
+    ]},
+    { name: "Lindmark 精细动作", desc: "手部精细", items: [
+      { label: "九孔插板用时", value: "62 s（患侧）" },
+    ]},
+  ],
+  ST: [
+    { name: "WAB 失语症", desc: "西方失语症成套测验", items: [
+      { label: "自发言语", value: "12 / 20" },
+      { label: "听理解", value: "6.5 / 10" },
+      { label: "复述", value: "5 / 10" },
+      { label: "命名", value: "6 / 10" },
+      { label: "失语商 AQ", value: "59.0", hint: "中度运动性失语" },
+    ]},
+    { name: "洼田饮水试验", desc: "1-5 级", items: [
+      { label: "分级", value: "3 级", hint: "可疑误吸 · 建议 VFSS" },
+    ]},
+    { name: "标准吞咽功能 (SSA)", desc: "床旁筛查", items: [
+      { label: "意识 / 头控制", value: "正常" },
+      { label: "饮水反应", value: "呛咳 1 次" },
+      { label: "总分", value: "28 / 46", hint: "异常" },
+    ]},
+    { name: "构音障碍 Frenchay", desc: "构音器官检查", items: [
+      { label: "唇 / 舌 / 软腭", value: "中度异常" },
+      { label: "言语清晰度", value: "60%" },
+    ]},
+    { name: "MMSE 简易精神状态", desc: "认知 · 满分 30", items: [
+      { label: "总分", value: "23 / 30", hint: "轻度认知下降" },
+    ]},
+  ],
+};
+
+const FirstAssessSheet = ({ patient, type, onChangeType }: { patient?: string; type: TherapistType; onChangeType: (t: TherapistType) => void }) => {
+  const name = patient ? patient.split(" ")[0] : "孙德强";
+  const scales = SCALE_LIB[type];
+  const [data, setData] = useState(scales);
+  const [note, setNote] = useState("");
+  // 重置数据当类型变化
+  const switchType = (t: TherapistType) => {
+    onChangeType(t);
+    setData(SCALE_LIB[t]);
+  };
+  const update = (si: number, ii: number, v: string) => {
+    setData(prev => prev.map((s, i) => i !== si ? s : { ...s, items: s.items.map((it, j) => j !== ii ? it : { ...it, value: v }) }));
+  };
+  const aiText: Record<TherapistType, string> = {
+    PT: `综合 FMA-LE 18 / Berg 32 / FAC 2 / MAS 踝 2，提示下肢中度运动障碍 + 跌倒高风险。建议：1) 先行踝跖屈肌牵伸 + 抗痉挛；2) 渐进负重 + 平行杠内步态训练；3) 平衡板 + 双任务训练 2 周后复评 BBS。`,
+    OT: `FMA-UE 24 / MBI 45 / ARAT 23 / MoCA 21，上肢重度障碍伴 ADL 中度依赖、轻度认知下降。建议：1) 镜像 / Bobath 上肢易化；2) 任务导向 ADL（穿衣 / 进食）；3) 认知-运动双任务训练，2 周后复评 MBI 与 ARAT。`,
+    ST: `WAB-AQ 59 / 洼田 3 级 / SSA 28 / Frenchay 中度，提示中度运动性失语 + 可疑误吸 + 构音障碍。建议：1) 申请 VFSS 明确分期；2) 姿势代偿 + 增稠饮食过渡；3) Schuell 刺激法 + 旋律语调治疗 (MIT)，2 周后复测 WAB。`,
+  };
+  return (
+    <div className="p-4 space-y-3">
+      {/* 患者信息 */}
+      <div className="bg-card rounded-2xl shadow-card p-4">
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl gradient-therapist text-white flex items-center justify-center font-bold text-lg">{name[0]}</div>
+          <div className="flex-1">
+            <div className="text-sm font-bold">{patient || "孙德强 · 男 60 · 床315"}</div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">急性缺血性脑卒中 · 入院第 1 天 · 主管医师：李志远</div>
+          </div>
+          <span className="text-[10px] px-2 py-1 rounded-full bg-secondary-soft text-secondary font-semibold">首次评估</span>
+        </div>
+      </div>
+
+      {/* 治疗师类型切换 */}
+      <div>
+        <div className="text-[11px] text-muted-foreground mb-1.5 px-1">当前治疗师类型 · 决定评估量表组</div>
+        <div className="flex items-center gap-1.5 bg-muted rounded-full p-1">
+          {(["PT", "OT", "ST"] as TherapistType[]).map((t) => {
+            const active = type === t;
+            const label = t === "PT" ? "PT 物理治疗" : t === "OT" ? "OT 作业治疗" : "ST 言语 / 吞咽";
+            return (
+              <button key={t} onClick={() => switchType(t)} className={`flex-1 text-[11px] py-1.5 rounded-full font-semibold transition-all ${active ? "gradient-therapist text-white shadow-card" : "text-foreground/70"}`}>
+                {label}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* AI 推荐 */}
+      <AICard title={`AI 已基于患者档案预填 ${type} 量表`}>
+        系统结合医师首评与既往史，自动调用与该患者相关的 {type} 评估量表 ({data.length} 项)，治疗师可逐项核对 / 修改后由 AI 生成评估建议。
+      </AICard>
+
+      {/* 量表列表 */}
+      <SectionTitle title={`${type} 评估量表 · ${data.length} 项`} extra={<button onClick={() => toast("已添加自定义量表")} className="text-[11px] text-secondary font-semibold flex items-center gap-1"><Plus className="w-3 h-3" />补充量表</button>} />
+      <div className="space-y-2">
+        {data.map((s, si) => (
+          <div key={s.name} className="bg-card rounded-2xl shadow-card p-3.5">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-[13px] font-semibold">{s.name}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">{s.desc}</div>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-ai/10 text-ai font-semibold">AI 预填</span>
+            </div>
+            <div className="mt-2 divide-y divide-border/60">
+              {s.items.map((it, ii) => (
+                <div key={ii} className="flex items-center justify-between py-2">
+                  <div>
+                    <div className="text-[12px] text-foreground">{it.label}</div>
+                    {it.hint && <div className="text-[10px] text-muted-foreground mt-0.5">{it.hint}</div>}
+                  </div>
+                  <input value={it.value} onChange={(e) => update(si, ii, e.target.value)} className="w-28 text-right bg-muted rounded px-2 py-1 text-xs" />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* AI 评估建议 */}
+      <AICard title="AI 首次评估建议（基于上述量表）" action={<button onClick={() => toast.success("已重新生成评估建议")} className="text-[11px] px-3 py-1 rounded-full bg-ai text-ai-foreground font-semibold">重新生成</button>}>
+        <div className="leading-relaxed">{aiText[type]}</div>
+      </AICard>
+
+      <SectionTitle title="治疗师补充备注" />
+      <div className="bg-card rounded-2xl shadow-card p-3">
+        <textarea value={note} onChange={(e) => setNote(e.target.value)} placeholder="临床触诊 / 患者主诉 / 评估过程中的偏差..." className="w-full bg-muted rounded-xl p-3 text-xs h-24 outline-none" />
+      </div>
+    </div>
+  );
+};
+
 const ConfirmAssessSheet = ({ patient }: { patient?: string }) => {
   const name = patient ? patient.split(" ")[0] : "王秀英";
   return (
