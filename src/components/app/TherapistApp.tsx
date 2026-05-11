@@ -465,19 +465,20 @@ const TherapistHome = ({
 /* ============== 患者管理（治疗师视角） ============== */
 const TherapistPatients = ({
   onPickPatient,
-  onOpenQueue,
   onSummaryPatient,
   initialFilter,
+  onAction,
 }: {
   onPickPatient: (p: Patient) => void;
   onOpenQueue?: (k: QueueKey) => void;
   onUploadDaily?: () => void;
   onSummaryPatient?: (p: Patient) => void;
   initialFilter?: import("@/components/app/PatientsModule").PatientFilter;
+  onAction?: (key: import("@/components/app/PatientsModule").PatientPendingKey, p: Patient) => void;
 }) => {
   return (
     <div className="pb-4">
-      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} initialFilter={initialFilter} />
+      <PatientsPage accent="therapist" onPick={onPickPatient} onSummary={onSummaryPatient} initialFilter={initialFilter} onAction={onAction} />
     </div>
   );
 };
