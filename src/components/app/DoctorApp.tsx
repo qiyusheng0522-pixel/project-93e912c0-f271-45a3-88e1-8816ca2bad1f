@@ -66,6 +66,8 @@ import {
   
   Edit2,
   RotateCcw,
+  X,
+  Camera,
 } from "lucide-react";
 
 type SheetKey =
