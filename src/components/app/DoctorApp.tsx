@@ -1173,7 +1173,7 @@ const GoalSheet = ({ patient }: { patient?: string }) => {
                     </div>
                   ) : (
                     <button onClick={() => { setSubFor(g.id); setSubDraft(""); }} className="mt-2 text-[11px] text-secondary font-semibold flex items-center gap-1">
-                      <Plus className="w-3 h-3" />治疗师添加子目标
+                      <Plus className="w-3 h-3" />添加子目标
                     </button>
                   )}
                 </div>
